@@ -1,0 +1,4 @@
+{
+  "version": "v1",
+  "why": "Path segment for public/wasm/<version>/. The .wasm filenames carry no content hash, so this segment is the only thing that makes the immutable cache header safe. Bump it whenever a binary changes. Read by src/lib/site-config.ts and scripts/copy-wasm.mjs — do not duplicate the value anywhere else."
+}

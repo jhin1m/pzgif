@@ -1,0 +1,31 @@
+{
+  "site": {
+    "name": "PZGIF",
+    "tagline": "GIF tools that run in your browser"
+  },
+  "trust": {
+    "line": "100% in your browser. Files never leave your device."
+  },
+  "nav": {
+    "skipToContent": "Skip to content",
+    "tools": "Tools",
+    "discord": "Discord presets",
+    "about": "About"
+  },
+  "theme": {
+    "toggle": "Switch theme",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "footer": {
+    "source": "Source",
+    "sourceTitle": "Browse the exact source of this deployment",
+    "licence": "Code under AGPL-3.0. Site copy and brand assets are not.",
+    "allTools": "All tools"
+  },
+  "notFound": {
+    "title": "That page does not exist",
+    "body": "The link may be out of date. Every tool is listed on the homepage.",
+    "cta": "Go to the homepage"
+  }
+}

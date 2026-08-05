@@ -122,7 +122,7 @@ pre-committed reversal in `phase-01` stands if judging later fails.
 | 1 | [Benchmark Spike and Architecture Gate](./phase-01-benchmark-spike-and-architecture-gate.md) | Desktop gates complete 2026-08-05 · G3 blocked on hardware · G6 awaiting judges | 2 |
 | 3 | [Design System and Layout](./phase-03-design-system-and-layout.md) | Code complete 2026-08-05 · browser suite unrun | 2 (+ 1 for the before/after fallback threshold only) |
 | 4 | [Media Engine Core](./phase-04-media-engine-core.md) | Code complete 2026-08-05 · browser suite unrun | 1 |
-| 5 | [Tool Framework and GIF Compressor](./phase-05-tool-framework-and-gif-compressor.md) | Pending | 3, 4 |
+| 5 | [Tool Framework and GIF Compressor](./phase-05-tool-framework-and-gif-compressor.md) | Complete 2026-08-05 · output decoded and verified in-browser | 3, 4 |
 | 6 | [GIF-to-GIF Tools](./phase-06-gif-to-gif-tools.md) | Pending | 5 |
 | 7 | [Cross-Format Tools](./phase-07-cross-format-tools.md) | Pending | 5 |
 | 8 | [Discord Preset Pages](./phase-08-discord-preset-pages.md) | Pending | 5 |
@@ -180,6 +180,7 @@ content/                  hand-written per-tool copy + FAQ (NOT generated from a
 | Risk | Impact | Mitigation |
 |---|---|---|
 | **gifski-wasm can deadlock** — open upstream issue #5, maintainer attributes it to "hacks I implemented to get this to compile" | **Existential** — the encoder hangs and the job never completes | Phase 1 gate G1 soak-tests 1000 consecutive encodes. Phase 4 vendors the fork, which is where a fix lands. A worker watchdog converts a hang into a reported error rather than a frozen tab |
+| **A service worker can silently kill the whole media engine** (found and fixed in Phase 5, 2026-08-05) | **Was blocking** — no tool could produce a file, for repeat visitors only, with no error anywhere | Turbopack identifies each worker by URL *fragment*; the Cache API strips it, so the encode worker was served the pipeline worker's response and never booted. `public/sw.js` now bypasses `request.destination === "worker"`, and `service-worker-policy.test.ts` locks it. **The general lesson stands: any caching layer that keys on a stripped URL can break a fragment-identified worker.** Re-check whenever the bundler or the service worker changes |
 | gifski output is not *visibly* better than `gifenc` at matched bytes | Differentiator #1 is fiction, and the AGPL obligation buys nothing | Phase 1 gate G6 judges it by eye on real fixtures. Escalate before Phase 4 if it fails |
 | `modern-gif` decode is too slow or mishandles frame disposal | The product's highest-volume input path degrades everywhere | Chosen on maintenance grounds, unbenchmarked. Phase 1 measures it. Fallback is a dual path with `ImageDecoder`, which reintroduces the complexity the single-path decision avoided |
 | gifski holds all frames resident (2× copy, cannot stream) | OOM on long or large GIFs, worst on iOS | Admission control refuses over-budget jobs **before** decoding, with concrete alternative settings. Never an OOM mid-job |

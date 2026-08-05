@@ -1,11 +1,34 @@
 ---
 phase: 5
 title: "Tool Framework and GIF Compressor"
-status: pending
+status: complete
 priority: P1
 effort: "4-6d"
 dependencies: [3, 4]
 ---
+
+> **Status 2026-08-05 — complete.**
+>
+> The framework, the compressor page and its hand-written copy ship and pass
+> typecheck, lint, build, 166 unit tests, `check:static` and `check:forbidden`.
+> The tool produces a real file: **4.1 MB → 705 KB (−83%)**, valid `GIF89a`, all
+> 48 frames, original 480×270, original 2,400 ms timing — asserted by decoding
+> the downloaded bytes in a real browser with the service worker active. "Drop
+> every second frame" decodes to 24 frames. Zero un-prompted layout shift across
+> every transition.
+>
+> **A blocking defect was found and fixed on the way, and it was not in this
+> phase.** The service worker cached Turbopack's shared worker bootstrap, whose
+> per-worker identity lives entirely in the URL *fragment* — which the Cache API
+> strips. The second worker to be requested (always the encode worker) received
+> the first one's response, booted with no chunk list, and then sat silent until
+> the hang watchdog fired. Shipped as-is, the media engine would have been dead
+> for every repeat visitor of every tool, silently. Fixed in `public/sw.js`;
+> locked by `src/lib/service-worker-policy.test.ts`.
+>
+> Deviations, the code-review outcome, the full isolation trail and what remains
+> open:
+> `plans/reports/from-cook-to-project-manager-phase-05-tool-framework-and-compressor-report.md`
 
 # Phase 5: Tool Framework and GIF Compressor
 

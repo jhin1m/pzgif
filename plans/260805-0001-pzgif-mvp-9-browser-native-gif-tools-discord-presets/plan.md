@@ -123,7 +123,7 @@ pre-committed reversal in `phase-01` stands if judging later fails.
 | 3 | [Design System and Layout](./phase-03-design-system-and-layout.md) | Code complete 2026-08-05 · browser suite unrun | 2 (+ 1 for the before/after fallback threshold only) |
 | 4 | [Media Engine Core](./phase-04-media-engine-core.md) | Code complete 2026-08-05 · browser suite unrun | 1 |
 | 5 | [Tool Framework and GIF Compressor](./phase-05-tool-framework-and-gif-compressor.md) | Complete 2026-08-05 · output decoded and verified in-browser | 3, 4 |
-| 6 | [GIF-to-GIF Tools](./phase-06-gif-to-gif-tools.md) | Pending | 5 |
+| 6 | [GIF-to-GIF Tools](./phase-06-gif-to-gif-tools.md) | Complete 2026-08-05 · 26/26 E2E on Chromium and WebKit, outputs decoded | 5 |
 | 7 | [Cross-Format Tools](./phase-07-cross-format-tools.md) | Pending | 5 |
 | 8 | [Discord Preset Pages](./phase-08-discord-preset-pages.md) | Pending | 5 |
 | 9 | [Content SEO and Legal](./phase-09-content-seo-and-legal.md) | Pending | 3 |
@@ -256,5 +256,6 @@ Tracked live at the end of each phase file. Blocking ones at plan time:
 7. Who is the named operator on the About page? Required before any ad-network application, the Contact page, GDPR controller identification, and a DMCA agent if one is ever needed
 8. Which real devices exist for gates G3/G4? The whole memory model rests on an iPhone SE 3-class floor. Without that hardware the budgets are unvalidated fiction. **Still open and now more urgent:** G4 ran on desktop only and found no ceiling below 732 MB; G3 never ran. The iOS scope decision above was taken on an *estimated* budget, so the hardware decides where the boundary falls, not whether there is one
 9. Does Journey by Mediavine work on Next.js? It is the only fallback if AdSense rejects. One email, and it should be sent in week 1
+10. **Five browser tests fail on `main`, and four of them are Phase 3's** (surfaced when Phase 6 ran the suite on 2026-08-05; each reproduces on a tree stashed back to before Phase 6). `/dev/states` overflows 40 px at 320 px in both engines; WebKit fails the skip-link tab order and the FAQ-panel height check. The fifth is Phase 5's: the compressor measures **CLS 0.015** on Chromium, against this plan's own "CLS = 0 on every route" criterion. That one is not cosmetic — CLS is a ranking input and the tool pages are the ranking surface. It should be diagnosed before Ship 1, not deferred to Phase 11
 
 <!-- slug: pzgif-mvp-9-browser-native-gif-tools-discord-presets -->

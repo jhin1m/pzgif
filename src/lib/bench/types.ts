@@ -6,28 +6,15 @@
  * interface the spike settles on is the one Phase 4 inherits.
  */
 
-/** One fully composited frame, at output size, ready to hand to an encoder. */
-export interface DecodedFrame {
-  /** Tightly packed RGBA8, exactly `width * height * 4` bytes. */
-  rgba: Uint8Array;
-  /** How long this frame is shown, in milliseconds. */
-  durationMs: number;
-}
-
 /**
- * A decoder, normalised across GIF and video inputs.
+ * `DecodedFrame` and `FrameSource` moved to `src/lib/media/types.ts` in Phase 4.
  *
- * `frameCount` is nullable on purpose. A GIF states its frame count up front; a
- * WebM often does not, and inventing a denominator to make a progress bar look
- * tidy is the exact thing `design-guidelines.md` §1.2 forbids. A null here has
- * to surface as an indeterminate track, not as a guess.
+ * They were always the product's interface rather than the benchmark's — the
+ * spike settled the decode contract, and Phase 4 inherited it. Re-exporting
+ * rather than redeclaring keeps one definition, so a change to the engine's
+ * frame contract cannot leave the harness silently measuring a different shape.
  */
-export interface FrameSource {
-  width: number;
-  height: number;
-  frameCount: number | null;
-  frames(): AsyncGenerator<DecodedFrame, void, unknown>;
-}
+export type { DecodedFrame, FrameSource } from "@/lib/media/types";
 
 export type EncoderId = "gifski" | "gifenc";
 

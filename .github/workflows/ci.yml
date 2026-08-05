@@ -50,6 +50,12 @@ jobs:
       - name: Check every route is statically prerendered
         run: pnpm check:static
 
+      # ffmpeg.wasm is ~10 MB and serves an estimated 1-3% of jobs. It must stay
+      # out of the shared client chunks, and a static import would undo that
+      # silently.
+      - name: Check no heavyweight decoder is bundled
+        run: pnpm check:heavy
+
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium webkit
 

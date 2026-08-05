@@ -19,9 +19,11 @@
     "test:e2e": "playwright test",
     "check:forbidden": "node scripts/check-forbidden-headers.mjs",
     "check:static": "node scripts/check-static-routes.mjs",
+    "check:heavy": "node scripts/check-heavy-deps.mjs",
     "check:source-sha": "node scripts/check-source-sha.mjs",
     "copy:wasm": "node scripts/copy-wasm.mjs",
     "bench": "playwright test -c playwright.bench.config.ts",
+    "test:engine": "playwright test -c playwright.bench.config.ts engine-",
     "bench:soak": "PZGIF_SOAK_RUNS=200 playwright test -c playwright.bench.config.ts g1-soak",
     "fixtures": "node scripts/make-fixtures.mjs"
   },

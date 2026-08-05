@@ -27,5 +27,50 @@
     "title": "That page does not exist",
     "body": "The link may be out of date. Every tool is listed on the homepage.",
     "cta": "Go to the homepage"
+  },
+  "engine": {
+    "stage": {
+      "probe": "Reading the file…",
+      "decode": "Reading frames…",
+      "encode": "Building the GIF…",
+      "package": "Packaging…",
+      "retry": "Retrying with the backup encoder…",
+      "preparing": "Preparing…",
+      "elapsed": "{seconds}s elapsed"
+    },
+    "plan": {
+      "downgraded": "Set to {width}px at {fps} fps — the largest this device can hold.",
+      "truncated": "Trimmed to the first {seconds}s so it fits this device."
+    },
+    "estimate": {
+      "point": "≈ {size}",
+      "range": "≈ {low}–{high}",
+      "caveat": "An estimate. The real size shows as soon as it exists."
+    },
+    "errors": {
+      "unsupportedFormat": "This is a {format} file, which this tool does not take.",
+      "tooLargeForDevice": "This is longer than this device can hold at once — {frames} frames needs more than the {budgetMb} MB available.",
+      "decodeFailed": "We could not read this file. It may be damaged, or use a format this browser cannot decode.",
+      "encodeFailed": "Compression failed. Lowering Colors to {colours} usually gets it through.",
+      "oom": "This ran out of memory partway through. Try {width}px or a shorter clip.",
+      "cancelled": "Cancelled.",
+      "browserUnsupported": {
+        "noVideoDecoder": "This browser cannot decode video at all, so video input is unavailable here.",
+        "noVideoEncoder": "This browser cannot create MP4 files.",
+        "iosVideoBudget": "iPhones and iPads do not have enough memory to convert video in the browser. GIF files work normally here.",
+        "noImageDecoder": "This browser cannot read animated WebP."
+      }
+    },
+    "actions": {
+      "useTool": "Use {tool} instead",
+      "runDegraded": "Do it anyway at {width}px, {fps} fps — about {seconds}s of GIF",
+      "changeColours": "Set Colors to {value}",
+      "changeWidth": "Set width to {value}px",
+      "changeFps": "Set frame rate to {value} fps",
+      "changeFrames": "Trim the clip and try again",
+      "installFallbackDecoder": "Download the extra decoder ({megabytes} MB)",
+      "tryOtherBrowser": "Chrome, Edge or Safari on a computer can do this",
+      "report": "Report this failure"
+    }
   }
 }

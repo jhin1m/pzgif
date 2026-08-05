@@ -125,8 +125,16 @@ export interface EncodePlan {
   downgraded: boolean;
 }
 
-const FPS_LADDER = [20, 15, 12, 10, 8];
-const WIDTH_LADDER = [640, 480, 400, 320, 240];
+/**
+ * The rungs admission control walks, largest first.
+ *
+ * Exported because `plan.ts` searches the same ladders for real jobs while this
+ * file's `planEncode()` remains the shape gate G8 measured the refusal rate
+ * against. Two private copies would let the measured number and the shipped
+ * behaviour drift apart silently.
+ */
+export const FPS_LADDER = [20, 15, 12, 10, 8] as const;
+export const WIDTH_LADDER = [640, 480, 400, 320, 240] as const;
 
 /**
  * Finds the largest settings that fit the budget, or null if nothing does.

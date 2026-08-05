@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BenchConsole } from "./bench-console";
+import { EngineConsole } from "./engine-console";
 
 /**
  * The Phase 1 benchmark harness, mounted **inside the real app**.
@@ -35,6 +36,7 @@ export default function BenchPage() {
     <html lang="en">
       <body>
         <BenchConsole />
+        <EngineConsole />
       </body>
     </html>
   );

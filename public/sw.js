@@ -20,7 +20,10 @@
  * a Phase 5 / Phase 11 gate, not something this file can promise alone.
  */
 
-const CACHE = "pzgif-shell-v1";
+/* Bumped to v2 so any client that already cached a Turbopack worker bootstrap
+ * under the v1 key drops it on activate, rather than carrying a poisoned entry
+ * that would keep the engine broken for that visitor. */
+const CACHE = "pzgif-shell-v2";
 
 /** Fetched during install, so the first offline reload has something to serve. */
 const PRECACHE = ["/"];
@@ -120,6 +123,31 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (NEVER_CACHE.some((fragment) => request.url.includes(fragment))) return;
+
+  /* Worker scripts go straight to the network. This is not an optimisation —
+   * caching them silently breaks the entire media engine.
+   *
+   * Turbopack ships one shared bootstrap file and identifies each worker purely
+   * by its URL **fragment**: `turbopack-worker-<hash>.js#params=[[…chunks]]`.
+   * The Cache API keys on the fragment-stripped URL, so all of them collapse
+   * onto one entry. The pipeline worker is requested first, misses, and
+   * populates it from the network; the encode worker is requested seconds later,
+   * hits that entry, and is handed a response whose URL carries no fragment. It
+   * boots with an empty chunk list, registers no message handler, and then sits
+   * there — no error, no message, nothing. The job stalls until the hang
+   * watchdog fires ~20s later and reports `encode-failed`.
+   *
+   * It only bites the second worker onwards, only once a service worker is
+   * active, and it fails silently, which is why it survived Phase 4's gates:
+   * `/__bench` renders its own document and never registers one.
+   *
+   * `request.destination` is the standards-defined answer to "is this a worker
+   * script", so this needs no path matching and cannot drift with hash names.
+   * The chunks the bootstrap then imports are ordinary `/_next/static/` URLs
+   * with no fragment, so they stay cache-first and offline still works. */
+  if (request.destination === "worker" || request.destination === "sharedworker") {
+    return;
+  }
 
   const immutable =
     url.pathname.startsWith("/wasm/") ||

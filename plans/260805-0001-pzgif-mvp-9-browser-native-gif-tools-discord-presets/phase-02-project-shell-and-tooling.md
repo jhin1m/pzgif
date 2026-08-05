@@ -1,7 +1,7 @@
 ---
 phase: 2
 title: "Project Shell and Tooling"
-status: pending
+status: code-complete
 priority: P1
 effort: "2-4d"
 dependencies: []
@@ -136,20 +136,45 @@ Without `@theme inline` on the bridge block, Tailwind snapshots values at build 
 
 ## Success Criteria
 
-- [ ] `pzgif.com` serving: DNS on Cloudflare, TLS live, holding page deployed, Search Console verified and a sitemap submitted — **on day 1**
-- [ ] `LICENSE` (AGPL, code) and `LICENSE-CONTENT` (all-rights-reserved, prose and brand) both present, with the boundary stated in `NOTICE`
-- [ ] Content lives in `.md`/`.mdx` data files, not `.tsx` modules
-- [ ] Footer source link resolves to the exact deployed commit SHA; CI blocks deploys whose SHA is not public
-- [ ] Service worker caches the shell and `/wasm/*`; a reload with the network off still runs a compression — and never caches ad or analytics endpoints
-- [ ] Hosting tier chosen and named, with bandwidth modelled against the infra budget
-- [ ] `pnpm build` produces a statically prerendered route for every page; any non-static page fails the build
-- [ ] `pnpm dev` and `pnpm build` both run clean on Turbopack
-- [ ] Dark mode toggles with no FOUC and no flash on first paint
-- [ ] All `design-guidelines.md` §2 tokens resolve as Tailwind utilities in both themes
-- [ ] CI green end to end, with the forbidden-headers guard demonstrably failing when a `SharedArrayBuffer` reference is added
-- [ ] `LICENSE`, `NOTICE`, public repo, and a working footer "Source" link all in place
-- [ ] `docs/tech-stack.md` amended with a dated changelog entry covering all six changes
-- [ ] `CLAUDE.md` written and accurate for this repo
+Code criteria verified 2026-08-05. Unticked items all need an account, a DNS
+record or a payment method — tracked in `docs/infrastructure-runbook.md`.
+
+- [ ] `pzgif.com` serving: DNS on Cloudflare, TLS live, holding page deployed, Search Console verified and a sitemap submitted — **on day 1** *(infra; app side ready — the homepage shell is the holding page, and `robots.ts` + `sitemap.ts` build)*
+- [x] `LICENSE` (AGPL, code) and `LICENSE-CONTENT` (all-rights-reserved, prose and brand) both present, with the boundary stated in `NOTICE`
+- [x] Content lives in `.md`/`.mdx` data files, not `.tsx` modules — `src/content/` established; `messages/` stays AGPL because the Program cannot run without its interface strings
+- [x] Footer source link resolves to the exact deployed commit SHA; `check-source-sha.mjs` fetches that SHA **anonymously** from the public repo URL and fails CI on `main` when it is not reachable *(wire it ahead of the deploy step once a host exists)*
+- [x] Service worker precaches the shell and cache-firsts `/wasm/*`, never caches ad or analytics endpoints, and falls back to the shell for offline navigations. Verified: emptying the precache list makes the offline e2e test fail. **A reload with the network off runs a *compression* only once an engine exists — that is a Phase 5/11 gate, not provable here**
+- [ ] Hosting tier chosen and named, with bandwidth modelled against the infra budget *(infra — Vercel Hobby ruled out; see the runbook)*
+- [x] `pnpm build` produces a statically prerendered route for every page; `check-static-routes.mjs` fails the build otherwise — demonstrated against a `force-dynamic` page, and it subtracts open-fallback routes
+- [x] `pnpm dev` and `pnpm build` both run clean on Turbopack
+- [x] Dark mode toggles with no FOUC and no flash on first paint — asserted on a rendered colour, not on the attribute
+- [x] All `design-guidelines.md` §2 tokens resolve as Tailwind utilities in both themes
+- [x] CI green end to end, with the forbidden-headers guard demonstrably failing when a `SharedArrayBuffer` reference is added
+- [ ] `LICENSE`, `NOTICE`, footer "Source" link in place *(done)*; **public repo** *(infra)*
+- [x] `docs/tech-stack.md` amended with a dated changelog entry covering all six changes
+- [x] `CLAUDE.md` written and accurate for this repo
+
+### Deviations from this phase file, with reasons
+
+1. **Step 12's CSP script hash was implemented, then reverted.** Per the CSP
+   spec a hash in `script-src` makes browsers ignore `'unsafe-inline'`, which
+   blocks Next's inline `self.__next_f.push` RSC payload scripts — the page stops
+   hydrating entirely. Observed in Playwright, not assumed. The alternative,
+   a per-request nonce, forces dynamic rendering and breaks this phase's own
+   static-prerender rule. `script-src-attr 'none'` was added instead, which
+   recovers most of what `'unsafe-inline'` costs. Regression-tested.
+2. **`upgrade-insecure-requests` removed.** WebKit applies it to loopback
+   origins, upgrading `http://127.0.0.1` to https and killing every script on a
+   TLS error. `default-src 'self'` already blocks cross-origin subresources, so
+   it bought nothing. HTTPS enforcement moved to Cloudflare — revisit at Phase 10
+   when ad and CMP origins enter the policy.
+3. **`next/font` weights omitted.** All three families are variable fonts, so the
+   full range ships and every weight in §3.2 is available. Cost: the weight scale
+   is not enforced by the font loader.
+4. **`shadcn init` partially failed** (CLI 4.16.1 errored after installing
+   deps). `components.json` and `src/lib/utils.ts` are in place and the token
+   bridge is verified against what shadcn/Radix components reference. No
+   components are copied in yet — Phase 3 owns the design system.
 
 ## Risk Assessment
 

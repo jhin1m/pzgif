@@ -1,10 +1,11 @@
 ---
 phase: 4
 title: "Media Engine Core"
-status: pending
+status: code-complete
 priority: P1
 effort: "10-16d"
 dependencies: [1]
+completedOn: 2026-08-05
 ---
 
 # Phase 4: Media Engine Core
@@ -217,8 +218,67 @@ Every error state also carries a **one-click "report this failed"** wired to the
 | Memory budgets too optimistic → iOS tab crashes | Budgets are deliberately conservative. Wrap the encode in try/catch and surface "ran out of memory — try a smaller size" rather than a white screen |
 | Progress `postMessage` per frame tanks INP | Throttle to ~10 Hz in the worker, and keep progress state out of any component that re-renders the tool panel |
 
+## Delivery record — 2026-08-05
+
+Code complete. Every module in "Related Code Files" exists except the vendored
+Rust fork, which was already ratified as deferred. **Browser verification did not
+run**: the engine's Playwright suite is written (`e2e/bench/engine-*.spec.ts`) but
+could not execute in this session — no browser would launch, the same wedged
+macOS Mach bootstrap namespace recorded as gap 3 in the Phase 1 report. A fresh
+terminal clears it:
+
+```
+pnpm test:engine                    # both engine specs, all three engines
+pnpm exec playwright test -c playwright.bench.config.ts engine- --project=chromium
+```
+
+Everything that does not need a browser is green: `typecheck`, `lint`,
+`test` (86 passing), `build`, `check:forbidden`, `check:static`, `check:heavy`.
+
+A `code-reviewer` pass over the whole engine found **16 defects, all fixed** —
+four of them would have shipped as user-visible failures: every iPhone
+misclassified as a desktop (the worker cannot read `maxTouchPoints`), every
+ping-pong job throwing `DataCloneError` on a duplicated transfer entry, the
+estimator pulling gifski's never-shrinking WASM heap into the long-lived worker,
+and `plan.frames` being used as both an output count and a decode cap. Details in
+the delivery report.
+
+### Deviations from this phase file
+
+| # | Planned | Shipped | Why |
+|---|---|---|---|
+| 1 | Vendor and patch `gifski-wasm` (steps 7, and encode progress) | Not done | Already ratified as deferred past launch in `plan.md` open question 5. Encode is a labelled indeterminate stage with an elapsed timer and **no invented percentage** |
+| 2 | `fflate@0.8.3` for ZIP | A ~100-line STORE-only writer in `encode/png-zip.ts` | The dependency was chosen for `ZipPassThrough`, i.e. for *not* compressing. With compression off, ZIP is header assembly plus a CRC32. Verified against Python's `zipfile` in `png-zip.test.ts`, not merely against itself. (The registry has no dependency-install path in this environment either, but the reasoning stands independently) |
+| 3 | `@jsquash/*` for image codecs | `createImageBitmap` | No MVP tool takes a still image as input. The engine only needs to *identify* one so the refusal can name it |
+| 4 | Encode animated WebP | Not built | No registry route outputs WebP — `GIF → WebP` was cut at planning. WebP is input-only |
+| 5 | `ops/resize.ts` + `ops/crop.ts` as separate files | One `ops/geometry.ts` | The load-bearing rule is the **order** — crop → rotate → resize. Split across two files it would live in neither |
+| 6 | `ffmpeg-fallback.ts` importing `@ffmpeg/*` | Runtime load from `public/ffmpeg/`, no npm dependency; binaries not vendered yet, so `isFfmpegAvailable()` is false | Keeps 10 MB out of the module graph *by construction* rather than by convention, and `pnpm check:heavy` asserts it. Advertising a fallback that cannot run would be a second dead end layered on the first |
+| 7 | (not specified) | **Firefox defaults to `gifenc`** | Phase 1 measured gifski's WASM 12-14× slower under SpiderMonkey — 51.8 s against a 30 s viability floor — while `gifenc` ran at parity on all three engines. Overridable by `NEXT_PUBLIC_GIF_ENCODER`. **Wants one confirmation run in release Firefox**; the Phase 1 number is from a Playwright build |
+
+### Success criteria status
+
+Passing under unit test and static verification; the rest need the browser run.
+
+- [x] One `runJob(spec)` API; long-lived pipeline worker plus a per-job encode worker over a `MessageChannel`, frames transferred and never cloned through the main thread
+- [x] Downscale step-down chain used everywhere (`ops/geometry.ts` ends every path in `drawDownscaled`)
+- [x] `NEXT_PUBLIC_GIF_ENCODER` switches encoders; a watchdog-detected hang falls back automatically for that job
+- [x] No recovery message mentions "Pro"; every error offers a concrete action plus a report link — asserted in `errors.test.ts`
+- [x] A refusal offers a one-click degraded run whenever any plan fits — asserted in `plan.test.ts`
+- [x] Admission control refuses over-budget jobs before decoding, with concrete alternative settings
+- [x] Determinate progress across decode; encode honestly indeterminate; no synthesised values — asserted in `progress.test.ts`
+- [x] Every error code produces a message naming a concrete next step; no dead ends
+- [x] Main client bundle contains no `@ffmpeg` reference, asserted in CI (`pnpm check:heavy`)
+- [x] `estimate.ts` uses a measured sample, not a settings-only formula, and reports a range
+- [x] Instrumentation reports refusal rate per device tier (`JobTelemetry`)
+- [ ] Portrait video with rotation metadata produces an upright GIF — spec written, unrun
+- [ ] GIF, MP4, MOV, WebM and animated WebP decode with correct per-frame durations — spec written, unrun
+- [ ] gifski encode produces a GIF a browser renders with the original timing — spec written, unrun
+- [ ] Cancel aborts within 500 ms — spec written, unrun
+- [ ] Peak memory on a real iPhone stays inside the tier budget — **blocked on hardware**, as G3 has been since Phase 1
+
 ## Open questions
 
+0. **Does the estimator's range actually contain the truth?** `e2e/bench/engine-estimate.spec.ts` measures it per fixture and writes `bench-results/engine-estimate-accuracy.*.json`. `SAMPLED_ESTIMATE_SPREAD` is currently ±20% by argument, not by measurement, and should be set from that artefact — narrowed if the error is tighter, because a range wider than the evidence is its own dishonesty.
 1. Does the vendored fork's progress patch also resolve the deadlock, or is the deadlock elsewhere in `crossbeam-channel`? Only Phase 1's soak can tell.
 2. Animated WebP on Safari: `ImageDecoder` is absent there too. Options are a hand-rolled RIFF/ANMF splitter feeding `@jsquash/webp` per frame (~150 lines) or descoping `webp→gif` on Safari with a clear message. **Recommend descoping at MVP** — animated WebP input is low volume — and revisiting with traffic data. Decided in Phase 7.
 3. Whether Safari 26.x can encode VP8/VP9 via WebCodecs — assumed decode-only. Probe with `isConfigSupported`; never hardcode.

@@ -75,12 +75,13 @@ File input
 | Video demux / mux | **`mediabunny@1.52.3`** (MPL-2.0) **[Amended 2026-08-05]** | Replaces `mp4box.js` + `mp4-muxer` + `webm-muxer`: both muxers are deprecated by their own author and `webm-demuxer` does not exist on npm. `CanvasSink` also bounds decode memory for free |
 | Video decode | **WebCodecs `VideoDecoder`** | Native, hardware-accelerated, zero WASM download, Safari 26+ shipped |
 | Animated GIF decode | **`modern-gif@2.1.0`** (MIT), on every browser **[Amended 2026-08-05]** | Safari has no `ImageDecoder` in any version (confirmed absent from WebKit source) and Firefox only from 133, while 6 of 9 tools take GIF input. One decode path beats a Safari special case. Chosen on maintenance grounds and **unbenchmarked** — Phase 1 measures it |
-| ZIP output | **`fflate@0.8.3`** (MIT) **[Added 2026-08-05]** | Frame extraction ships a ZIP of PNGs |
+| ZIP output | **hand-written STORE writer** (`src/lib/media/encode/png-zip.ts`) **[Amended 2026-08-05, Phase 4]** | `fflate` was chosen for one property — `ZipPassThrough` stores without re-deflating, because PNG is already compressed. With compression off, ZIP is a header format; ~100 lines replace the dependency and its bundle cost. Verified against Python `zipfile` in `png-zip.test.ts` |
 | Frame ops | **OffscreenCanvas + Web Workers** | Mandatory — never block the main thread |
 | GIF encode | **`gifski-wasm`** (AGPL-3.0-or-later, vendored fork) | Best-in-class quality/size. This is differentiator #1 — most WASM competitors use `gif.js`/`gifenc` and look visibly worse. **[Amended 2026-08-05]** Its licence is why the PZGIF client bundle is published under the AGPL; see "Licensing" below. The fork adds progress and cancellation and is deferred past launch |
 | Quick preview encode | `gifenc` | Tiny, fast, low-quality — for live preview only, never final export |
-| Image codecs / resize | **`@jsquash/*`** (webp, png, jpeg, avif, resize) | Modular, squoosh-derived, load only what's used |
-| Exotic format fallback | `@ffmpeg/core` **single-thread**, lazy-loaded | Only when WebCodecs cannot handle the container. Single-thread = no SAB = no COEP |
+| Still-image decode | **`createImageBitmap`** **[Amended 2026-08-05, Phase 4]** | `@jsquash/*` is not adopted. No MVP tool takes a still image as *input*; the engine only needs to identify one so the refusal can name it, and every supported browser decodes PNG/JPEG/WebP natively inside a worker. A WASM codec would be a megabyte of download to learn an image's size |
+| Animated WebP decode | **`ImageDecoder`**, where present **[Added 2026-08-05, Phase 4]** | Absent in Safari at every version and Firefox below 133, so `webp-to-gif` reports `browser-unsupported` there rather than failing mid-job. The hand-rolled RIFF/ANMF splitter is Phase 7's decision |
+| Exotic format fallback | `@ffmpeg/core` **single-thread**, runtime-loaded from `public/ffmpeg/` **[Amended 2026-08-05, Phase 4]** | Only when WebCodecs cannot handle the container. Single-thread = no SAB = no COEP. Not an npm dependency: `ffmpeg-fallback.ts` imports it from a URL assembled at call time so no bundler can follow it, and `pnpm check:heavy` fails the build if it ever reaches a client chunk. The binaries are **not vendored yet**, so `isFfmpegAvailable()` is false and the recovery is not offered |
 | Heavy multi-step image pipelines (later) | `wasm-vips` | Only if static-image tools get added; not MVP |
 
 **Explicitly rejected:** `@ffmpeg/core-mt` (multi-thread) — kills ad revenue via COEP. `wasm-imagemagick` — slower and heavier than jsquash/vips for equivalent ops.
@@ -203,6 +204,22 @@ Deferred until the server tier ships: DMCA Policy + registered DMCA agent ($6 / 
 ---
 
 ## Changelog
+
+### 2026-08-05 — three library corrections from building the engine (Phase 4)
+
+Source: `plans/reports/from-cook-to-project-manager-phase-04-media-engine-report.md`.
+
+| # | Section | Was | Now |
+|---|---|---|---|
+| 1 | §4 | `fflate@0.8.3` for ZIP output | **A ~100-line STORE-only writer.** The dependency was chosen for `ZipPassThrough`, i.e. for *not* compressing; with compression off the container is header assembly plus a CRC32. Verified against an independent unzip implementation rather than trusted |
+| 2 | §4 | `@jsquash/*` for image codecs | **Dropped.** No MVP tool takes a still image as input. `createImageBitmap` identifies one natively so the refusal can name it |
+| 3 | §4 | `@ffmpeg/core` lazy-loaded as a dependency | **Runtime-loaded from `public/ffmpeg/`, not an npm dependency.** Keeps 10 MB out of the module graph by construction; `pnpm check:heavy` asserts it. Binaries not vendored yet, so the path reports unavailable rather than advertising a fallback it cannot deliver |
+
+Also settled in Phase 4: the GIF encoder is chosen at runtime by
+`NEXT_PUBLIC_GIF_ENCODER`, by the job, or by rendering engine — **Firefox
+defaults to `gifenc`**, because gifski's WASM measured 12-14× slower under
+SpiderMonkey (51.8 s against a 30 s viability floor) while `gifenc` ran at
+parity on all three engines.
 
 ### 2026-08-05 — six research-driven corrections (Phase 2)
 

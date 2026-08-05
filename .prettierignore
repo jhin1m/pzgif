@@ -1,0 +1,16 @@
+.next/
+out/
+build/
+coverage/
+playwright-report/
+test-results/
+pnpm-lock.yaml
+public/wasm/
+LICENSE
+LICENSE-CONTENT
+NOTICE
+docs/
+plans/
+CLAUDE.md
+README.md
+

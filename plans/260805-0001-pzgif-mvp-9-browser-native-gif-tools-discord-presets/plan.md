@@ -50,6 +50,54 @@ Research surfaced four facts that the locked documents did not know. Each forced
 | `mp4-muxer` and `webm-muxer` are **deprecated by their own author**; `webm-demuxer` does not exist on npm | **Adopt `mediabunny@1.52.3` (MPL-2.0)**, replacing `mp4box.js` + both muxers. Its `CanvasSink` also bounds decode memory for free. `docs/tech-stack.md` §4 is amended in Phase 2 |
 | `tech-stack.md`'s "mobile: ~50 MB, up to 60 s" is wrong — the binding constraint is decoded RGBA, and gifski holds **2× all frames**. On an iPhone SE 3 that is ~57 frames at 480×270, i.e. **~3.8 s of GIF** | **Device-class frame-buffer budgeting** with admission control before decode, and honest copy. Limits are computed from `frames × w × h × 4`, never from input file size |
 
+### Decisions taken after Phase 1 measurement (user-ratified 2026-08-05)
+
+Gate G8 measured an **80% iOS refusal rate** against a pre-committed ~30%
+escalation threshold — the trigger `phase-01` set specifically so this reached
+the operator before Phase 5 rather than after launch. Everything that passes on
+iOS is an existing small GIF; every video input is refused. Full numbers in
+`plans/reports/from-bench-spike-to-planner-pipeline-measurements-report.md`.
+
+| Finding | Decision |
+|---|---|
+| iOS refuses 80% of realistic inputs, all of them video | **On iOS, ship the GIF-input tools; do not ship video → GIF.** The alternative — pulling the server tier forward — was rejected: it contradicts the "every free-tier operation runs in the tab" premise the whole product is built on, and it is not a launch-scope change |
+
+**This is broader than one tool.** `registry.ts` shows video input reaching six
+routes, not one:
+
+- `mp4-to-gif` — the dedicated tool, video-only input. **Unavailable on iOS.**
+- `gif-for-discord` and all four dedicated Discord routes accept
+  `gif, mp4, webm, mov`. **Their video path is unavailable on iOS; their GIF path
+  works.** The Discord cluster is differentiator #2 and ships in Ship 1, so this
+  is not a footnote.
+
+The other eight tools take GIF or WebP input and are unaffected.
+
+**What this obliges, by phase:**
+
+| Phase | Obligation |
+|---|---|
+| 4 | `capability.ts` classifies the device *before* a file is accepted. An iOS visitor offering a video is refused up front with a real reason, never mid-job and never after a decode has started |
+| 5 | The tool framework carries a per-tool availability state. "Unsupported on this device" is a designed state with copy, not a thrown error |
+| 7 | `mp4-to-gif` ships knowing its iOS visitors cannot use it. The page must say so above the fold rather than letting them upload and fail |
+| 8 | The Discord routes degrade to GIF-input-only on iOS instead of appearing broken |
+| 11 | Copy audit: no page may imply video conversion works everywhere. The limits caption states the device truth |
+
+**Do not let this become a silent failure.** A refused job with no explanation is
+indistinguishable from a broken tool, and iOS Safari is a large share of the
+mobile traffic a GIF utility attracts.
+
+**Still unmeasured, and the reason this decision may be revisited:** the 30 MB
+iOS budget is a research estimate carrying `measured: false`, and G3 has never
+run — there is no iPhone. The direction is safe because the gap is 50 points
+wide, but the *exact* boundary is not knowable until the hardware exists.
+
+Gate G6 has **not** been decided — the blind-judging pack is generated and
+pre-registered but unscored, so whether gifski is visibly better than `gifenc`
+at matched bytes remains open, and with it whether the AGPL obligation buys
+anything. Phase 4 proceeds with gifski on the pre-existing assumption; the
+pre-committed reversal in `phase-01` stands if judging later fails.
+
 ## Goals
 
 | # | Goal | Priority |
@@ -203,9 +251,9 @@ Tracked live at the end of each phase file. Blocking ones at plan time:
 3. **How fast is `modern-gif`?** Unbenchmarked; it was chosen for maintenance, not measured speed. Phase 1 answers it
 4. **Animated WebP on Safari** has no maintained library and no `ImageDecoder`. Phase 7 resolves it by building a ~150-line RIFF/ANMF splitter so the page works everywhere. **A knowingly-broken ranking page is not an option** — if the splitter is not built, the page and its sitemap entry are cut instead (it is in Ship 4, the last and most cuttable)
 5. **The gifski Rust fork is deferred past launch** (ratified 2026-08-05). MVP ships the unforked encoder with honest progress — determinate through decode, a clearly labelled encode stage with an elapsed timer, no invented percentage. Revisit after launch with real data, or immediately if gate G1 exposes a deadlock, in which case it gets its own budget rather than being absorbed into Phase 4
-6. **If G6 fails, does the project continue?** The pre-registered decision tree in Phase 1 says reposition on presets, privacy and the size-budget UX. Confirm the operator accepts that branch before the gate runs, not after
+6. **If G6 fails, does the project continue?** The pre-registered decision tree in Phase 1 says reposition on presets, privacy and the size-budget UX. **Still open** — the judging pack is generated and pre-registered but unscored, so Phase 4 proceeds on the assumption gifski wins while already paying the AGPL cost for it
 7. Who is the named operator on the About page? Required before any ad-network application, the Contact page, GDPR controller identification, and a DMCA agent if one is ever needed
-8. Which real devices exist for gates G3/G4? The whole memory model rests on an iPhone SE 3-class floor. Without that hardware the budgets are unvalidated fiction — this is a **procurement blocker for Phase 1**, not a Phase 11 question
+8. Which real devices exist for gates G3/G4? The whole memory model rests on an iPhone SE 3-class floor. Without that hardware the budgets are unvalidated fiction. **Still open and now more urgent:** G4 ran on desktop only and found no ceiling below 732 MB; G3 never ran. The iOS scope decision above was taken on an *estimated* budget, so the hardware decides where the boundary falls, not whether there is one
 9. Does Journey by Mediavine work on Next.js? It is the only fallback if AdSense rejects. One email, and it should be sent in week 1
 
 <!-- slug: pzgif-mvp-9-browser-native-gif-tools-discord-presets -->

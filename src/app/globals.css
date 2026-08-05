@@ -125,20 +125,30 @@
   --radius-xl: var(--radius-panel);
   --radius-2xl: var(--radius-card);
 
-  /* ── shadow (§4.3) ─────────────────────────────────────── */
-  --shadow-sm:
-    0 1px 2px oklch(21% 0.03 265 / 0.06), 0 1px 3px oklch(21% 0.03 265 / 0.08);
+  /* ── shadow (§4.3) ───────────────────────────────────────
+     The tints are `var()` references, not literals, and that is the whole
+     trick. Tailwind copies a theme value into the utility verbatim at build
+     time, so a shadow written with literal colours can never change per theme —
+     `[data-theme="dark"] { --shadow-sm: … }` would be inert. Referencing a
+     runtime variable inside the value keeps the resolution live, which is what
+     §4.3 needs: "halve nothing — instead swap", because a soft grey shadow over
+     #0B0D12 is invisible.
+
+     The alternative, overriding Tailwind's internal `--tw-shadow` from outside
+     every cascade layer, also beats `shadow-none` — so a disabled or pressed
+     button would keep a shadow §5.1 says it must not have. */
+  --shadow-sm: 0 1px 2px var(--shadow-tint-1), 0 1px 3px var(--shadow-tint-2);
   --shadow-md:
-    0 4px 10px -2px oklch(21% 0.03 265 / 0.08),
-    0 2px 4px -2px oklch(21% 0.03 265 / 0.06);
-  --shadow-lg: 0 14px 32px -8px oklch(21% 0.03 265 / 0.16);
+    0 4px 10px -2px var(--shadow-tint-2), 0 2px 4px -2px var(--shadow-tint-1);
+  --shadow-lg: 0 14px 32px -8px var(--shadow-tint-3);
 }
 
 /* ── 4. Semantic tokens (§2.2) ───────────────────────────────────────────────
    Components consume THESE, never a primitive. Going through a semantic token
    is what makes dark mode work for free. */
 
-:root {
+:root,
+[data-theme="light"] {
   --bg: var(--color-neutral-0);
   --surface-1: var(--color-neutral-50); /* tool panel, card */
   --surface-2: var(--color-neutral-100); /* dropzone, inset, progress track */
@@ -158,6 +168,19 @@
   --border-control: var(--color-neutral-500); /* input edge — 3:1 required */
   --border-ad: var(--color-neutral-200);
 
+  /* The four states §5.1/§5.5/§5.6 specify with a *different primitive per
+     theme*. They exist as semantic tokens so no component ever needs a `dark:`
+     utility: that variant matches any descendant of [data-theme="dark"], which
+     means it also fires inside a nested light subtree — the exact situation
+     /dev/states creates when it renders both themes on one page. Going through
+     a token makes the theme the element actually sits in the one that wins. */
+  --surface-hover: var(--color-neutral-200); /* secondary button hover */
+  --border-control-hover: var(--color-neutral-600);
+  --border-hover: var(--color-neutral-300); /* chip and card edge on hover */
+  --mark-muted: var(--color-neutral-300); /* large decorative marks, idle */
+  --surface-disabled: var(--color-neutral-300); /* filled disabled control */
+  --control-track: var(--color-neutral-400); /* switch, off */
+
   --primary: var(--color-primary-700); /* links, brand */
   --primary-fill: var(--color-primary-800); /* button fill */
   --primary-fill-hover: var(--color-primary-900); /* keeps white ≥4.5:1 */
@@ -167,6 +190,18 @@
     var(--color-primary-700) 6%,
     transparent
   );
+  /* Pressed/dragging surfaces. design-guidelines §5.1 asks ghost:active to be
+     "bg stronger 10%" and §5.2 asks drag-over to be more emphatic than hover
+     without naming a token; docs/wireframe/wireframe.css resolves both with a
+     second, stronger tint, so it is named here rather than inlined per use. */
+  --primary-subtle-strong: color-mix(
+    in oklch,
+    var(--color-primary-700) 14%,
+    transparent
+  );
+  /* Same reasoning for danger:hover ("bg color-mix(--danger 8%)", §5.1) and the
+     invalid dropzone fill ("bg color-mix(--danger 6%)", §5.2). */
+  --danger-subtle: color-mix(in oklch, var(--color-danger-500) 8%, transparent);
 
   --accent: var(--color-accent-500); /* progress fill only */
   --accent-text: var(--color-accent-700); /* teal text/badges */
@@ -179,6 +214,12 @@
 
   --focus-ring: var(--color-primary-700);
   --overlay: oklch(21% 0.032 264.7 / 0.55);
+
+  /* Read by the `--shadow-*` theme values above. */
+  --shadow-tint-1: oklch(21% 0.03 265 / 0.06);
+  --shadow-tint-2: oklch(21% 0.03 265 / 0.08);
+  --shadow-tint-3: oklch(21% 0.03 265 / 0.16);
+  --shadow-bar: 0 -4px 12px oklch(21% 0.03 265 / 0.07); /* bars cast upward */
 
   /* ── z-index (§4.4) ─────────────────────────────────────── */
   --z-content: 0; /* page content AND ad slots — ads are pinned here */
@@ -209,6 +250,14 @@
   --border-control: var(--color-neutral-500);
   --border-ad: var(--color-neutral-800);
 
+  --surface-hover: var(--color-neutral-800);
+  --border-control-hover: var(--color-neutral-400);
+  --border-hover: var(--color-neutral-700);
+  --mark-muted: var(--color-neutral-700);
+  --shadow-bar: 0 -4px 12px oklch(0% 0 0 / 0.5);
+  --surface-disabled: var(--color-neutral-800);
+  --control-track: var(--color-neutral-600);
+
   --primary: var(--color-primary-500);
   --primary-fill: var(--color-primary-600);
   --primary-fill-hover: var(
@@ -218,6 +267,16 @@
   --primary-subtle: color-mix(
     in oklch,
     var(--color-primary-500) 14%,
+    transparent
+  );
+  --primary-subtle-strong: color-mix(
+    in oklch,
+    var(--color-primary-500) 24%,
+    transparent
+  );
+  --danger-subtle: color-mix(
+    in oklch,
+    var(--color-danger-300) 12%,
     transparent
   );
 
@@ -232,6 +291,13 @@
 
   --focus-ring: var(--color-primary-500);
   --overlay: oklch(10% 0.01 264 / 0.7);
+
+  /* Opaque black rather than a tinted grey: on #0B0D12 a 6%-alpha shadow is
+     nothing at all, which is why §4.3 pairs every raised surface with a border. */
+  --shadow-tint-1: oklch(0% 0 0 / 0.5);
+  --shadow-tint-2: oklch(0% 0 0 / 0.55);
+  --shadow-tint-3: oklch(0% 0 0 / 0.6);
+  --shadow-bar: 0 -4px 12px oklch(0% 0 0 / 0.5);
 }
 
 /* ── 5. Bridge semantics → Tailwind utilities ────────────────────────────────
@@ -244,6 +310,9 @@
   --color-surface-2: var(--surface-2);
   --color-surface-ad: var(--surface-ad);
   --color-surface-raised: var(--surface-raised);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-disabled: var(--surface-disabled);
+  --color-control-track: var(--control-track);
 
   --color-fg: var(--text);
   --color-fg-secondary: var(--text-secondary);
@@ -257,6 +326,8 @@
   --color-brand-fill-hover: var(--primary-fill-hover);
   --color-brand-hover: var(--primary-hover);
   --color-brand-subtle: var(--primary-subtle);
+  --color-brand-subtle-strong: var(--primary-subtle-strong);
+  --color-danger-subtle: var(--danger-subtle);
 
   --color-progress: var(--accent); /* teal, progress fill only */
   --color-accent-text: var(--accent-text);
@@ -269,6 +340,9 @@
 
   --color-line: var(--border);
   --color-line-control: var(--border-control);
+  --color-line-control-hover: var(--border-control-hover);
+  --color-line-hover: var(--border-hover);
+  --color-mark-muted: var(--mark-muted);
   --color-line-ad: var(--border-ad);
   --color-focus-ring: var(--focus-ring);
   --color-overlay: var(--overlay);
@@ -338,14 +412,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* §7.2 — visible on every interactive element, never removed, never
-     replaced by a shadow-only ring (shadows vanish in forced-colors mode). */
-  :focus-visible {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
-    box-shadow: 0 0 0 4px var(--primary-subtle);
-  }
-
   /* Theme switch (§6). Suppressed on first paint: the boot script removes
      [data-theme-booting] only after the initial theme is applied. */
   html:not([data-theme-booting]) body {
@@ -353,6 +419,272 @@
       background-color 120ms ease,
       color 120ms ease;
   }
+}
+
+/* ── 6. Component classes ────────────────────────────────────────────────────
+   Everything a component can express with Tailwind utilities stays in the
+   component file, shadcn-style. What lands here is only what utilities cannot
+   reach: vendor pseudo-elements (the range track and thumb), generated content
+   (the mandatory "Advertisement" label), keyframed animation, and the
+   `grid-template-rows` transition the accordion is specified to use.
+
+   Keeping the list short is deliberate — every rule here is one more place a
+   component can drift from docs/design-guidelines.md §5. */
+
+@layer components {
+  /* §5.4 Slider. A native <input type="range"> so the keyboard behaviour is the
+     platform's, which means the track and thumb are only reachable through
+     vendor pseudo-elements. `--fill` carries the filled proportion; WebKit has
+     no ::-webkit-slider-progress, so the fill is a hard-stop gradient. */
+  .pz-range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    margin: 0;
+    padding-block: 6px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .pz-range::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: var(--radius-xs);
+    background: linear-gradient(
+      to right,
+      var(--primary) var(--fill, 50%),
+      var(--surface-2) var(--fill, 50%)
+    );
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+  .pz-range::-moz-range-track {
+    height: 6px;
+    border-radius: var(--radius-xs);
+    background: var(--surface-2);
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+  .pz-range::-moz-range-progress {
+    height: 6px;
+    border-radius: var(--radius-xs);
+    background: var(--primary);
+  }
+  .pz-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    margin-top: -7px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--primary);
+    box-shadow: var(--shadow-sm);
+    /* Size only. A transition on the POSITION would lag the pointer, and the
+       readout beside it would then disagree with the thumb (§5.4). */
+    transition:
+      width 100ms ease-out,
+      height 100ms ease-out,
+      margin-top 100ms ease-out;
+  }
+  /* Firefox needs its own copy of every thumb state: the two engines share no
+     pseudo-element, and a rule list that mentions both is dropped whole by both.
+     Without these, a Firefox user tabbing to a slider gets no visible focus at
+     all — the base ring is suppressed above so it can be drawn on the thumb. */
+  .pz-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--primary);
+    box-shadow: var(--shadow-sm);
+  }
+  .pz-range:hover::-moz-range-thumb,
+  .pz-range[data-force="hover"]::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+  }
+  .pz-range:focus-visible::-moz-range-thumb,
+  .pz-range[data-force="focus"]::-moz-range-thumb {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--primary-subtle);
+  }
+  .pz-range:disabled::-moz-range-thumb {
+    background: var(--surface-2);
+    border-color: var(--border-hover);
+    box-shadow: none;
+  }
+  .pz-range:disabled::-moz-range-track {
+    background: var(--surface-2);
+  }
+  .pz-range:hover::-webkit-slider-thumb,
+  .pz-range[data-force="hover"]::-webkit-slider-thumb {
+    width: 22px;
+    height: 22px;
+    margin-top: -8px;
+  }
+  .pz-range:active::-webkit-slider-thumb {
+    box-shadow: var(--shadow-md);
+  }
+  .pz-range:focus-visible::-webkit-slider-thumb,
+  .pz-range[data-force="focus"]::-webkit-slider-thumb {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--primary-subtle);
+  }
+  .pz-range:disabled {
+    cursor: not-allowed;
+  }
+  .pz-range:disabled::-webkit-slider-runnable-track {
+    background: var(--surface-2);
+  }
+  .pz-range:disabled::-webkit-slider-thumb {
+    background: var(--surface-2);
+    border-color: var(--border-hover);
+    box-shadow: none;
+  }
+
+  /* §5.10 + §8 Ad slot. THE QUARANTINE. 6px radius, flat fill, no shadow, a
+     label that is always present, and `contain: layout size` so a late fill can
+     never reflow the page. `position: relative` is this project's correction to
+     §5.10, which positions the label absolutely without ever establishing a
+     containing block — as written the label would position against whatever
+     ancestor happened to be positioned. */
+  .ad-slot {
+    position: relative;
+    z-index: var(--z-content);
+    display: grid;
+    place-items: center;
+    width: 100%;
+    overflow: hidden;
+    background: var(--surface-ad);
+    border: 1px solid var(--border-ad);
+    border-radius: var(--radius-ad);
+    box-shadow: none;
+    contain: layout size;
+    margin-block: 24px;
+  }
+  .ad-slot::before {
+    content: "Advertisement";
+    position: absolute;
+    inset-block-start: 6px;
+    inset-inline-start: 8px;
+    font-family: var(--font-sans);
+    font-size: var(--text-micro);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-ad-label);
+  }
+  .ad-slot--rect {
+    min-height: 250px;
+    aspect-ratio: 300 / 250;
+    max-width: 300px;
+    margin-inline: auto;
+  }
+  .ad-slot--inline {
+    min-height: 280px;
+    aspect-ratio: 336 / 280;
+    max-width: 336px;
+    margin-inline: auto;
+  }
+  .ad-slot--rail {
+    min-height: 600px;
+    width: 300px;
+  }
+  .ad-slot--anchor {
+    min-height: 50px;
+    aspect-ratio: 320 / 50;
+    max-width: 320px;
+    margin-inline: auto;
+  }
+
+  /* §5.7 ProgressBar, indeterminate only. The determinate fill is a plain
+     inline width with `transition: none` and lives in the component, where a
+     unit test can assert it equals the passed value exactly. */
+  .pz-shuttle {
+    width: 40%;
+    animation: pz-shuttle 1.4s ease-in-out infinite alternate;
+  }
+  @keyframes pz-shuttle {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(250%);
+    }
+  }
+
+  /* Panel and result reveal (§6): 180ms, 8px rise. The space is already
+     reserved, so this fades content in — it never grows a box. */
+  @keyframes pz-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* One micro-bounce on completion, then static forever (§6). A looping success
+     animation reads as "still working", which is the opposite of what it says. */
+  @keyframes pz-check-pop {
+    0% {
+      transform: scale(0.7);
+    }
+    60% {
+      transform: scale(1.12);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* §5.12 Accordion. `grid-template-rows: 0fr → 1fr` animates the panel with no
+     JS height maths and no CLS. The panel content stays in the DOM in both
+     states — the FAQ answers are what the SEO strategy is built on. */
+  .pz-acc-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 150ms ease-out;
+  }
+  .pz-acc-panel[data-state="open"] {
+    grid-template-rows: 1fr;
+  }
+  .pz-acc-panel > div {
+    overflow: hidden;
+  }
+}
+
+/* ── Focus (§7.2) ─────────────────────────────────────────────────────────────
+   Visible on every interactive element, never removed, and never replaced by a
+   shadow-only ring — shadows disappear in forced-colors mode, outlines do not.
+
+   Unlayered on purpose. The halo is a `box-shadow`, and so is every `shadow-*`
+   utility; utilities sit in `@layer utilities`, which beats `@layer base` no
+   matter the specificity. Left in the base layer this rule would silently do
+   nothing on the primary button, the before/after handle, the result panel and
+   the toast — i.e. on most of the controls a keyboard user actually lands on.
+   The focused element loses its resting shadow for as long as it is focused,
+   which is a trade this project makes knowingly: the ring is an accessibility
+   requirement and the shadow is decoration.
+
+   `.force-focus` paints the same treatment for `/dev/states` screenshots and has
+   to live in the same place for the same reason. */
+
+:focus-visible,
+.force-focus {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--primary-subtle);
+}
+
+/* The one exception: a range input is a full-width transparent box, so a ring
+   around it would frame the whole row instead of the control. The ring is drawn
+   on the thumb in both engines above. Unlayered so it can override the rule
+   directly above it. */
+.pz-range:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 /* ── Motion (§6) ─────────────────────────────────────────────────────────────
@@ -369,5 +701,14 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* The shuttle carries no information — the label beside it does. Stopped, it
+     would sit frozen at a random offset and read as a stalled job, so it becomes
+     a full-width static track at low opacity instead (§5.7). */
+  .pz-shuttle {
+    width: 100%;
+    opacity: 0.3;
+    transform: none;
   }
 }

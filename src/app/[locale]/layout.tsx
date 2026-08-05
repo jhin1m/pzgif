@@ -3,7 +3,11 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
-import { SiteFooter } from "@/components/site-footer";
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+import { SkipLink } from "@/components/layout/skip-link";
+import { BottomBarProvider } from "@/components/tool/action-bar-context";
+import { ToastProvider } from "@/components/ui/toast";
 import { routing } from "@/i18n/routing";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/theme-init-script";
 import { SITE_NAME, SITE_URL } from "@/lib/site-config";
@@ -63,8 +67,17 @@ export default async function LocaleLayout({
       </head>
       <body>
         <NextIntlClientProvider>
-          {children}
-          <SiteFooter />
+          {/* The bottom of a phone viewport can hold exactly one of: the sticky
+              action bar, the anchor ad, the consent bar. The provider is what
+              makes that mutual exclusion structural rather than a review note. */}
+          <BottomBarProvider>
+            <ToastProvider>
+              <SkipLink />
+              <SiteHeader />
+              {children}
+              <SiteFooter />
+            </ToastProvider>
+          </BottomBarProvider>
         </NextIntlClientProvider>
         <ServiceWorkerRegistrar />
       </body>

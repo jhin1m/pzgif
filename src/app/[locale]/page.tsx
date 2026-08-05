@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { TrustLine } from "@/components/layout/trust-line";
 import { Link } from "@/i18n/navigation";
 import {
   TOOL_GROUP_ORDER,
@@ -15,12 +16,6 @@ import {
  * holding page from day one, so the domain is never parked.
  */
 
-const GROUP_LABELS: Record<ToolGroup, string> = {
-  edit: "Edit",
-  convert: "Convert",
-  presets: "Presets",
-};
-
 export default async function HomePage({
   params,
 }: {
@@ -32,19 +27,17 @@ export default async function HomePage({
   const t = await getTranslations();
 
   return (
-    <main id="main" className="mx-auto max-w-[1280px] px-4 py-12">
+    <main id="main" className="mx-auto max-w-[1280px] px-4 py-12 sm:px-6">
       <h1 className="text-display font-bold">{t("site.tagline")}</h1>
 
-      <p className="mt-3 text-sm text-fg-secondary">
-        <span aria-hidden="true" className="text-accent-text">
-          🔒
-        </span>{" "}
-        <strong className="font-semibold">{t("trust.line")}</strong>
-      </p>
+      <TrustLine className="mt-3" />
 
-      {TOOL_GROUP_ORDER.map((group) => (
+      {TOOL_GROUP_ORDER.map((group: ToolGroup) => (
         <section key={group} className="mt-10">
-          <h2 className="text-h2 font-bold">{GROUP_LABELS[group]}</h2>
+          {/* The group headings are the same strings the nav and footer use —
+              one label per group, read from the message catalogue, not spelled
+              again per surface. */}
+          <h2 className="text-h2 font-bold">{t(`nav.${group}`)}</h2>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {routesInGroup(group).map((route) => (
               <li key={route.slug}>

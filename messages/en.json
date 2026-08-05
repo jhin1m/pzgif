@@ -4,24 +4,40 @@
     "tagline": "GIF tools that run in your browser"
   },
   "trust": {
-    "line": "100% in your browser. Files never leave your device."
+    "line": "100% in your browser. Files never leave your device.",
+    "claim": "100% in your browser.",
+    "detail": "Files never leave your device."
   },
   "nav": {
     "skipToContent": "Skip to content",
     "tools": "Tools",
-    "discord": "Discord presets",
-    "about": "About"
+    "edit": "Edit",
+    "convert": "Convert",
+    "presets": "Discord presets",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "theme": {
-    "toggle": "Switch theme",
-    "light": "Light",
-    "dark": "Dark"
+    "switchToDark": "Switch to dark theme",
+    "switchToLight": "Switch to light theme"
+  },
+  "dropzone": {
+    "title": "Drop your file here or click to browse",
+    "caption": "or paste with Ctrl+V · {formats}",
+    "release": "Release to load",
+    "invalidTitle": "{extension} files aren't supported here.",
+    "invalidTitleUnknown": "This file isn't supported here.",
+    "invalidSuggestion": "Try {tool} instead.",
+    "invalidNoSuggestion": "This tool takes {formats}.",
+    "removeFile": "Remove file"
   },
   "footer": {
     "source": "Source",
     "sourceTitle": "Browse the exact source of this deployment",
     "licence": "Code under AGPL-3.0. Site copy and brand assets are not.",
-    "allTools": "All tools"
+    "allTools": "All tools",
+    "blurb": "Browser-native GIF tools. Your files stay on your device.",
+    "trustShort": "No upload. No server copy."
   },
   "notFound": {
     "title": "That page does not exist",

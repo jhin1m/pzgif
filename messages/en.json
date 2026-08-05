@@ -44,6 +44,29 @@
     "body": "The link may be out of date. Every tool is listed on the homepage.",
     "cta": "Go to the homepage"
   },
+  "tool": {
+    "settings": "Settings",
+    "waitingForFile": "Waiting for a file",
+    "lockedWhileEncoding": "Locked while encoding",
+    "reset": "Reset",
+    "cancel": "Cancel",
+    "startOver": "Start over",
+    "chooseDifferent": "Choose a different file",
+    "runsLocally": "Runs locally · nothing is uploaded",
+    "keepTabOpen": "Your device is doing the work. Keep this tab open — closing it cancels the job.",
+    "done": "Done",
+    "encodedIn": "encoded in {seconds}s",
+    "sourceMeta": "{width}×{height} · {frames} frames",
+    "sourceMetaUnknown": "{width}×{height}",
+    "sourcePreviewAlt": "The GIF you loaded",
+    "resultPreviewAlt": "The compressed GIF",
+    "beforeLabel": "Before · {size}",
+    "afterLabel": "After · {size}",
+    "relatedHeading": "Related tools",
+    "encoderBadge": "{encoder} · {colours} colours",
+    "announceResult": "Done. {from} became {to}, {delta}.",
+    "progressLabel": "Compression progress"
+  },
   "engine": {
     "stage": {
       "probe": "Reading the file…",

@@ -21,12 +21,24 @@ export type MediaFormat =
 /** Footer/nav grouping. Also the order groups are rendered in. */
 export type ToolGroup = "edit" | "convert" | "presets";
 
+/**
+ * Whether the route has a page behind it in *this* deployment.
+ *
+ * The plan ships in five stages, so for most of the build the registry
+ * describes more routes than exist. Anything that emits a link a crawler or a
+ * visitor will follow — the sitemap, the related-tools block — has to filter on
+ * this, or the first crawl of a new domain is a page of 404s.
+ */
+export type RouteStatus = "live" | "planned";
+
 export interface ToolDefinition {
   /** URL segment. English serves prefix-free, e.g. /gif-compressor. */
   readonly slug: string;
   /** Short label for nav, footer and cards. Not marketing copy. */
   readonly name: string;
   readonly group: ToolGroup;
+  /** Defaults to "planned" — a route is live only once its page ships. */
+  readonly status?: RouteStatus;
   readonly inputFormats: readonly MediaFormat[];
   readonly outputFormats: readonly MediaFormat[];
   /** Slugs of tools worth offering next. Validated to exist and not self-refer. */
@@ -44,6 +56,7 @@ export const TOOLS: readonly ToolDefinition[] = [
     slug: "gif-compressor",
     name: "GIF compressor",
     group: "edit",
+    status: "live",
     inputFormats: ["gif"],
     outputFormats: ["gif"],
     related: ["resize-gif", "gif-speed-changer", "gif-for-discord"],
@@ -190,4 +203,25 @@ export function relatedRoutes(slug: string): readonly ToolDefinition[] {
   return route.related
     .map((relatedSlug) => BY_SLUG.get(relatedSlug))
     .filter((related): related is ToolDefinition => related !== undefined);
+}
+
+/** True when the route has a page in this deployment. */
+export function isLive(route: ToolDefinition): boolean {
+  return route.status === "live";
+}
+
+/** Routes a crawler may be pointed at. The sitemap's only legitimate source. */
+export function liveRoutes(): readonly ToolDefinition[] {
+  return ALL_ROUTES.filter(isLive);
+}
+
+/**
+ * Related tools that actually exist yet.
+ *
+ * Kept separate from `relatedRoutes()` rather than filtering it in place: the
+ * unfiltered list is what the registry test asserts against, and it is what a
+ * future "coming soon" surface would want.
+ */
+export function relatedLiveRoutes(slug: string): readonly ToolDefinition[] {
+  return relatedRoutes(slug).filter(isLive);
 }

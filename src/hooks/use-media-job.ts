@@ -20,6 +20,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { JobController, type JobTelemetry } from "@/lib/media/job-controller";
 import type {
   AcceptedPlan,
+  InputProbe,
   JobSpec,
   JobStats,
   MediaError,
@@ -229,6 +230,40 @@ export function useMediaJob({ onTelemetry }: UseMediaJobOptions = {}) {
     [controller],
   );
 
+  /**
+   * Identifies a file without decoding it.
+   *
+   * Runs the moment a file is accepted, because two things the page must show
+   * before offering a single setting depend on it: the real dimensions and frame
+   * count for the file chip, and whether this device can take this input at all.
+   * Refusing an iOS visitor's video at the picker is honest; letting them choose
+   * settings and then refusing is a broken tool with extra steps.
+   *
+   * A probe failure is deliberately swallowed into `null` rather than pushed
+   * into the error state. It is metadata for a caption — the job itself will
+   * fail with a proper taxonomy entry if the file is genuinely unreadable, and
+   * surfacing the same problem twice, once without a recovery action, is worse
+   * than surfacing it once with one.
+   */
+  const probe = useCallback(
+    (file: File, onProbe: (result: InputProbe | null) => void) => {
+      return controller().probe(file, (event) => {
+        switch (event.type) {
+          case "probed":
+            onProbe(event.probe);
+            return;
+          case "error":
+          case "refused":
+            onProbe(null);
+            return;
+          default:
+            return;
+        }
+      });
+    },
+    [controller],
+  );
+
   const cancel = useCallback(() => {
     handleRef.current?.cancel();
     handleRef.current = null;
@@ -238,5 +273,5 @@ export function useMediaJob({ onTelemetry }: UseMediaJobOptions = {}) {
     setState((previous) => ({ ...IDLE, previewUrl: previous.previewUrl }));
   }, [progress]);
 
-  return { state, progress, run, estimate, cancel, reset };
+  return { state, progress, run, estimate, probe, cancel, reset };
 }

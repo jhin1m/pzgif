@@ -4,6 +4,9 @@ import {
   PRESET_ROUTES,
   TOOLS,
   getRoute,
+  isLive,
+  liveRoutes,
+  relatedLiveRoutes,
   relatedRoutes,
 } from "./registry";
 
@@ -50,6 +53,30 @@ describe("tool registry", () => {
       "gif-speed-changer",
       "gif-for-discord",
     ]);
+  });
+
+  it("treats a route as unbuilt unless it says otherwise", () => {
+    // The default has to be the safe one. A route that ships without anyone
+    // remembering to mark it planned is a 404 in the sitemap; a route that
+    // ships without anyone remembering to mark it live is merely invisible.
+    for (const route of ALL_ROUTES) {
+      if (route.status === undefined) expect(isLive(route)).toBe(false);
+    }
+  });
+
+  it("only exposes routes that have a page behind them", () => {
+    // Ship 1 of five. Anything listed here is a URL a crawler will follow, so
+    // this set must never run ahead of what is built.
+    expect(liveRoutes().map((route) => route.slug)).toEqual(["gif-compressor"]);
+  });
+
+  it("filters unbuilt tools out of the related block", () => {
+    const related = relatedRoutes("gif-compressor").map((route) => route.slug);
+    const live = relatedLiveRoutes("gif-compressor").map((route) => route.slug);
+    expect(related.length).toBeGreaterThan(live.length);
+    for (const slug of live) {
+      expect(isLive(getRoute(slug)!), slug).toBe(true);
+    }
   });
 
   it("declares at least one input and one output format per route", () => {

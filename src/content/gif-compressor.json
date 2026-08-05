@@ -1,0 +1,153 @@
+{
+  "slug": "gif-compressor",
+  "title": "GIF compressor — shrink GIF file size online",
+  "lead": "Make a GIF smaller without the muddy, banded look most compressors leave behind. Everything runs inside this tab — and the before/after slider shows the real byte counts, so you can judge the trade for yourself instead of taking our word for it.",
+  "meta": {
+    "title": "GIF compressor — shrink a GIF in your browser",
+    "description": "Compress a GIF in your own browser tab. No upload, no account, no server copy. Compare before and after with real byte counts before you download."
+  },
+  "dropzone": {
+    "title": "Drop your GIF here or click to browse",
+    "caption": "or paste with Ctrl+V · .gif · long or large GIFs are checked against what this device can hold before anything starts"
+  },
+  "actions": {
+    "run": "Compress GIF",
+    "running": "Compressing…",
+    "rerun": "Re-compress",
+    "download": "Download compressed GIF",
+    "disabledReason": "Add a GIF first."
+  },
+  "controls": {
+    "quality": {
+      "label": "Quality",
+      "hint": "Higher keeps more detail and costs more kilobytes. 80 is a good place to start."
+    },
+    "qualityCappedPalette": {
+      "label": "Quality",
+      "hint": "Quality is the dial for the full-palette encoder. While Colours is capped below 256, Colours is what sets the quality — set Colours back to 256 to use this."
+    },
+    "qualityPaletteEncoder": {
+      "label": "Quality",
+      "hint": "This browser encodes GIFs from the palette rather than from a quality target, so Colours is the dial here."
+    },
+    "colours": {
+      "label": "Colours",
+      "hint": "256 keeps the full palette and the best-looking output. Fewer colours shrinks the palette table in every frame — clean on flat art, visible banding on photos.",
+      "options": [
+        { "value": "256", "label": "256 — best quality" },
+        { "value": "128", "label": "128 — good balance" },
+        { "value": "64", "label": "64 — small file" },
+        { "value": "32", "label": "32 — flat art only" }
+      ]
+    },
+    "width": {
+      "label": "Width",
+      "hint": "Height follows automatically. Halving the width is the single biggest size win."
+    },
+    "dropFrames": {
+      "label": "Drop every second frame",
+      "hint": "Halves the frame count. Fine for screen recordings, visible on fast motion."
+    }
+  },
+  "resultEmpty": {
+    "message": "Your compressed GIF will appear here.",
+    "hint": "The preview above shows your GIF while you tune the settings."
+  },
+  "faqHeading": "GIF compressor FAQ",
+  "explainer": [
+    {
+      "heading": "How GIF compression actually works",
+      "level": 2,
+      "paragraphs": [
+        "A GIF is not a video. It is a stack of still images, each one limited to a palette of at most 256 colours, played back on a timer. That format was designed in 1987, and it is the reason a five-second clip that would be 300 KB as an MP4 can arrive as a 6 MB GIF. There are only four levers that make a GIF smaller: fewer pixels per frame, fewer frames, fewer colours, and better encoding of the parts that do not change between frames. Every honest GIF compressor is pulling some combination of those four.",
+        "Most online compressors pull the crude ones. They drop the palette to 64 colours, apply a heavy-handed dither, and hand you a file that is technically smaller and visibly worse — banded skies, speckled gradients, smeared edges. PZGIF's default encoder is gifski, which builds the palette per frame instead of once for the whole animation and applies temporal dithering across frames rather than within a single one. In practice that means you can hold quality at a setting where other tools have already started to fall apart. Capping the palette below 256 colours switches to a palette encoder instead, and the settings panel says so when it does."
+      ]
+    },
+    {
+      "heading": "Which setting should you change first?",
+      "level": 3,
+      "paragraphs": [
+        "**Width.** Halving the width of a GIF removes three quarters of the pixels and usually cuts the file by roughly the same proportion, with no visible damage as long as the GIF is not already small. Try that before you touch anything else. It is also the change that costs your device the least, because everything downstream is working on a quarter of the data.",
+        "**Quality** next. It is a single dial from 1 to 100 and 80 is a deliberate default: high enough that most people cannot tell the output from the input, low enough that the file is meaningfully smaller. Drop it in steps of ten and watch the slider rather than the number — the point at which a GIF starts to look wrong depends entirely on what is in it.",
+        "**Colours** last, and only for flat artwork, screenshots and line drawings. Capping the palette below 256 is the bluntest of the four levers: it shrinks the palette table in every single frame, which is a real saving on a diagram and immediate banding on a photograph. Leave it at 256 unless the picture is genuinely flat.",
+        "**Drop every second frame** is the fifth option and the one people forget. It halves the frame count outright, which halves both the file and the memory the job needs. On a screen recording it is close to invisible. On fast motion it is not, and the before/after slider will tell you which one you have."
+      ]
+    },
+    {
+      "heading": "Why the limit is frames, not megabytes",
+      "level": 3,
+      "paragraphs": [
+        "Every other GIF tool asks how big your file is. That is the wrong question, and it is why those tools fail halfway through instead of saying no up front. What a browser tab has to hold is not the compressed file — it is every frame, decoded, uncompressed, at four bytes per pixel. A 2 MB GIF at 800×600 with 200 frames unpacks to well over a gigabyte of raw pixels, and the encoder needs two copies of that at once.",
+        "So this tool works the budget out before it reads a single frame. It measures what the job would need, compares it against what this device can realistically hold, and either accepts it, quietly reduces the width and frame rate to something that fits and tells you it did, or refuses with a concrete alternative. What it never does is start a job it cannot finish. A tab that dies mid-encode loses your file and explains nothing, and on a phone that is the normal outcome rather than the rare one."
+      ]
+    },
+    {
+      "heading": "When a GIF is the wrong format",
+      "level": 3,
+      "paragraphs": [
+        "If the destination accepts MP4 or WebM, use them. The same animation as a video is typically five to ten times smaller than a well-compressed GIF, because a real video codec can describe motion instead of re-listing pixels frame by frame. No amount of GIF compression closes that gap; the format has no way to say \"this part did not change\" beyond a crude per-frame trick from the 1980s.",
+        "Use GIF where the platform demands it — Discord emoji and stickers, email signatures, some forums and wikis, anywhere autoplay-without-controls is the point. Everywhere else, a video file is smaller, sharper and kinder to whoever loads the page."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "how-much",
+      "question": "How much can I compress a GIF without it looking worse?",
+      "answer": [
+        "It depends almost entirely on what is in the GIF, which is why this page does not quote a percentage at you. Flat artwork, screen recordings and line drawings compress hard and stay clean. Photographic content and film grain compress much less before banding shows.",
+        "The before/after slider exists so you can decide instead of trusting a number. Both byte counts on it are measured from the real files — the input you dropped and the output that was just produced — not estimated."
+      ]
+    },
+    {
+      "id": "why-large",
+      "question": "Why is my GIF so large in the first place?",
+      "answer": [
+        "GIF stores whole frames rather than describing motion, and it has no modern compression. A 30 fps, 1080p, ten-second GIF is 300 near-complete images in one file. Reducing the width and the frame count almost always helps more than any quality dial."
+      ]
+    },
+    {
+      "id": "size-limit",
+      "question": "Is there a file size limit?",
+      "answer": [
+        "Not a fixed one, because file size is not what constrains this. The limit is how many decoded frames your device can hold at once, which depends on the width, the height and the frame count together — not on how many megabytes the compressed file happens to be.",
+        "The tool checks that before it starts. If the job is too big it will reduce the width and frame rate to something that fits and say so, or refuse and offer a shorter run. There is no server-side quota because there is no server in the loop."
+      ]
+    },
+    {
+      "id": "dimensions",
+      "question": "Does compressing change the dimensions or frame rate?",
+      "answer": [
+        "Only if you ask it to, or if the job would not otherwise fit in memory. Width and \"drop every second frame\" are separate, clearly labelled controls, and both start at the input's own values. If the device budget forces a reduction, the result panel says which one changed and by how much — it never happens silently."
+      ]
+    },
+    {
+      "id": "uploaded",
+      "question": "Are my files uploaded to a server?",
+      "answer": [
+        "No. Decoding, resizing and encoding all happen in this browser tab using WebCodecs and WebAssembly. You can confirm it: open your browser's network panel, compress a file, and watch for the upload that never happens. Disconnecting and compressing again works too, once the page and its encoder have loaded — there is nothing on our side left to reach."
+      ]
+    },
+    {
+      "id": "quality-vs-colours",
+      "question": "What is the difference between Quality and Colours?",
+      "answer": [
+        "Quality is the encoder's overall effort dial: how much error it will tolerate in exchange for a smaller file, judged across the whole animation. Colours is a hard cap on how many distinct shades any one frame may contain.",
+        "They damage different things first. Quality softens fine texture and fast motion. Colours bands gradients and smooth shading immediately. For a photograph, lower the quality and leave the palette alone; for a diagram or a screenshot, capping the palette is nearly free."
+      ]
+    },
+    {
+      "id": "on-phone",
+      "question": "Can I compress a GIF on my phone?",
+      "answer": [
+        "Yes, and short clips are the ones phones handle best. A phone has far less memory to spare than a laptop, so the tool sizes the job against the device before it starts and will reduce the width, drop the frame rate or refuse rather than crash the tab.",
+        "Keep the tab in the foreground while it encodes. A backgrounded tab can be reclaimed by the operating system at any moment, and there is nothing on a server to resume from."
+      ]
+    }
+  ],
+  "related": {
+    "resize-gif": "Set exact dimensions. Usually the single biggest size win.",
+    "gif-speed-changer": "Retime a GIF, or thin the frames out to shrink it further.",
+    "gif-for-discord": "Auto-tunes the settings until the file fits Discord's limit."
+  }
+}

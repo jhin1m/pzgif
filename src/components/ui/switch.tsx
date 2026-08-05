@@ -20,6 +20,8 @@ export interface SwitchFieldProps {
   defaultChecked?: boolean;
   onCheckedChange?: (checked: boolean) => void;
   disabled?: boolean;
+  /** Space-separated ids describing the control — its hint, a panel-wide reason. */
+  describedBy?: string;
   className?: string;
   /** Screenshot support for /dev/states. Never set this in product code. */
   forceState?: ForcedState;
@@ -31,6 +33,7 @@ export function SwitchField({
   defaultChecked,
   onCheckedChange,
   disabled = false,
+  describedBy,
   className,
   forceState,
 }: SwitchFieldProps) {
@@ -50,6 +53,7 @@ export function SwitchField({
         defaultChecked={defaultChecked}
         onCheckedChange={onCheckedChange}
         disabled={disabled}
+        aria-describedby={describedBy}
         data-force={forceState}
         className={cn(
           "relative h-6 w-11 flex-none cursor-pointer rounded-pill",

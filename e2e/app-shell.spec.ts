@@ -102,7 +102,9 @@ test.describe("app shell", () => {
       page.evaluate(() => getComputedStyle(document.body).backgroundColor);
     const before = await readBackground();
 
-    await page.getByRole("button", { name: /switch theme/i }).click();
+    await page
+      .getByRole("button", { name: /switch to (dark|light) theme/i })
+      .click();
     const flipped = initial === "dark" ? "light" : "dark";
     await expect(page.locator("html")).toHaveAttribute("data-theme", flipped);
 

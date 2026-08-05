@@ -1,10 +1,12 @@
 # PZGIF — Design Guidelines
 
-Status: **v1.0** (2026-08-04) · Build-ready
+Status: **v1.0** (2026-08-04), **amended 2026-08-05** — see the changelog at the foot of this file · Build-ready
 Implements `plans/reports/research-260804-2230-visual-design-direction-and-ad-safe-layout-report.md`. Constrained by `docs/tech-stack.md`.
 Reference wireframes: `docs/wireframe/*.html`.
 
 > **This document is the source of truth for tokens, states and ad-slot rules.** If a component in code disagrees with this file, the code is wrong.
+
+> Building the library (Phase 3) proved four statements here incomplete rather than wrong: a missing containing block, a missing set of per-theme tokens, a shadow definition that cannot vary by theme under Tailwind v4, and one open question that now has a provisional answer. Each is corrected inline and marked **[Amended 2026-08-05]**. Everything unmarked stands.
 
 ---
 
@@ -152,6 +154,20 @@ Never reference a primitive directly in a component. Always go through a semanti
 }
 ```
 
+**[Amended 2026-08-05, Phase 3]** Seven tokens were missing, and their absence forced components to reach for `dark:` utilities — which resolve against *any* `[data-theme="dark"]` ancestor and therefore fire inside a nested light subtree too. `/dev/states` renders both themes on one page and exposed it immediately. Added, per theme:
+
+```css
+--surface-hover        /* secondary button hover: neutral-200 / neutral-800   */
+--border-control-hover /* control edge on hover: neutral-600 / neutral-400    */
+--border-hover         /* chip and card edge on hover: neutral-300 / -700     */
+--surface-disabled     /* filled disabled control: neutral-300 / neutral-800  */
+--control-track        /* switch, off: neutral-400 / neutral-600              */
+--mark-muted           /* large decorative marks, idle: neutral-300 / -700    */
+--shadow-bar           /* upward shadow on the sticky bars                    */
+```
+
+`src/components/theme-tokens.test.ts` fails the build on any `dark:` variant or palette primitive inside a component, which is what makes §2.2's "never reference a primitive directly" enforceable rather than advisory.
+
 Wire `@theme` to semantics so Tailwind utilities resolve correctly:
 
 ```css
@@ -254,6 +270,8 @@ The 6px-vs-16px mismatch is a deliberate subconscious "this is not app UI" signa
 | `--shadow-none` | `none` | **Ad slots — enforced.** |
 
 Dark mode: halve nothing — instead swap to `--shadow-*` with a 1px `--border` outline, since shadows read poorly on `#0B0D12`.
+
+**[Amended 2026-08-05, Phase 3]** *How* to swap them is not free. Tailwind v4 copies a theme value into the utility at build time, so redefining `--shadow-sm` on `[data-theme="dark"]` is inert — the utility already carries the light literal. The shadow values are therefore written with `var()` references to per-theme tints (`0 1px 2px var(--shadow-tint-1)`), which keeps resolution live. Overriding Tailwind's internal `--tw-shadow` from outside the cascade layers also works and was rejected: unlayered CSS beats `shadow-none` too, so a disabled or pressed button would keep a shadow §5.1 forbids.
 
 ### 4.4 Z-index
 
@@ -386,6 +404,7 @@ See §8 for placement law. Visual spec:
 
 ```css
 .ad-slot{
+  position: relative;                   /* [Amended 2026-08-05, Phase 3] */
   background: var(--surface-ad);        /* flat, no gradient */
   border: 1px solid var(--border-ad);
   border-radius: 6px;                   /* --radius-ad, reserved word */
@@ -406,6 +425,8 @@ See §8 for placement law. Visual spec:
 .ad-slot--rail   { min-height: 600px; width: 300px; }
 ```
 
+**[Amended 2026-08-05, Phase 3]** `position: relative` is required and was missing: the label below is positioned absolutely, and without a containing block on the slot it would position against whatever ancestor happened to be positioned.
+
 States: **reserved/unfilled** — empty box, label only, no spinner, no "loading ad" text. **Filled** — creative fills the box; no entrance animation, ever. **Blocked/failed** — the box collapses to `0` height *only* on a resize-safe boundary (after the next user interaction), never mid-scroll.
 
 ### 5.11 Toast
@@ -419,6 +440,8 @@ Region: `<div role="status" aria-live="polite">` for success, `role="alert"` for
 Header = `<button>` full-width, 56px min, `--text-h3`, chevron rotates 180° over 150ms ease-out. 1px `--border` bottom divider between items; no border on the last.
 Hover: bg `--surface-1`. Open: header text `--text`, chevron `--primary`, panel `--text-body` with 68ch measure, 16px top / 24px bottom pad. Focus-visible: 2px ring inset 2px so it doesn't clip against the divider.
 Panel height animates via `grid-template-rows: 0fr → 1fr` (no JS height math, no CLS). **Every FAQ answer is present in the SSG HTML and is not `display:none`-hidden from crawlers** — use `hidden="until-found"` so Chrome's find-in-page can reveal it and the content stays indexable.
+
+**[Amended 2026-08-05, Phase 3]** Never render that attribute server-side. Safari does not support it, and its invalid-value default is the plain *hidden* state — so a closed answer would be `display: none` there and the accordion could not open it at all, on every iOS visitor and the pages the ranking strategy depends on. Ship the panels visible-but-collapsed and attach `hidden="until-found"` imperatively after mount, guarded by `"onbeforematch" in document.body`. Crawlability holds in both branches because the answer is in the served HTML either way.
 
 ---
 
@@ -607,7 +630,22 @@ Exact string, one per page, immediately below the h1 (tool pages) or below the s
 ## Open questions
 
 1. Ezoic's "Ad Tester" may override manual placements; the slot map in §8.1 assumes manual control holds. Verify before launch (report §Unresolved 1).
-2. Before/after slider fallback threshold for very large GIFs is not set — needs an eng benchmark (report §Unresolved 2).
+2. Before/after slider fallback threshold for very large GIFs. **[Amended 2026-08-05, Phase 3] Provisionally set:** `shouldRenderSideBySide()` drops to the static pair when `frames × width × height` exceeds a quarter of the device tier's frame-buffer budget divided by the 8 bytes two RGBA layers cost per pixel. The shape is grounded in the one quantity Phase 1 measured; the constant is not, because Phase 1 measured decode and encode throughput rather than browser compositing. It errs toward the static pair. Phase 11 re-measures on real hardware.
 3. Logo/mark does not exist yet; wireframes use a placeholder loop mark built from the brief in report §6. Final favicon legibility at 32px is untested.
 4. No real CLS measurement exists for the ad + dropzone coexistence layout — this is original synthesis with no competitor precedent (report §Unresolved 3). Measure once the ad script is live.
 5. Mobile anchor ad vs sticky action bar are specified as mutually exclusive; whether Ezoic can be configured to respect that conditional suppression is unverified.
+
+---
+
+## Changelog
+
+### 2026-08-05 — four corrections from building the library (Phase 3)
+
+| § | Was | Now | Why it surfaced |
+|---|---|---|---|
+| 2.2 | 30 semantic tokens | +7, covering every state that resolves to a different primitive per theme | `dark:` matches any descendant of a dark subtree, including a nested light one. Building `/dev/states` — both themes on one page — made light-pane buttons render dark hover colours |
+| 4.3 | "swap to `--shadow-*`" | Shadow values are `var()` references to per-theme tints | Tailwind v4 inlines a theme value at build time, so a `[data-theme]` override of `--shadow-sm` never applies |
+| 5.10 | `.ad-slot` without `position` | `position: relative` | The "Advertisement" label is absolutely positioned and had no containing block |
+| 5.12 | `hidden="until-found"` | Applied at runtime, only where `onbeforematch` exists | Safari treats the unsupported value as plain *hidden*, which would make a closed FAQ answer unopenable |
+
+Open question 2 (before/after fallback threshold) now carries a provisional answer; it is still unmeasured.

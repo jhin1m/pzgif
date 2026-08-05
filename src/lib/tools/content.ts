@@ -80,6 +80,23 @@ export interface ToolContent {
   controls: Readonly<Record<string, ControlCopy>>;
   /** The empty result panel — the box that reserves the space before it fills. */
   resultEmpty: { message: string; hint: string };
+  /**
+   * Short strings the chrome needs but that read wrong when they are generic.
+   *
+   * "Compression progress" is right on one page and wrong on the other four, and
+   * an alt text of "The compressed GIF" on the reverse tool is simply false —
+   * which matters more than tone, because it is what a screen-reader user is
+   * told the image is. Optional so a page that has nothing tool-specific to say
+   * falls back to the message catalogue rather than restating it.
+   */
+  labels?: {
+    /** Accessible name of the progress bar, e.g. "Resizing progress". */
+    progress?: string;
+    /** Alt text for the produced file's preview. */
+    resultAlt?: string;
+    /** Alt text for the loaded source preview. */
+    sourceAlt?: string;
+  };
   explainer: readonly ExplainerSection[];
   faqHeading: string;
   faq: readonly FaqEntry[];

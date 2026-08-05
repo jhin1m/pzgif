@@ -65,7 +65,36 @@
     "relatedHeading": "Related tools",
     "encoderBadge": "{encoder} · {colours} colours",
     "announceResult": "Done. {from} became {to}, {delta}.",
-    "progressLabel": "Compression progress"
+    "progressLabel": "Compression progress",
+    "outputMeta": "{width}×{height} · {frames} frames",
+    "outputSize": "Output {width}×{height} px · {percent}% of the original",
+    "speedPlanRetime": "All {frames} frames kept · about {seconds}s of GIF",
+    "speedPlanDrop": "{frames} of {sourceFrames} frames kept · about {seconds}s of GIF",
+    "speedFloorNotice": "Your frames are about {sourceMs} ms apart. This speed asks for {targetMs} ms, below the {floorMs} ms browsers honour, so frames past that point are dropped instead.",
+    "directionPlan": "{frames} output frames from {sourceFrames}",
+    "directionDowngraded": "To hold that many frames this device will run the job at {width} px.",
+    "directionWontFit": "{frames} frames will not fit this device at once. Try a straight reverse, or crop the frame down first."
+  },
+  "crop": {
+    "moveLabel": "Crop area — arrow keys move it, Shift for 10 px",
+    "readout": "{width}×{height} at {x}, {y}",
+    "selectAll": "Select the whole frame",
+    "fields": {
+      "x": "X (px from left)",
+      "y": "Y (px from top)",
+      "width": "Width (px)",
+      "height": "Height (px)"
+    },
+    "handles": {
+      "nw": "Resize from the top-left corner",
+      "n": "Resize from the top edge",
+      "ne": "Resize from the top-right corner",
+      "e": "Resize from the right edge",
+      "se": "Resize from the bottom-right corner",
+      "s": "Resize from the bottom edge",
+      "sw": "Resize from the bottom-left corner",
+      "w": "Resize from the left edge"
+    }
   },
   "engine": {
     "stage": {

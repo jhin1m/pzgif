@@ -1,0 +1,145 @@
+{
+  "slug": "gif-speed-changer",
+  "title": "GIF speed changer — speed up or slow down a GIF",
+  "lead": "Play a GIF anywhere from a quarter speed to four times faster. You choose how: keep every frame and restretch the timing, or drop frames and keep the timing — the two produce noticeably different files, and the difference is explained rather than decided for you.",
+  "meta": {
+    "title": "GIF speed changer — faster or slower, in your browser",
+    "description": "Change a GIF's playback speed from 0.25× to 4× without uploading it. Choose between retiming every frame and dropping frames, and see what each one costs."
+  },
+  "dropzone": {
+    "title": "Drop the GIF you want to retime",
+    "caption": "or paste with Ctrl+V · .gif · the frame delays are read from the file, not guessed"
+  },
+  "actions": {
+    "run": "Change speed",
+    "running": "Retiming…",
+    "rerun": "Run again",
+    "download": "Download retimed GIF",
+    "disabledReason": "Add a GIF first."
+  },
+  "controls": {
+    "speed": {
+      "label": "Speed",
+      "hint": "Below 1× the GIF plays slower and lasts longer. Above 1× it plays faster and finishes sooner.",
+      "options": [
+        { "value": "0.25", "label": "0.25× — quarter speed" },
+        { "value": "0.5", "label": "0.5× — half speed" },
+        { "value": "0.75", "label": "0.75× — slightly slower" },
+        { "value": "1.5", "label": "1.5× — slightly faster" },
+        { "value": "2", "label": "2× — twice as fast" },
+        { "value": "3", "label": "3× — three times faster" },
+        { "value": "4", "label": "4× — four times faster" }
+      ]
+    },
+    "method": {
+      "label": "How",
+      "hint": "Retiming keeps the motion smooth and the file about the same size. Dropping frames makes it choppier and the file smaller.",
+      "options": [
+        { "value": "retime", "label": "Keep every frame, change the delays" },
+        { "value": "drop", "label": "Drop frames, keep the delays" }
+      ]
+    },
+    "methodRetimeOnly": {
+      "label": "How",
+      "hint": "Dropping frames can only speed a GIF up by a whole number, so it is available at 2×, 3× and 4×. At this speed every frame is kept and the delays are changed."
+    }
+  },
+  "resultEmpty": {
+    "message": "Your retimed GIF will appear here.",
+    "hint": "The predicted frame count and duration are shown under the settings first."
+  },
+  "labels": {
+    "progress": "Retiming progress",
+    "resultAlt": "The retimed GIF",
+    "sourceAlt": "The GIF you loaded, at its original speed"
+  },
+  "faqHeading": "Changing GIF speed — common questions",
+  "explainer": [
+    {
+      "heading": "A GIF has no frame rate — it has delays",
+      "level": 2,
+      "paragraphs": [
+        "Video files carry a frame rate. A GIF does not. Each frame stores its own delay before the next one, in hundredths of a second, so a GIF can be uneven by design — a long pause on a title card followed by twenty fast frames is perfectly ordinary. That is why \"change the frame rate\" is the wrong description of what this tool does. It changes the delays, and there are exactly two ways to make an animation finish sooner.",
+        "**Retiming** keeps every frame and shortens each delay. The motion stays as smooth as it was and the file size barely changes, because the same pictures are still in it. **Dropping frames** keeps the delays and removes frames — every second one at 2×, two of every three at 3×. The animation gets choppier and the file gets meaningfully smaller. Neither is the right answer in general, which is why both are here."
+      ]
+    },
+    {
+      "heading": "The 20-millisecond floor, and why 4× is not always 4×",
+      "level": 3,
+      "paragraphs": [
+        "Browsers do not honour arbitrarily short GIF delays. A delay of zero or one hundredth of a second — a convention from when a zero-delay GIF would peg the processor — is clamped up to around a tenth of a second by every major engine. In practice anything under about 20 milliseconds per frame stops being reliable, and asking for less makes the animation render *slower* than you asked, not faster.",
+        "So retiming refuses to write delays below that floor. Where a requested speed would cross it, the frames that would have been shown for an impossible length of time are removed instead, and the time they would have taken is carried forward so the animation keeps its overall pacing. The settings panel tells you before you run when that is going to happen, with the actual millisecond figures from your file rather than a general warning. A GIF that is already fast — many screen-capture GIFs sit near the floor at their original speed — has very little headroom above 2×, and the honest thing is to say so rather than produce a file that plays at an unexpected rate."
+      ]
+    },
+    {
+      "heading": "Which one should you pick?",
+      "level": 3,
+      "paragraphs": [
+        "**Speeding up a long screen recording**: drop frames. The content is mostly static, the choppiness is barely visible, and it is the only one of the two that makes the file smaller — often by close to the same proportion as the speed change.",
+        "**Speeding up motion** — anything with a person, a camera move, or fast action: retime. Dropped frames on real motion read as a stutter immediately, and the smoothness is the point of the GIF.",
+        "**Slowing down**: retiming is the only option, and it does not add frames. A GIF slowed to a quarter speed shows each of its original frames four times longer, which looks like a slideshow if the source was already sparse. There is no frame interpolation here and there should not be — inventing frames that were never recorded is a different tool with a much larger cost."
+      ]
+    },
+    {
+      "heading": "What changes and what does not",
+      "level": 3,
+      "paragraphs": [
+        "The dimensions never change. Neither does the loop: a GIF that loops forever still loops forever, it simply gets round faster or slower. What changes is the frame count in drop mode and the total duration in both modes, and both numbers are shown before the job runs so you can check them against whatever limit you are working to.",
+        "If your goal is a smaller file rather than a different pace, dropping frames at 2× is one of the better trades available on GIF — roughly half the frames for a barely perceptible change on static content. Combine it with a width reduction and you have taken most of the size out before touching any quality dial."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "which-method",
+      "question": "What is the actual difference between retiming and dropping frames?",
+      "answer": [
+        "Retiming keeps all the pictures and shortens the gaps between them, so the file stays about the same size and the motion stays smooth. Dropping frames removes pictures and leaves the gaps alone, so the file shrinks roughly in proportion and the motion becomes stepped.",
+        "Both finish the animation in the same amount of time at the same speed setting. The difference is entirely in smoothness and file size."
+      ]
+    },
+    {
+      "id": "no-faster",
+      "question": "I asked for 4× but it does not look four times faster.",
+      "answer": [
+        "Your GIF's frames were probably already close to the delay floor browsers honour. Retiming will not write a delay below about 20 milliseconds, because browsers ignore delays that short and render them far slower than requested — so frames are dropped instead once the floor is reached.",
+        "The notice under the settings shows your file's real per-frame delay and what the chosen speed would ask for. If they are close to the floor, use drop mode, which is not constrained by it."
+      ]
+    },
+    {
+      "id": "smaller-file",
+      "question": "Does changing the speed change the file size?",
+      "answer": [
+        "In retime mode, hardly at all — the same frames are still there, only the delay bytes changed. In drop mode, yes: at 2× you keep half the frames and the file usually lands near half the size.",
+        "If size is the goal, drop mode at 2× and a smaller width together are more effective than any quality setting."
+      ]
+    },
+    {
+      "id": "slow-motion",
+      "question": "Can I get smooth slow motion?",
+      "answer": [
+        "Only as smooth as the original. Slowing down holds each existing frame for longer; it does not create intermediate ones. A GIF recorded at 10 frames a second and slowed to a quarter speed shows 2.5 frames a second, which reads as a slideshow.",
+        "For genuinely smooth slow motion you need a source with more frames — a video recorded at a high frame rate, converted afterwards."
+      ]
+    },
+    {
+      "id": "uneven",
+      "question": "My GIF has pauses in it. Are they preserved?",
+      "answer": [
+        "Yes. Every delay is scaled by the same factor rather than being replaced by an average, so a deliberate pause on one frame stays proportionally longer than the frames around it. A GIF with a two-second title card and fast action after it keeps that structure at any speed."
+      ]
+    },
+    {
+      "id": "no-upload",
+      "question": "Does my GIF get uploaded?",
+      "answer": [
+        "No. The file is decoded, retimed and re-encoded in this tab. There is no server involved in the free tools, so there is nothing to upload to and nothing stored afterwards — closing the tab is the only cleanup there is."
+      ]
+    }
+  ],
+  "related": {
+    "reverse-gif": "Play it backwards, or forwards and back in a loop.",
+    "gif-compressor": "Set the quality, palette and width to hit a size target.",
+    "resize-gif": "Change the dimensions without touching the timing."
+  }
+}

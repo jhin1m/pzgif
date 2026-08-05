@@ -1,0 +1,141 @@
+{
+  "slug": "resize-gif",
+  "title": "Resize GIF — change GIF dimensions online",
+  "lead": "Set a GIF to an exact pixel width, or scale it by a percentage. The height follows the original proportions, the animation and its timing are preserved frame for frame, and the whole job runs in this tab.",
+  "meta": {
+    "title": "Resize GIF — set exact dimensions in your browser",
+    "description": "Resize a GIF to an exact width or a percentage without uploading it. Keeps every frame and its timing, and shows the real output dimensions before you run it."
+  },
+  "dropzone": {
+    "title": "Drop the GIF you want to resize",
+    "caption": "or paste with Ctrl+V · .gif · the frame count and dimensions are read before anything is decoded"
+  },
+  "actions": {
+    "run": "Resize GIF",
+    "running": "Resizing…",
+    "rerun": "Resize again",
+    "download": "Download resized GIF",
+    "disabledReason": "Add a GIF first."
+  },
+  "controls": {
+    "mode": {
+      "label": "Size by",
+      "hint": "Pixels when a platform gave you a number. Percent when you just want it smaller.",
+      "options": [
+        { "value": "pixels", "label": "Exact width in pixels" },
+        { "value": "percent", "label": "Percentage of the original" }
+      ]
+    },
+    "width": {
+      "label": "Width",
+      "hint": "The slider stops at the original width, because nothing here can add detail that was never recorded."
+    },
+    "scale": {
+      "label": "Scale",
+      "hint": "50% removes three quarters of the pixels. That is usually the point where a GIF stops being awkward to share.",
+      "options": [
+        { "value": "75", "label": "75% — a light trim" },
+        { "value": "50", "label": "50% — half size" },
+        { "value": "33", "label": "33% — a third" },
+        { "value": "25", "label": "25% — quarter size" }
+      ]
+    }
+  },
+  "resultEmpty": {
+    "message": "Your resized GIF will appear here.",
+    "hint": "The output dimensions are shown under the settings before you run anything."
+  },
+  "labels": {
+    "progress": "Resizing progress",
+    "resultAlt": "The resized GIF",
+    "sourceAlt": "The GIF you loaded, at its original size"
+  },
+  "faqHeading": "Resizing GIFs — common questions",
+  "explainer": [
+    {
+      "heading": "What changing a GIF's dimensions actually does",
+      "level": 2,
+      "paragraphs": [
+        "Resizing is the only edit on this site that touches every pixel of every frame. Each frame is decoded to raw colour, redrawn at the new dimensions through a series of halving steps rather than one large jump, and then re-encoded into a fresh palette. The step-down matters more than it sounds: a single large-ratio draw behaves like a box filter in most browser engines, and on moving content its aliasing shimmers from frame to frame — the kind of fault people describe as \"it went crunchy\" without being able to point at a setting.",
+        "Because the frames are re-encoded, a resized GIF is a second generation of quantisation. Going down in size hides that comfortably; there are fewer pixels carrying the same picture, so the palette has an easier job than it did originally. That is why halving a GIF's width usually looks clean while re-saving one at its own size does not — the second one pays the quantisation cost with nothing to show for it."
+      ]
+    },
+    {
+      "heading": "Set the width; the height follows",
+      "level": 3,
+      "paragraphs": [
+        "This tool takes a width and derives the height from the original proportions. There is no unlock for entering both independently, and that is a decision rather than an omission: a GIF stretched to a shape it was not filmed in looks wrong in a way no encoder setting repairs, and the honest way to change a GIF's shape is to cut pixels off it instead. That is what the crop tool is for.",
+        "The number under the settings is the real output size, computed as you drag rather than after the job. If it reads 481 pixels when you asked for 480, that is the rounding needed to keep the aspect ratio a whole number of pixels on both axes — the alternative is a half-pixel row the encoder has to invent."
+      ]
+    },
+    {
+      "heading": "Sizes worth knowing before you pick a number",
+      "level": 3,
+      "paragraphs": [
+        "**128 pixels** is the Discord emoji frame, and **320 pixels** is a Discord sticker. **Around 480 pixels** wide is the sweet spot for a GIF embedded in a forum post or a wiki: large enough to read text in a screen recording, small enough that the page does not stall while it loads. **Under 200 pixels** is where email signatures and small avatars live, and where the frame count matters more than the width.",
+        "If the destination has published a byte limit rather than a pixel one, resize is still the first lever to reach for — the file shrinks roughly with the pixel count, so halving the width takes about three quarters of the bytes with it. When you need to land exactly under a stated limit, the compressor's settings give you the finer control, and the Discord pages search for the settings that fit automatically."
+      ]
+    },
+    {
+      "heading": "Why there is no enlarge option",
+      "level": 3,
+      "paragraphs": [
+        "The width slider stops at the GIF's own width. Enlarging a GIF cannot recover detail that was never recorded — it interpolates between the pixels that exist, which produces a softer picture in a larger file, and on a 256-colour format the interpolated shades then get quantised back down and band. Every kilobyte you gain buys blur.",
+        "Tools that offer upscaling and then silently cap it at 100% are worse than tools that do not offer it, because the cap reads as a bug. If you genuinely need a larger animation, the source has to be larger: re-export it from the original video or screen recording at the size you want, then bring that here."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "smaller-file",
+      "question": "Does resizing make the file smaller?",
+      "answer": [
+        "Almost always, and usually by more than people expect. Pixel count falls with the square of the width, so a GIF resized to 50% has a quarter of the pixels to encode. The file rarely lands at exactly a quarter of the bytes — compression is content-dependent — but the direction is reliable and it is the largest single saving available on most GIFs.",
+        "The result panel shows both byte counts, measured from the actual files rather than predicted, so you can see what the change bought."
+      ]
+    },
+    {
+      "id": "exact-height",
+      "question": "Can I set an exact height instead of a width?",
+      "answer": [
+        "Not directly. Work out the width that gives the height you need — multiply the height you want by the original width and divide by the original height — and enter that. The live readout under the settings confirms the height before you run anything.",
+        "If the target is a fixed box in both directions, such as a square avatar, crop first and then resize the cropped result. Cropping to the shape and then scaling to the size is also the order that keeps the most detail."
+      ]
+    },
+    {
+      "id": "blurry",
+      "question": "Why does my resized GIF look softer than the original?",
+      "answer": [
+        "Some softening is unavoidable when pixels are merged, and it is usually invisible at 50% or above. Below about a third of the original width, fine detail — small text in a screen recording, thin lines in a diagram — stops surviving the reduction, because there are no longer enough pixels to describe it.",
+        "If text has to stay readable, resize less and shorten the clip instead. Frame count and width are independent levers on file size, and dropping seconds costs nothing visually where dropping pixels costs a lot."
+      ]
+    },
+    {
+      "id": "animation-preserved",
+      "question": "Does resizing keep the animation and its speed?",
+      "answer": [
+        "Yes. Every frame is resized and the per-frame delays are copied across untouched, so the output has the same frame count and the same total duration as the input. Nothing here changes timing — that is the speed changer's job, and it is a separate tool so that the two cannot happen by accident at once."
+      ]
+    },
+    {
+      "id": "transparency",
+      "question": "What happens to transparency?",
+      "answer": [
+        "Transparent regions are composited during decoding, which is what makes frames with partial updates and disposal methods come out correct. The output is a fully opaque GIF: every frame is a complete picture rather than a patch over the previous one.",
+        "For most GIFs that is invisible and often smaller. If you need a GIF with a genuinely transparent background — an emoji that sits on a coloured surface, for instance — check the result on the surface it is going to live on before you commit."
+      ]
+    },
+    {
+      "id": "no-upload",
+      "question": "Is my GIF uploaded anywhere?",
+      "answer": [
+        "No. The file is read, decoded, redrawn and re-encoded inside this browser tab. Open your network panel and resize something: there is no request carrying your file, because there is no server on our side that could receive it. Turning the network off after the page has loaded and resizing again works for the same reason."
+      ]
+    }
+  ],
+  "related": {
+    "crop-gif": "Cut the frame down to the part you want, then resize the result.",
+    "gif-compressor": "Already the right size but still too heavy? Trade quality for bytes here.",
+    "gif-for-discord": "Give it a Discord target and it finds the settings that fit."
+  }
+}

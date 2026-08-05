@@ -1,0 +1,137 @@
+{
+  "slug": "crop-gif",
+  "title": "Crop GIF — cut a GIF down to the part that matters",
+  "lead": "Drag a rectangle over the first frame, or type exact coordinates, and every frame is cut to the same region. Nothing is uploaded, and the crop is applied before the resize so the part you keep is sampled from full-resolution pixels.",
+  "meta": {
+    "title": "Crop GIF — trim the frame in your browser",
+    "description": "Crop a GIF to any region with a draggable rectangle or exact pixel coordinates. Runs entirely in your browser, keeps every frame, and never uploads your file."
+  },
+  "dropzone": {
+    "title": "Drop the GIF you want to crop",
+    "caption": "or paste with Ctrl+V · .gif · the first frame is shown as a still so the rectangle is easy to place"
+  },
+  "actions": {
+    "run": "Crop GIF",
+    "running": "Cropping…",
+    "rerun": "Crop again",
+    "download": "Download cropped GIF",
+    "disabledReason": "Add a GIF first."
+  },
+  "controls": {
+    "aspect": {
+      "label": "Shape",
+      "hint": "Free lets the rectangle take any shape. The presets hold their ratio while you drag a corner.",
+      "options": [
+        { "value": "free", "label": "Free" },
+        { "value": "1:1", "label": "Square — 1:1" },
+        { "value": "16:9", "label": "Widescreen — 16:9" },
+        { "value": "4:3", "label": "Classic — 4:3" }
+      ]
+    },
+    "rect": {
+      "label": "Crop area in pixels",
+      "hint": "X and Y are the top-left corner, measured from the top-left of the original. Width and height land on even numbers so the result can also be converted to MP4 later."
+    },
+    "play": {
+      "label": "Play the preview",
+      "hint": "Off by default: a still is easier to place a rectangle on. Turn it on when the subject moves and you need to see where it goes."
+    }
+  },
+  "resultEmpty": {
+    "message": "Your cropped GIF will appear here.",
+    "hint": "The rectangle over the preview is the region every frame will be cut to."
+  },
+  "labels": {
+    "progress": "Cropping progress",
+    "resultAlt": "The cropped GIF",
+    "sourceAlt": "The first frame of your GIF, with the crop rectangle over it"
+  },
+  "faqHeading": "Cropping GIFs — common questions",
+  "explainer": [
+    {
+      "heading": "One rectangle, every frame",
+      "level": 2,
+      "paragraphs": [
+        "A crop takes the same rectangle out of all of the frames. That sounds obvious until you have a GIF where the subject moves — a cursor crossing a screen recording, a face walking out of shot — and the region that framed it in the first frame is empty by the fortieth. There is no per-frame crop here and there is not going to be one; a rectangle that moves is a pan, which is an editing decision a GIF utility should not be making silently on your behalf. Turn the preview on and let the animation play under the rectangle before you commit, and you will see the problem in the two seconds it takes to watch.",
+        "The crop happens **before** the resize, and the order is not arbitrary. Scaling first would throw away the pixels the crop was about to keep, so the crop would then be sampling an already-softened image. Cutting first means the region you keep is taken from the original pixels at full resolution, which is why a crop of a small area still looks sharp."
+      ]
+    },
+    {
+      "heading": "Three ways to place the rectangle",
+      "level": 3,
+      "paragraphs": [
+        "**Drag it.** Move the rectangle from anywhere inside it; drag any of the eight handles to resize from that edge or corner. The pointer stays captured while you drag, so a fast gesture that leaves the image does not drop the rectangle where it was.",
+        "**Use the keyboard.** Tab to the rectangle and the arrow keys move it a pixel at a time, ten with Shift held. Tab again and each handle takes the same keys to resize from its own edge. This is not a courtesy path — it is the only way to nudge a crop by one pixel without a fight, and it exists because a drag-only control is not usable at all for some people.",
+        "**Type the numbers.** X, Y, width and height are in the settings panel as ordinary number inputs, in source pixels, measured from the top-left corner. If a platform handed you exact coordinates, or you are matching a crop you made somewhere else, this is the fastest route and it is the same rectangle the drag produces."
+      ]
+    },
+    {
+      "heading": "Why the width and height land on even numbers",
+      "level": 3,
+      "paragraphs": [
+        "The crop size always rounds down to an even number of pixels on both axes. GIF itself does not care, but H.264 — the codec inside almost every MP4 — stores colour at half resolution and rejects odd dimensions outright. A 499-pixel-wide crop is fine here and then fails later at the point where somebody converts the result to MP4, with an error message about `yuv420p` that says nothing about cropping.",
+        "Rounding down rather than up matters too: the rectangle never grows past the edge you dragged it to, so a crop taken flush against the right side of a frame does not quietly pick up a column of pixels from beyond it."
+      ]
+    },
+    {
+      "heading": "Cropping is also a size reduction",
+      "level": 3,
+      "paragraphs": [
+        "Removing dead space is the cheapest compression there is, because the pixels you cut cost nothing to encode and lose nothing you wanted. A screen recording of one window inside a 1440p desktop is mostly background; cropping to the window can take three quarters of the file with it and leaves everything you were trying to show at its original sharpness.",
+        "That also makes cropping the right first step before anything else. Crop, then resize the cropped region to the width you need, then compress if it is still too heavy. Doing it in that order means each step works on less data than the last, and the whole job runs faster on your device — which matters most on a phone, where the memory budget, not the file size, is what decides whether a job can run at all."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "moving-subject",
+      "question": "Can the crop follow a moving subject?",
+      "answer": [
+        "No. One rectangle applies to every frame. If the subject moves out of the region you chose, it will be missing for those frames.",
+        "Turn on the preview playback before you run the job. It is off by default because a still is easier to place a rectangle on, but a moving subject is exactly the case where you want it on."
+      ]
+    },
+    {
+      "id": "exact-square",
+      "question": "How do I crop an exact square for an avatar?",
+      "answer": [
+        "Choose the 1:1 shape preset. The rectangle then holds its ratio while you drag any corner, so it stays square whatever size you settle on. Position it with the arrow keys if you need it centred on something precisely.",
+        "Then resize the result to whatever pixel size the platform asks for. Cropping to the shape first and scaling to the size second keeps more detail than doing it the other way round."
+      ]
+    },
+    {
+      "id": "quality-loss",
+      "question": "Does cropping reduce quality?",
+      "answer": [
+        "The pixels you keep are taken at full resolution, so nothing is softened by the crop itself. The output is re-encoded, which means a second pass of palette quantisation — on most content that is invisible, and on a crop it is usually more than offset by the fact that the encoder now has a simpler picture to describe."
+      ]
+    },
+    {
+      "id": "even-numbers",
+      "question": "Why won't the width accept an odd number?",
+      "answer": [
+        "It rounds down to the nearest even number on both axes so that the result stays convertible to MP4. H.264 stores colour at half resolution and rejects odd dimensions, and a crop that only fails later, in a different tool, is worse than one that quietly costs you a single pixel now."
+      ]
+    },
+    {
+      "id": "transparent-edges",
+      "question": "My GIF has transparent edges — what happens to them?",
+      "answer": [
+        "Frames are composited as they are decoded, so what you crop is what the animation actually shows at that moment rather than the raw frame data underneath. Transparent regions inside the crop stay where they were visually, and the output is written as a sequence of complete frames."
+      ]
+    },
+    {
+      "id": "large-gif",
+      "question": "Can I crop a very large GIF on my phone?",
+      "answer": [
+        "Often yes, and more often than you can resize the same file, because the crop reduces the pixel count before the frames are held in memory. The job is still measured against what the device can hold before it starts, so if it does not fit you get a concrete alternative rather than a tab that dies halfway.",
+        "Keep the tab in the foreground while it runs. A backgrounded tab can be reclaimed by the operating system, and there is no server-side copy to resume from."
+      ]
+    }
+  ],
+  "related": {
+    "resize-gif": "Cropped it to shape? Set the exact pixel size here.",
+    "gif-compressor": "Cropping cuts the dead space; this cuts the bytes that are left.",
+    "gif-for-discord": "Crop to a square first, then let the preset hit Discord's limit."
+  }
+}

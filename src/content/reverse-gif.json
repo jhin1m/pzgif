@@ -1,0 +1,128 @@
+{
+  "slug": "reverse-gif",
+  "title": "Reverse GIF — play a GIF backwards or in a loop",
+  "lead": "Run a GIF backwards, or forwards and then back so it returns to where it started. The ping-pong option doubles the frame count, so the page tells you what that costs on this device before the job starts rather than after it fails.",
+  "meta": {
+    "title": "Reverse GIF — backwards or ping-pong, in your browser",
+    "description": "Reverse a GIF, or make it play forwards and back in a seamless loop. Runs in your browser with no upload, and checks the doubled frame count against your device first."
+  },
+  "dropzone": {
+    "title": "Drop the GIF you want to reverse",
+    "caption": "or paste with Ctrl+V · .gif · the frame count is read up front, because ping-pong doubles it"
+  },
+  "actions": {
+    "run": "Reverse GIF",
+    "running": "Reversing…",
+    "rerun": "Run again",
+    "download": "Download reversed GIF",
+    "disabledReason": "Add a GIF first."
+  },
+  "controls": {
+    "direction": {
+      "label": "Direction",
+      "hint": "Ping-pong plays through and comes back, so the last frame joins the first without a jump.",
+      "options": [
+        { "value": "reverse", "label": "Backwards — last frame first" },
+        { "value": "ping-pong", "label": "Ping-pong — forwards, then back" }
+      ]
+    }
+  },
+  "resultEmpty": {
+    "message": "Your reversed GIF will appear here.",
+    "hint": "The frame count the chosen direction produces is shown under the settings."
+  },
+  "labels": {
+    "progress": "Reversing progress",
+    "resultAlt": "The reversed GIF",
+    "sourceAlt": "The GIF you loaded, playing forwards"
+  },
+  "faqHeading": "Reversing GIFs — common questions",
+  "explainer": [
+    {
+      "heading": "Backwards, and the reason it sometimes looks wrong",
+      "level": 2,
+      "paragraphs": [
+        "Reversing sounds like the simplest edit on this site — put the frames in the opposite order and write them out. It nearly is, but there is a detail that catches naive implementations, and it is why some reversed GIFs come out as a mess of smeared trails. GIF frames are not always complete pictures. To save space the format lets a frame contain only the region that changed, along with a disposal method telling the player what to do with the previous frame first: leave it, restore the background, or restore what was underneath. A frame in the middle of a GIF can be a handful of pixels that only makes sense on top of everything before it.",
+        "Play those partial frames in reverse and each one lands on the wrong background. The fix is to composite first: every frame is rebuilt into a full picture as it is decoded, exactly as a player would show it at that moment, and only then reordered. That is what happens here, which is why a reversed GIF from this page looks like the original running backwards rather than like a fault. It also means the output is a sequence of complete frames, which is occasionally larger than the input — the space the original saved by storing patches is space a reordered animation cannot save the same way."
+      ]
+    },
+    {
+      "heading": "Ping-pong, and what it costs",
+      "level": 3,
+      "paragraphs": [
+        "Ping-pong plays the animation through and then back to the start, so the loop closes on itself and there is no jump at the seam. It is the right choice for anything where the first and last frames do not match — a door opening, a hand raising, a chart drawing itself.",
+        "The frames used on the way back are the same pictures, not copies, so the memory cost is not double. The **output** frame count is, though: n frames become 2n − 2. The two endpoints are not repeated, because showing the first and last frames twice in a row reads as a stutter at each turning point, which is the one artefact the effect exists to avoid. So a 48-frame GIF becomes 94 frames, and the file grows to match.",
+        "That doubling is checked against what your device can hold before anything is decoded. The panel shows the frame count the current setting will produce, and if the doubled job does not fit, you are told what will happen — a smaller width, a shorter run — while you can still choose differently. A job that dies halfway through on a phone loses your file and explains nothing, and that is the outcome the check exists to make impossible."
+      ]
+    },
+    {
+      "heading": "Timing survives the reversal",
+      "level": 3,
+      "paragraphs": [
+        "Each frame keeps the delay it had, and the delays travel with their frames. A GIF that pauses on its final frame therefore pauses on its *first* frame once reversed, which is usually what people want and occasionally a surprise. Total duration is unchanged for a straight reverse and roughly doubled for ping-pong.",
+        "If the pause lands somewhere awkward, the speed changer can even the timing out afterwards, and cropping or resizing can be applied before or after — the tools are deliberately separate so that one edit never quietly performs another."
+      ]
+    },
+    {
+      "heading": "Where a reversed GIF is actually useful",
+      "level": 3,
+      "paragraphs": [
+        "Reaction GIFs are the obvious one: a gesture read backwards often means the opposite of what it meant forwards, which is most of the joke. Beyond that, ping-pong is genuinely useful for anything demonstrating a mechanism — an animation of a part sliding into place, a before-and-after comparison, a UI interaction on a documentation page — because the viewer sees the transition in both directions without the animation ever snapping back.",
+        "It is also a practical way to make a short clip feel longer without adding a single new picture. Two seconds of footage becomes four seconds of loop, at roughly double the file size but with none of the quality cost that stretching or interpolation would bring."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "why-larger",
+      "question": "Why is my reversed GIF bigger than the original?",
+      "answer": [
+        "Because every frame in the output is a complete picture. Many GIFs store only the pixels that changed from one frame to the next, which is a large saving, but those partial frames cannot simply be reordered — they only make sense on top of what came before. Compositing them into whole frames is what makes the reversal correct, and it costs some of that saving.",
+        "If the size matters, run the result through the compressor, or reduce the width first. Both take back more than the reversal added."
+      ]
+    },
+    {
+      "id": "frame-count",
+      "question": "Why does ping-pong give me 94 frames from a 48-frame GIF?",
+      "answer": [
+        "The return journey skips both endpoints: 2 × 48 − 2 = 94. Repeating the first and last frames back to back would hold them on screen for twice as long as every other frame, which reads as a hitch at each turn.",
+        "The frame count for the current setting is shown under the settings before you run the job, so the number is never a surprise afterwards."
+      ]
+    },
+    {
+      "id": "too-big",
+      "question": "It says the ping-pong job will not fit my device. Why?",
+      "answer": [
+        "What a browser tab has to hold is not the compressed file — it is every frame, decoded, at four bytes per pixel, and the encoder needs two copies of that at once. Doubling the frame count doubles that requirement, and on a phone the budget is tight enough that the doubled version of a job that fits may not.",
+        "The check runs before any decoding, so you get a concrete alternative — usually a smaller width — rather than a tab that dies partway through. A straight reverse of the same file will normally still run."
+      ]
+    },
+    {
+      "id": "loop-seam",
+      "question": "How do I stop the loop from jumping?",
+      "answer": [
+        "Use ping-pong. A straight reverse still ends where the original began, so if the first and last frames are very different the loop still snaps. Ping-pong ends on the frame it started from, so the seam disappears entirely."
+      ]
+    },
+    {
+      "id": "transparency",
+      "question": "Does reversing work on GIFs with transparency?",
+      "answer": [
+        "Yes, and correctly — that is the main thing compositing before reordering fixes. The output frames are opaque, complete pictures rather than patches, so transparent regions in the source appear as they were being displayed at that moment.",
+        "If you need the output itself to keep a transparent background, check the result on the surface it will live on before you use it."
+      ]
+    },
+    {
+      "id": "no-upload",
+      "question": "Is the file sent anywhere?",
+      "answer": [
+        "No. Decoding, reordering and re-encoding all happen in this tab. There is no upload on the free tools, so there is nothing on a server to delete afterwards and nothing that could be retained."
+      ]
+    }
+  ],
+  "related": {
+    "gif-speed-changer": "Even out the timing, or run the loop faster.",
+    "gif-compressor": "Ping-pong doubled the frames? Take the bytes back here.",
+    "crop-gif": "Trim the frame down before doubling it costs you twice."
+  }
+}

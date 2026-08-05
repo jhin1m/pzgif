@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   ALL_ROUTES,
@@ -65,9 +67,22 @@ describe("tool registry", () => {
   });
 
   it("only exposes routes that have a page behind them", () => {
-    // Ship 1 of five. Anything listed here is a URL a crawler will follow, so
-    // this set must never run ahead of what is built.
-    expect(liveRoutes().map((route) => route.slug)).toEqual(["gif-compressor"]);
+    // Anything listed here is a URL a crawler will follow, so this set must
+    // never run ahead of what is built. Asserted against the file tree rather
+    // than a hand-maintained list: the failure this guards against is marking a
+    // route live and forgetting to build it, and a list that has to be edited
+    // in the same commit as the mistake cannot catch it.
+    for (const route of liveRoutes()) {
+      const page = join(
+        process.cwd(),
+        "src",
+        "app",
+        "[locale]",
+        route.slug,
+        "page.tsx",
+      );
+      expect(existsSync(page), `${route.slug} is live with no page`).toBe(true);
+    }
   });
 
   it("filters unbuilt tools out of the related block", () => {

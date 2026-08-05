@@ -1,0 +1,102 @@
+{
+  "gate": "G7",
+  "context": {
+    "browser": "firefox",
+    "browserVersion": "153.0",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:153.0) Gecko/20100101 Firefox/153.0",
+    "platform": "MacIntel",
+    "cpuCores": 8,
+    "deviceMemoryGb": null,
+    "recordedAt": "2026-08-05T06:36:01.601Z"
+  },
+  "coverage": [
+    {
+      "fixture": "screen-720p-10s.mp4",
+      "demux": {
+        "ok": true,
+        "error": null
+      },
+      "details": {
+        "codedWidth": 1280,
+        "codedHeight": 720,
+        "displayWidth": 1280,
+        "displayHeight": 720,
+        "rotationDegrees": 0,
+        "durationSec": 10,
+        "codec": "avc1.4d401f"
+      },
+      "decode": {
+        "ok": true,
+        "frames": 4,
+        "error": null,
+        "decodesToValidGif": true
+      }
+    },
+    {
+      "fixture": "phone-1080p-5s.mov",
+      "demux": {
+        "ok": true,
+        "error": null
+      },
+      "details": {
+        "codedWidth": 1920,
+        "codedHeight": 1080,
+        "displayWidth": 1920,
+        "displayHeight": 1080,
+        "rotationDegrees": 0,
+        "durationSec": 5,
+        "codec": "hev1.1.6.L120.90"
+      },
+      "decode": {
+        "ok": false,
+        "frames": 0,
+        "error": "This video track cannot be decoded by this browser. Make sure to check decodability before using a track.",
+        "decodesToValidGif": false
+      }
+    },
+    {
+      "fixture": "clip-vp9-5s.webm",
+      "demux": {
+        "ok": true,
+        "error": null
+      },
+      "details": {
+        "codedWidth": 1280,
+        "codedHeight": 720,
+        "displayWidth": 1280,
+        "displayHeight": 720,
+        "rotationDegrees": 0,
+        "durationSec": 5,
+        "codec": "vp09.00.31.08.01.06.06.06.00"
+      },
+      "decode": {
+        "ok": true,
+        "frames": 4,
+        "error": null,
+        "decodesToValidGif": true
+      }
+    },
+    {
+      "fixture": "portrait-rotated.mp4",
+      "demux": {
+        "ok": true,
+        "error": null
+      },
+      "details": {
+        "codedWidth": 1920,
+        "codedHeight": 1080,
+        "displayWidth": 1080,
+        "displayHeight": 1920,
+        "rotationDegrees": 270,
+        "durationSec": 4,
+        "codec": "avc1.640028"
+      },
+      "decode": {
+        "ok": true,
+        "frames": 4,
+        "error": null,
+        "decodesToValidGif": true
+      }
+    }
+  ]
+}

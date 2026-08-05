@@ -1,13 +1,31 @@
 ---
 phase: 1
 title: "Benchmark Spike and Architecture Gate"
-status: pending
+status: "Desktop gates complete 2026-08-05 · G3 blocked on hardware · G6 awaiting judges"
 priority: P1
 effort: "6-9d"
 dependencies: [2]
 ---
 
 # Phase 1: Benchmark Spike and Architecture Gate
+
+> **Status 2026-08-05.** Desktop gates run. Full numbers and the go/no-go call
+> are in
+> [`plans/reports/from-bench-spike-to-planner-pipeline-measurements-report.md`](../reports/from-bench-spike-to-planner-pipeline-measurements-report.md).
+>
+> **Passed:** G1 (2,500 encodes, zero hangs — 5 of 6 cells), G2 on Chromium and
+> WebKit, G4 (no ceiling below 732 MB), G5, G7 rotation.
+> **Not run:** G3 — needs an iPhone and a mid-range Android, still a procurement
+> blocker. **Undecided:** G6 — the blind-judging pack is generated and
+> pre-registered but three humans have not scored it.
+> **Failed:** G8 — iOS refuses 80% of a modelled corpus against a pre-committed
+> ~30% escalation threshold. This is an operator decision due before Phase 5.
+>
+> Three findings the plan did not anticipate: gifski's WASM runs 12-14x slower on
+> Firefox (so Firefox breaches the 30 s viability floor at 51.8 s), HEVC decode
+> fails on Chromium and Firefox, and the obvious `modern-gif` streaming API is
+> O(n^2) — found, fixed, and verified pixel-exact against the library's own
+> reference decoder.
 
 ## Overview
 

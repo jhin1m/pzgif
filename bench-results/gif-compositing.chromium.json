@@ -1,0 +1,44 @@
+{
+  "comparisons": [
+    {
+      "fixture": "loop-small.gif",
+      "frames": 24,
+      "maxChannelDelta": 0,
+      "mismatchedPixels": 0,
+      "totalPixels": 3110400,
+      "matches": true
+    },
+    {
+      "fixture": "flat-art.gif",
+      "frames": 24,
+      "maxChannelDelta": 0,
+      "mismatchedPixels": 0,
+      "totalPixels": 4233600,
+      "matches": true
+    },
+    {
+      "fixture": "photo-grain.gif",
+      "frames": 24,
+      "maxChannelDelta": 0,
+      "mismatchedPixels": 0,
+      "totalPixels": 4233600,
+      "matches": true
+    },
+    {
+      "fixture": "odd-dims.gif",
+      "frames": 24,
+      "maxChannelDelta": 0,
+      "mismatchedPixels": 0,
+      "totalPixels": 3365256,
+      "matches": true
+    },
+    {
+      "fixture": "loop-large.gif",
+      "frames": 24,
+      "maxChannelDelta": 0,
+      "mismatchedPixels": 0,
+      "totalPixels": 11520000,
+      "matches": true
+    }
+  ]
+}

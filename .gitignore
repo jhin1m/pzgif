@@ -59,3 +59,14 @@ blob-report/
 # header safe; see src/lib/site-config.ts.
 /public/wasm/**/*.wasm
 !/public/wasm/**/.gitkeep
+
+# Benchmark artefacts.
+#
+# The JSON results ARE committed — they are the evidence behind the Phase 1
+# report and the calibration data Phase 4's estimator is fitted to, and a claim
+# whose supporting numbers are not in the repo is not checkable.
+#
+# The G6 judging GIFs are not: 10 MB of binaries that `pnpm bench` regenerates
+# deterministically in under a minute. The tally sheet and the answer key stay,
+# because those are the record of what was pre-registered.
+bench-results/g6-pack/*.gif

@@ -1,0 +1,88 @@
+{
+  "gate": "G8",
+  "corpusSize": 30,
+  "corpusProvenance": "Modelled input shapes, not observed uploads. The rates below are a property of this corpus.",
+  "requested": {
+    "fps": 20,
+    "width": 640
+  },
+  "tiers": {
+    "desktop": {
+      "budgetMb": 500,
+      "measured": false,
+      "total": 30,
+      "refused": 0,
+      "refusedPct": 0,
+      "downgraded": 19,
+      "downgradedPct": 63.3,
+      "refusedLabels": []
+    },
+    "desktop-low-ram": {
+      "budgetMb": 200,
+      "measured": false,
+      "total": 30,
+      "refused": 3,
+      "refusedPct": 10,
+      "downgraded": 27,
+      "downgradedPct": 90,
+      "refusedLabels": [
+        "iphone-portrait-60s",
+        "android-portrait-45s",
+        "screen-1080p-60s"
+      ]
+    },
+    "android-mobile": {
+      "budgetMb": 120,
+      "measured": false,
+      "total": 30,
+      "refused": 7,
+      "refusedPct": 23.3,
+      "downgraded": 23,
+      "downgradedPct": 76.7,
+      "refusedLabels": [
+        "iphone-portrait-30s",
+        "iphone-portrait-60s",
+        "android-portrait-45s",
+        "screen-1080p-60s",
+        "screen-macbook-30s",
+        "gameclip-30s",
+        "action-1080p-40s"
+      ]
+    },
+    "ios": {
+      "budgetMb": 30,
+      "measured": false,
+      "total": 30,
+      "refused": 24,
+      "refusedPct": 80,
+      "downgraded": 6,
+      "downgradedPct": 20,
+      "refusedLabels": [
+        "iphone-portrait-5s",
+        "iphone-portrait-15s",
+        "iphone-portrait-30s",
+        "iphone-portrait-60s",
+        "android-portrait-10s",
+        "android-portrait-45s",
+        "phone-landscape-8s",
+        "phone-landscape-20s",
+        "phone-4k-10s",
+        "screen-720p-10s",
+        "screen-1080p-15s",
+        "screen-1080p-60s",
+        "screen-1440p-20s",
+        "screen-macbook-30s",
+        "gameclip-30s",
+        "gameclip-15s",
+        "gif-long-15s",
+        "gif-tall-5s",
+        "webcam-720p-12s",
+        "webcam-480p-25s",
+        "action-1080p-40s",
+        "action-4k-20s",
+        "social-vertical-12s",
+        "social-wide-9s"
+      ]
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "gate": "G6",
+  "context": {
+    "browser": "chromium",
+    "browserVersion": "151.0.7922.34",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36",
+    "platform": "MacIntel",
+    "cpuCores": 8,
+    "deviceMemoryGb": 16,
+    "recordedAt": "2026-08-05T07:38:22.630Z"
+  },
+  "pairs": [
+    {
+      "pair": 1,
+      "fixture": "photo-grain.gif",
+      "note": "photographic, heavy grain",
+      "A": "gifski",
+      "B": "gifenc",
+      "dimensions": "400x225",
+      "frames": 45,
+      "gifskiBytes": 4234306,
+      "gifencBytes": 4105976,
+      "gifencColours": 256,
+      "gifencLadderAttempts": 1,
+      "gifskiMs": 4418.0999999940395,
+      "gifencMs": 2384.300000011921,
+      "byteDeltaPct": -3
+    },
+    {
+      "pair": 2,
+      "fixture": "flat-art.gif",
+      "note": "flat colour, few shades",
+      "A": "gifenc",
+      "B": "gifski",
+      "dimensions": "400x225",
+      "frames": 36,
+      "gifskiBytes": 158824,
+      "gifencBytes": 149993,
+      "gifencColours": 12,
+      "gifencLadderAttempts": 10,
+      "gifskiMs": 394.2999999821186,
+      "gifencMs": 827.5999999940395,
+      "byteDeltaPct": -5.6
+    },
+    {
+      "pair": 3,
+      "fixture": "screen-720p-10s.mp4",
+      "note": "screen recording",
+      "A": "gifski",
+      "B": "gifenc",
+      "dimensions": "400x225",
+      "frames": 150,
+      "gifskiBytes": 1158772,
+      "gifencBytes": 1050364,
+      "gifencColours": 64,
+      "gifencLadderAttempts": 5,
+      "gifskiMs": 2605.399999976158,
+      "gifencMs": 7497,
+      "byteDeltaPct": -9.4
+    }
+  ]
+}

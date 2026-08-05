@@ -1,0 +1,55 @@
+{
+  "context": {
+    "browser": "chromium",
+    "browserVersion": "151.0.7922.34",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36",
+    "platform": "MacIntel",
+    "cpuCores": 8,
+    "deviceMemoryGb": 16,
+    "recordedAt": "2026-08-05T07:23:16.250Z"
+  },
+  "rows": [
+    {
+      "fixture": "loop-small.gif",
+      "width": 320,
+      "label": "48f @ 320px",
+      "frames": 48,
+      "outWidth": 320,
+      "outHeight": 180,
+      "gifskiEncodeMs": 761.8000000119209,
+      "gifencEncodeMs": 461.80000001192093,
+      "gifskiBytes": 399983,
+      "gifencBytes": 418813,
+      "decodeMs": 271.5,
+      "gifskiMsPerMegapixel": 275.5353009302376
+    },
+    {
+      "fixture": "flat-art.gif",
+      "width": 320,
+      "label": "36f @ 320px",
+      "frames": 36,
+      "outWidth": 320,
+      "outHeight": 180,
+      "gifskiEncodeMs": 332,
+      "gifencEncodeMs": 119.69999998807907,
+      "gifskiBytes": 165592,
+      "gifencBytes": 232630,
+      "decodeMs": 210.09999999403954,
+      "gifskiMsPerMegapixel": 160.10802469135803
+    },
+    {
+      "fixture": "odd-dims.gif",
+      "width": 240,
+      "label": "30f @ 240px",
+      "frames": 30,
+      "outWidth": 240,
+      "outHeight": 135,
+      "gifskiEncodeMs": 265,
+      "gifencEncodeMs": 221.19999998807907,
+      "gifskiBytes": 139841,
+      "gifencBytes": 182079,
+      "decodeMs": 138.59999999403954,
+      "gifskiMsPerMegapixel": 272.6337448559671
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "context": {
+    "browser": "chromium",
+    "browserVersion": "151.0.7922.34",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36",
+    "platform": "MacIntel",
+    "cpuCores": 8,
+    "deviceMemoryGb": 16,
+    "recordedAt": "2026-08-05T07:22:51.700Z"
+  },
+  "fixture": "loop-large.gif",
+  "rows": [
+    {
+      "maxFrames": 10,
+      "frames": 10,
+      "decodeMs": 161.69999998807907,
+      "encodeMs": 40,
+      "decodeMsPerFrame": 16.169999998807906,
+      "encodeMsPerFrame": 4,
+      "ok": true,
+      "error": null
+    },
+    {
+      "maxFrames": 25,
+      "frames": 25,
+      "decodeMs": 362,
+      "encodeMs": 97.10000002384186,
+      "decodeMsPerFrame": 14.48,
+      "encodeMsPerFrame": 3.8840000009536744,
+      "ok": true,
+      "error": null
+    },
+    {
+      "maxFrames": 50,
+      "frames": 50,
+      "decodeMs": 748.8000000119209,
+      "encodeMs": 198.89999997615814,
+      "decodeMsPerFrame": 14.976000000238418,
+      "encodeMsPerFrame": 3.977999999523163,
+      "ok": true,
+      "error": null
+    },
+    {
+      "maxFrames": 100,
+      "frames": 100,
+      "decodeMs": 1675,
+      "encodeMs": 427.19999998807907,
+      "decodeMsPerFrame": 16.75,
+      "encodeMsPerFrame": 4.271999999880791,
+      "ok": true,
+      "error": null
+    },
+    {
+      "maxFrames": 200,
+      "frames": 200,
+      "decodeMs": 3015.0999999940395,
+      "encodeMs": 876.4000000059605,
+      "decodeMsPerFrame": 15.075499999970198,
+      "encodeMsPerFrame": 4.3820000000298025,
+      "ok": true,
+      "error": null
+    }
+  ],
+  "perFrameGrowthFactor": 0.9323129252369574,
+  "verdict": "decode is approximately linear"
+}

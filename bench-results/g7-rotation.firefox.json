@@ -1,0 +1,17 @@
+{
+  "gate": "G7",
+  "probe": {
+    "codedWidth": 1920,
+    "codedHeight": 1080,
+    "displayWidth": 1080,
+    "displayHeight": 1920,
+    "rotationDegrees": 270,
+    "durationSec": 4,
+    "codec": "avc1.640028"
+  },
+  "outWidth": 240,
+  "outHeight": 427,
+  "upright": true,
+  "ok": true,
+  "error": null
+}

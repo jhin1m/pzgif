@@ -1,0 +1,17 @@
+{
+  "gate": "G5",
+  "context": {
+    "browser": "firefox",
+    "browserVersion": "153.0",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:153.0) Gecko/20100101 Firefox/153.0",
+    "platform": "MacIntel",
+    "cpuCores": 8,
+    "deviceMemoryGb": null,
+    "recordedAt": "2026-08-05T06:24:56.728Z"
+  },
+  "coldMs": 38,
+  "warmMs": 0,
+  "ok": true,
+  "error": null,
+  "consoleErrors": []
+}

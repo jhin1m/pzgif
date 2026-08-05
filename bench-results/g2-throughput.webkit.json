@@ -1,0 +1,94 @@
+{
+  "gate": "G2",
+  "fixture": "screen-720p-10s.mp4",
+  "settings": {
+    "width": 480,
+    "fps": 15,
+    "quality": 80,
+    "encoder": "gifski"
+  },
+  "context": {
+    "browser": "webkit",
+    "browserVersion": "26.5",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.5 Safari/605.1.15",
+    "platform": "MacIntel",
+    "cpuCores": 8,
+    "deviceMemoryGb": null,
+    "recordedAt": "2026-08-05T07:24:15.218Z"
+  },
+  "inGateScope": true,
+  "target": 25000,
+  "viabilityFloorMs": 30000,
+  "breachesViabilityFloor": false,
+  "coldRunMs": 5693,
+  "medianMs": 5984,
+  "warmMedianMs": 6067,
+  "meetsTarget": true,
+  "runs": [
+    {
+      "totalMs": 5693,
+      "probeMs": 6,
+      "wasmInitMs": 8,
+      "decodeMs": 1917,
+      "encodeMs": 3756,
+      "frames": 150,
+      "outBytes": 1612059,
+      "outWidth": 480,
+      "outHeight": 270,
+      "peakJsHeapBytes": null,
+      "longestMainThreadTaskMs": null
+    },
+    {
+      "totalMs": 5458,
+      "probeMs": 2,
+      "wasmInitMs": 0,
+      "decodeMs": 1914,
+      "encodeMs": 3537,
+      "frames": 150,
+      "outBytes": 1612059,
+      "outWidth": 480,
+      "outHeight": 270,
+      "peakJsHeapBytes": null,
+      "longestMainThreadTaskMs": null
+    },
+    {
+      "totalMs": 6161,
+      "probeMs": 21,
+      "wasmInitMs": 0,
+      "decodeMs": 2602,
+      "encodeMs": 3533,
+      "frames": 150,
+      "outBytes": 1612059,
+      "outWidth": 480,
+      "outHeight": 270,
+      "peakJsHeapBytes": null,
+      "longestMainThreadTaskMs": null
+    },
+    {
+      "totalMs": 6067,
+      "probeMs": 3,
+      "wasmInitMs": 0,
+      "decodeMs": 2422,
+      "encodeMs": 3638,
+      "frames": 150,
+      "outBytes": 1612059,
+      "outWidth": 480,
+      "outHeight": 270,
+      "peakJsHeapBytes": null,
+      "longestMainThreadTaskMs": null
+    },
+    {
+      "totalMs": 5984,
+      "probeMs": 2,
+      "wasmInitMs": 0,
+      "decodeMs": 2464,
+      "encodeMs": 3515,
+      "frames": 150,
+      "outBytes": 1612059,
+      "outWidth": 480,
+      "outHeight": 270,
+      "peakJsHeapBytes": null,
+      "longestMainThreadTaskMs": null
+    }
+  ]
+}

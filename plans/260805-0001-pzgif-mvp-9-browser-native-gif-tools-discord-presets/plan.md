@@ -71,7 +71,7 @@ Research surfaced four facts that the locked documents did not know. Each forced
 | # | Phase | Status | Depends on |
 |---|-------|--------|------------|
 | 2 | [Project Shell and Tooling](./phase-02-project-shell-and-tooling.md) | Code complete 2026-08-05 · infra pending | — |
-| 1 | [Benchmark Spike and Architecture Gate](./phase-01-benchmark-spike-and-architecture-gate.md) | Pending | 2 |
+| 1 | [Benchmark Spike and Architecture Gate](./phase-01-benchmark-spike-and-architecture-gate.md) | Desktop gates complete 2026-08-05 · G3 blocked on hardware · G6 awaiting judges | 2 |
 | 3 | [Design System and Layout](./phase-03-design-system-and-layout.md) | Pending | 2 (+ 1 for the before/after fallback threshold only) |
 | 4 | [Media Engine Core](./phase-04-media-engine-core.md) | Pending | 1 |
 | 5 | [Tool Framework and GIF Compressor](./phase-05-tool-framework-and-gif-compressor.md) | Pending | 3, 4 |

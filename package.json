@@ -20,12 +20,19 @@
     "check:forbidden": "node scripts/check-forbidden-headers.mjs",
     "check:static": "node scripts/check-static-routes.mjs",
     "check:source-sha": "node scripts/check-source-sha.mjs",
-    "copy:wasm": "node scripts/copy-wasm.mjs"
+    "copy:wasm": "node scripts/copy-wasm.mjs",
+    "bench": "playwright test -c playwright.bench.config.ts",
+    "bench:soak": "PZGIF_SOAK_RUNS=200 playwright test -c playwright.bench.config.ts g1-soak",
+    "fixtures": "node scripts/make-fixtures.mjs"
   },
   "dependencies": {
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "gifenc": "1.0.3",
+    "gifski-wasm": "2.2.0",
     "lucide-react": "1.28.0",
+    "mediabunny": "1.52.3",
+    "modern-gif": "2.1.0",
     "next": "16.3.0",
     "next-intl": "4.13.5",
     "radix-ui": "1.6.7",

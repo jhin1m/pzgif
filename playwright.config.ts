@@ -14,6 +14,9 @@ const baseURL = `http://127.0.0.1:${PORT}`;
  */
 export default defineConfig({
   testDir: "./e2e",
+  // `e2e/bench/` needs a build that opts the `/__bench` route in, which is the
+  // opposite of what this suite asserts. It has its own config.
+  testIgnore: "**/bench/**",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

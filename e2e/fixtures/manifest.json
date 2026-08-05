@@ -1,0 +1,55 @@
+{
+  "generatedBy": "scripts/make-fixtures.mjs",
+  "fixtures": [
+    {
+      "name": "screen-720p-10s.mp4",
+      "bytes": 3832598,
+      "why": "H.264 720p30 10s. The headline throughput case (G2). Screen-recording-like content: large flat regions, hard edges and text, which is where palette quantisation is easiest and motion estimation is cheapest."
+    },
+    {
+      "name": "phone-1080p-5s.mov",
+      "bytes": 2742290,
+      "why": "HEVC 1080p in MOV — what an iPhone actually uploads. Exercises HEVC decode support and the memory ceiling (1080p RGBA is 8.29 MB/frame)."
+    },
+    {
+      "name": "clip-vp9-5s.webm",
+      "bytes": 1432993,
+      "why": "VP9 in WebM 720p. The non-MP4 demux path."
+    },
+    {
+      "name": "portrait-rotated.mp4",
+      "bytes": 3083837,
+      "why": "Portrait phone video: 1920x1080 coded frames carrying a 90-degree display matrix. Without honouring container rotation this produces a sideways GIF, and it is the most common real-world video input there is (G7). The pass condition is programmatic and needs no eye: the coded frame is landscape, so an output whose height exceeds its width proves the rotation was applied. The two edge bars — yellow along the coded top, red along the coded left — let a human confirm the direction as well."
+    },
+    {
+      "name": "loop-small.gif",
+      "bytes": 4123289,
+      "why": "480x270, 48 frames at 20 fps. The wireframe's canonical compressor example and the mobile survival case (G3). Light grain is added on purpose: clean synthetic content compresses to a few hundred KB, which would make the canonical compressor demo a fixture with almost nothing left to compress. The grain puts it in the size range a real uploaded GIF occupies."
+    },
+    {
+      "name": "loop-large.gif",
+      "bytes": 5562939,
+      "why": "800x600, 200 frames. The memory ceiling and deadlock stress case (G1, G4). 200 x 800 x 600 x 4 = 384 MB of decoded RGBA, doubled by gifski's copy."
+    },
+    {
+      "name": "photo-grain.gif",
+      "bytes": 6541187,
+      "why": "Photographic content with heavy grain — the worst case for palette quality, and half of the G6 quality proof. Grain defeats flat-region quantisation and is where gifski's dithering should be most visible."
+    },
+    {
+      "name": "flat-art.gif",
+      "bytes": 160902,
+      "why": "Flat colour, few shades — the best case, and the other half of G6. Also the fixture that validates the '32 colours is usually enough' advice the copy will make."
+    },
+    {
+      "name": "odd-dims.gif",
+      "bytes": 329347,
+      "why": "499x281 — odd on both axes. H.264 yuv420p rejects odd dimensions, so this is the regression guard for the even-dimension rounding that GIF-to-MP4 depends on."
+    },
+    {
+      "name": "anim.webp",
+      "bytes": 343590,
+      "why": "Animated WebP, from loop-small.gif so the two share content and the webp-to-gif round trip is checkable. ffmpeg has no libwebp encoder in the common Homebrew build, so this uses gif2webp from the webp package. Encoded lossy on purpose — gif2webp defaults to lossless, which is not what animated WebP on the web actually is, and lossy is what exercises the VP8 (not VP8L) branch of any ANMF splitter."
+    }
+  ]
+}

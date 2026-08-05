@@ -17,6 +17,10 @@ export const config = {
    * Match every path except Next internals, the API surface, and anything that
    * looks like a static file. `/wasm/...`, `/sw.js` and the SEO files must
    * never be rewritten through the locale proxy.
+   *
+   * `__bench` is excluded because the dev-only benchmark harness sits outside
+   * the `[locale]` segment and renders its own document; rewriting it to
+   * `/en/__bench` would 404 a route that exists.
    */
-  matcher: ["/((?!api|_next|_vercel|wasm|.*\\..*).*)"],
+  matcher: ["/((?!api|_next|_vercel|wasm|__bench|.*\\..*).*)"],
 };

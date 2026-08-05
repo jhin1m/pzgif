@@ -1,0 +1,67 @@
+name: Nightly gifski soak
+
+# Gate G1. `gifski-wasm` issue #5 is open and unresolved — the maintainer
+# attributes an intermittent encoder deadlock to "hacks I implemented to get this
+# to compile" — and gifski uses `crossbeam-channel` even in its non-rayon build,
+# so the single-thread path is not exempt by construction.
+#
+# A deadlock at a low enough rate cannot be found by a one-off run. Zero hangs in
+# 1000 encodes only bounds the failure rate at roughly 0.3% with 95% confidence,
+# which is a ceiling rather than an absence, and the bound only tightens with
+# accumulated volume. So this runs every night, forever, and the accumulated
+# result is the evidence.
+#
+# It is deliberately separate from the PR pipeline: it takes tens of minutes,
+# and a slow flaky job attached to every pull request gets disabled rather than
+# investigated.
+
+on:
+  schedule:
+    # 03:00 UTC daily.
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      runs_per_fixture:
+        description: "Encodes per fixture, per mode"
+        required: false
+        default: "200"
+
+concurrency:
+  group: nightly-soak
+  cancel-in-progress: false
+
+jobs:
+  soak:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # All three engines. The deadlock is in WASM the browser executes, and
+      # nothing rules out an engine-specific trigger a priori.
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium webkit firefox
+
+      - name: Soak
+        env:
+          PZGIF_SOAK_RUNS: ${{ github.event.inputs.runs_per_fixture || '200' }}
+        run: pnpm exec playwright test -c playwright.bench.config.ts g1-soak
+
+      # Uploaded even on failure — especially on failure. A hang's fixture,
+      # worker mode and run index are the entire lead for reproducing it.
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: soak-results
+          path: bench-results/
+          retention-days: 30

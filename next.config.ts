@@ -90,7 +90,35 @@ function resolveCommitSha(): string {
   }
 }
 
+/**
+ * The Phase 1 benchmark harness route.
+ *
+ * `/__bench` must not exist in a shipped build — not merely 404, but never
+ * bundled, so its raw encoder surface cannot be reached and its imports cannot
+ * inflate the production JS.
+ *
+ * A runtime `NODE_ENV` check inside the page would not achieve that: the module
+ * still compiles and its imports still bundle. Extending `pageExtensions`
+ * instead means `page.dev.tsx` is only *recognised as a page* when enabled. When
+ * it is not, nothing in `__bench/` matches a page extension, so the route does
+ * not exist and neither does its module graph.
+ *
+ * The opt-in is an explicit env var rather than `NODE_ENV === "development"`
+ * alone, because gate G5 has to prove the worker and `.wasm` boot **in a
+ * production build** — under the production CSP, with the real
+ * `immutable`-cached `/wasm/*` headers, and through whatever Turbopack does to a
+ * TypeScript module worker when it optimises. A dev-only route cannot be asked
+ * that question at all. `PZGIF_ENABLE_BENCH=1 pnpm build` answers it; ordinary
+ * builds do not set the flag, and `e2e/app-shell.spec.ts` asserts the 404.
+ */
+const benchRouteEnabled =
+  process.env.NODE_ENV === "development" ||
+  process.env.PZGIF_ENABLE_BENCH === "1";
+
+const devOnlyPageExtensions = benchRouteEnabled ? ["dev.tsx"] : [];
+
 const nextConfig: NextConfig = {
+  pageExtensions: [...devOnlyPageExtensions, "tsx", "ts", "jsx", "js"],
   env: {
     NEXT_PUBLIC_COMMIT_SHA: resolveCommitSha(),
   },

@@ -1,0 +1,17 @@
+{
+  "gate": "G5",
+  "context": {
+    "browser": "chromium",
+    "browserVersion": "151.0.7922.34",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36",
+    "platform": "MacIntel",
+    "cpuCores": 8,
+    "deviceMemoryGb": 16,
+    "recordedAt": "2026-08-05T06:24:49.072Z"
+  },
+  "coldMs": 8.799999982118607,
+  "warmMs": 0,
+  "ok": true,
+  "error": null,
+  "consoleErrors": []
+}

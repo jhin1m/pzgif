@@ -1,0 +1,94 @@
+{
+  "gate": "G2",
+  "fixture": "screen-720p-10s.mp4",
+  "settings": {
+    "width": 480,
+    "fps": 15,
+    "quality": 80,
+    "encoder": "gifski"
+  },
+  "context": {
+    "browser": "chromium",
+    "browserVersion": "151.0.7922.34",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.7922.34 Safari/537.36",
+    "platform": "MacIntel",
+    "cpuCores": 8,
+    "deviceMemoryGb": 16,
+    "recordedAt": "2026-08-05T07:23:19.823Z"
+  },
+  "inGateScope": true,
+  "target": 15000,
+  "viabilityFloorMs": 30000,
+  "breachesViabilityFloor": false,
+  "coldRunMs": 4426.700000017881,
+  "medianMs": 3955.4000000059605,
+  "warmMedianMs": 3955.4000000059605,
+  "meetsTarget": true,
+  "runs": [
+    {
+      "totalMs": 4426.700000017881,
+      "probeMs": 6,
+      "wasmInitMs": 8.200000017881393,
+      "decodeMs": 459.2999999821186,
+      "encodeMs": 3942.899999976158,
+      "frames": 150,
+      "outBytes": 1485535,
+      "outWidth": 480,
+      "outHeight": 270,
+      "peakJsHeapBytes": null,
+      "longestMainThreadTaskMs": null
+    },
+    {
+      "totalMs": 3955.4000000059605,
+      "probeMs": 1.300000011920929,
+      "wasmInitMs": 0,
+      "decodeMs": 448.5,
+      "encodeMs": 3494.0999999940395,
+      "frames": 150,
+      "outBytes": 1485535,
+      "outWidth": 480,
+      "outHeight": 270,
+      "peakJsHeapBytes": null,
+      "longestMainThreadTaskMs": null
+    },
+    {
+      "totalMs": 4005.2000000178814,
+      "probeMs": 1,
+      "wasmInitMs": 0,
+      "decodeMs": 495.5,
+      "encodeMs": 3498.9000000059605,
+      "frames": 150,
+      "outBytes": 1485535,
+      "outWidth": 480,
+      "outHeight": 270,
+      "peakJsHeapBytes": null,
+      "longestMainThreadTaskMs": null
+    },
+    {
+      "totalMs": 3938.4000000059605,
+      "probeMs": 1,
+      "wasmInitMs": 0,
+      "decodeMs": 462.30000001192093,
+      "encodeMs": 3465.399999976158,
+      "frames": 150,
+      "outBytes": 1485535,
+      "outWidth": 480,
+      "outHeight": 270,
+      "peakJsHeapBytes": null,
+      "longestMainThreadTaskMs": null
+    },
+    {
+      "totalMs": 3935.7999999821186,
+      "probeMs": 0.7999999821186066,
+      "wasmInitMs": 0,
+      "decodeMs": 457.10000002384186,
+      "encodeMs": 3468.2999999821186,
+      "frames": 150,
+      "outBytes": 1485535,
+      "outWidth": 480,
+      "outHeight": 270,
+      "peakJsHeapBytes": null,
+      "longestMainThreadTaskMs": null
+    }
+  ]
+}

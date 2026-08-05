@@ -31,6 +31,19 @@ test.describe("app shell", () => {
     expect(background).not.toBe("rgba(0, 0, 0, 0)");
   });
 
+  test("does not ship the benchmark harness", async ({ page }) => {
+    // `/__bench` exposes the raw encoder surface and pulls gifski, mediabunny,
+    // modern-gif and gifenc into its module graph. It exists only in builds that
+    // set `PZGIF_ENABLE_BENCH=1`, which is how gate G5 measures the production
+    // boot path — and this suite runs against a build that does not set it.
+    //
+    // The exclusion is structural rather than a runtime check: `page.dev.tsx`
+    // is only a recognised page extension when the flag is on, so without it the
+    // route and its imports are never compiled. This asserts that holds.
+    const response = await page.goto("/__bench");
+    expect(response?.status()).toBe(404);
+  });
+
   test("is never cross-origin isolated", async ({ page }) => {
     const response = await page.goto("/");
     const headers = response!.headers();

@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PZGIF — component &amp; state gallery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="wireframe.css">
+<style>
+  body { background: var(--n-100); }
+  .gal-sec { margin-block: 40px; }
+  .gal-sec > h2 { margin-bottom: 4px; }
+  .gal-sec > .gal-desc { font-size:.8125rem; color:var(--n-600); margin-bottom:14px; max-width:80ch; }
+  .type-row { display:flex; align-items:baseline; gap:16px; padding:8px 0; border-bottom:1px dashed var(--border); }
+  .type-row .t-tok { font-family:var(--font-mono); font-size:.6875rem; color:var(--text-muted); min-width:130px; flex:none; }
+  .radius-demo { display:flex; gap:12px; flex-wrap:wrap; }
+  .radius-demo figure { margin:0; text-align:center; }
+  .radius-demo i { display:block; width:72px; height:56px; background:var(--surface-2); border:1px solid var(--border); }
+  .radius-demo figcaption { font-family:var(--font-mono); font-size:.625rem; color:var(--text-muted); margin-top:6px; }
+  .shadow-demo { display:flex; gap:16px; flex-wrap:wrap; }
+  .shadow-demo i { display:block; width:88px; height:60px; background:var(--bg); border-radius:var(--radius-card); }
+</style>
+</head>
+<body>
+
+<div class="wf-banner">WIREFRAME · states.html — every component in every interaction state, light and dark side by side</div>
+
+<div class="container" style="padding-block:32px">
+  <h1 style="font-size:2rem">PZGIF component &amp; state gallery</h1>
+  <p class="lead" style="max-width:70ch;margin-top:8px">
+    Reference build of every component in <b>docs/design-guidelines.md §5</b>. Hover and focus states are shown both
+    live (interact with them) and force-applied via <span class="mono">.is-hover</span> /
+    <span class="mono">.is-active</span> / <span class="mono">.is-focus</span> so they survive a screenshot.
+  </p>
+  <p class="text-sm" style="color:var(--n-600);margin-top:10px">
+    <a href="index.html">index</a> ·
+    <a href="tool-compressor.html">compressor</a> ·
+    <a href="tool-mp4-to-gif.html">mp4-to-gif</a> ·
+    <a href="discord-preset.html">discord preset</a>
+  </p>
+
+  <!-- ══ FOUNDATIONS ══════════════════════════════════════════════ -->
+  <section class="gal-sec">
+    <h2>Color — semantic tokens</h2>
+    <p class="gal-desc">Same token names resolve differently per theme. Contrast ratios are listed in design-guidelines.md §7.1.</p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div class="swatch-grid" data-swatches></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div class="swatch-grid" data-swatches></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Type scale</h2>
+    <p class="gal-desc">Space Grotesk for display, Hanken Grotesk for UI and prose, JetBrains Mono for numbers.</p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="type"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="type"></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Radius &amp; shadow</h2>
+    <p class="gal-desc"><b>6px is a reserved word.</b> Ad slots only. The mismatch against the 16px product-card radius is the visual quarantine.</p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="radius"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="radius"></div></div>
+    </div>
+  </section>
+
+  <!-- ══ COMPONENTS ═══════════════════════════════════════════════ -->
+  <section class="gal-sec">
+    <h2>Button</h2>
+    <p class="gal-desc">Primary / Secondary / Ghost / Danger × default, hover, active, focus-visible, disabled, loading. Sizes sm 32 · md 40 · lg 48 · xl 56 (mobile bar).</p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="btn"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="btn"></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Dropzone</h2>
+    <p class="gal-desc">Idle / hover / drag-over / invalid-file / loaded. The box never changes size between states.</p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="dz"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="dz"></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>FileChip</h2>
+    <p class="gal-desc">Default / hover / focus on remove / error. Name truncates at 22ch, size badge is mono tabular.</p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="chipfile"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="chipfile"></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Slider · Select · Toggle · Preset chip</h2>
+    <p class="gal-desc">Native <span class="mono">&lt;input type=range&gt;</span> and <span class="mono">&lt;select&gt;</span> so keyboard support is free. Production uses Radix Select for the popover variant.</p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="controls"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="controls"></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>ProgressBar</h2>
+    <p class="gal-desc">Indeterminate / determinate / complete / error. <b>No transition on the fill width</b> — it must track real worker callbacks.</p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="prog"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="prog"></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>BeforeAfterSlider</h2>
+    <p class="gal-desc">Handle is <span class="mono">role="slider"</span>, keyboard-operable, no transition while dragging. Working version lives on the compressor page.</p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="ba"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="ba"></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>ResultPanel</h2>
+    <p class="gal-desc">Empty (reserves the space) / complete. Both are exactly 320px min-height so the reveal causes zero shift.</p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="result"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="result"></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>AdSlot — visual quarantine</h2>
+    <p class="gal-desc">
+      Directly beside a product card at the same width. If a reviewer cannot tell them apart in under a second, the
+      layout fails. Differences: 6px vs 16px radius · flat fill vs surface + shadow · label · no hover state.
+    </p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="ad"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="ad"></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Toast</h2>
+    <p class="gal-desc">Success auto-dismisses at 6s; error and warning never auto-dismiss. Always a 44px close target.</p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="toast"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="toast"></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Accordion</h2>
+    <p class="gal-desc">Closed / open / hover / focus. Opens via <span class="mono">grid-template-rows: 0fr → 1fr</span>; content stays in the DOM for crawlers.</p>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="acc"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="acc"></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Badges &amp; status</h2>
+    <div class="pane-grid">
+      <div class="pane" data-theme="light"><p class="pane-label">Light</p><div data-tpl="badges"></div></div>
+      <div class="pane" data-theme="dark"><p class="pane-label">Dark</p><div data-tpl="badges"></div></div>
+    </div>
+  </section>
+
+  <p class="text-sm" style="color:var(--n-600);margin-block:40px 24px">
+    Missing on purpose: modal (no modal exists in the MVP flows) and tooltip (only used to explain a disabled
+    primary; spec is in design-guidelines.md §5).
+  </p>
+</div>
+
+<!-- ══════════════════ TEMPLATES ══════════════════════════════════ -->
+
+<template id="tpl-type">
+  <div class="type-row"><span class="t-tok">--text-display</span><span style="font-family:var(--font-display);font-weight:700;font-size:2.25rem;letter-spacing:-.02em">Shrink it</span></div>
+  <div class="type-row"><span class="t-tok">--text-h1</span><span style="font-family:var(--font-display);font-weight:700;font-size:2rem;letter-spacing:-.02em">GIF Compressor</span></div>
+  <div class="type-row"><span class="t-tok">--text-h2</span><span style="font-family:var(--font-display);font-weight:700;font-size:1.5rem">How compression works</span></div>
+  <div class="type-row"><span class="t-tok">--text-h3</span><span style="font-family:var(--font-display);font-weight:500;font-size:1.1875rem">Which setting first?</span></div>
+  <div class="type-row"><span class="t-tok">--text-lead</span><span style="font-size:1.125rem;color:var(--text-secondary)">Cut a GIF by 60–85%.</span></div>
+  <div class="type-row"><span class="t-tok">--text-body</span><span>Body copy at 1rem / 1.6, capped at 68ch.</span></div>
+  <div class="type-row"><span class="t-tok">--text-sm</span><span style="font-size:.875rem">Helper and secondary UI text.</span></div>
+  <div class="type-row"><span class="t-tok">--text-label</span><span style="font-size:.8125rem;font-weight:600">Quality</span></div>
+  <div class="type-row"><span class="t-tok">--text-caption</span><span style="font-size:.75rem;font-weight:500;color:var(--text-muted)">Max 150 MB · .gif</span></div>
+  <div class="type-row"><span class="t-tok">--text-micro</span><span style="font-size:.6875rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-ad-label)">Advertisement</span></div>
+  <div class="type-row"><span class="t-tok">mono / tabular</span><span class="mono">2.4 MB → 480 KB · 640×360 · 20 fps</span></div>
+</template>
+
+<template id="tpl-radius">
+  <div class="radius-demo">
+    <figure><i style="border-radius:var(--radius-xs)"></i><figcaption>xs 4 · progress</figcaption></figure>
+    <figure><i style="border-radius:var(--radius-ad);border-style:solid"></i><figcaption style="color:var(--danger-text)">ad 6 · ADS ONLY</figcaption></figure>
+    <figure><i style="border-radius:var(--radius-control)"></i><figcaption>control 8 · button</figcaption></figure>
+    <figure><i style="border-radius:var(--radius-panel)"></i><figcaption>panel 12 · toast</figcaption></figure>
+    <figure><i style="border-radius:var(--radius-card)"></i><figcaption>card 16 · panels</figcaption></figure>
+    <figure><i style="border-radius:var(--radius-pill)"></i><figcaption>pill · chips</figcaption></figure>
+  </div>
+  <div class="shadow-demo" style="margin-top:20px">
+    <figure style="margin:0;text-align:center"><i style="box-shadow:var(--shadow-sm)"></i><figcaption style="font-family:var(--font-mono);font-size:.625rem;color:var(--text-muted);margin-top:6px">shadow-sm</figcaption></figure>
+    <figure style="margin:0;text-align:center"><i style="box-shadow:var(--shadow-md)"></i><figcaption style="font-family:var(--font-mono);font-size:.625rem;color:var(--text-muted);margin-top:6px">shadow-md</figcaption></figure>
+    <figure style="margin:0;text-align:center"><i style="box-shadow:var(--shadow-lg)"></i><figcaption style="font-family:var(--font-mono);font-size:.625rem;color:var(--text-muted);margin-top:6px">shadow-lg</figcaption></figure>
+    <figure style="margin:0;text-align:center"><i style="box-shadow:none;border:1px solid var(--border-ad);border-radius:var(--radius-ad)"></i><figcaption style="font-family:var(--font-mono);font-size:.625rem;color:var(--text-muted);margin-top:6px">ad · none</figcaption></figure>
+  </div>
+</template>
+
+<template id="tpl-btn">
+  <div class="spec-row"><span class="spec-name">primary</span><span class="spec-items">
+    <button class="btn btn-primary">Compress GIF</button>
+    <button class="btn btn-primary is-hover">hover</button>
+    <button class="btn btn-primary is-active">active</button>
+    <button class="btn btn-primary is-focus">focus</button>
+    <button class="btn btn-primary is-disabled" aria-disabled="true">disabled</button>
+    <button class="btn btn-primary is-loading" aria-busy="true"><span class="spinner"></span> Compressing…</button>
+  </span></div>
+  <div class="spec-row"><span class="spec-name">secondary</span><span class="spec-items">
+    <button class="btn btn-secondary">Re-compress</button>
+    <button class="btn btn-secondary is-hover">hover</button>
+    <button class="btn btn-secondary is-active">active</button>
+    <button class="btn btn-secondary is-focus">focus</button>
+    <button class="btn btn-secondary is-disabled" aria-disabled="true">disabled</button>
+    <button class="btn btn-secondary is-loading" aria-busy="true"><span class="spinner"></span> Working…</button>
+  </span></div>
+  <div class="spec-row"><span class="spec-name">ghost</span><span class="spec-items">
+    <button class="btn btn-ghost">Start over</button>
+    <button class="btn btn-ghost is-hover">hover</button>
+    <button class="btn btn-ghost is-active">active</button>
+    <button class="btn btn-ghost is-focus">focus</button>
+    <button class="btn btn-ghost is-disabled" aria-disabled="true">disabled</button>
+  </span></div>
+  <div class="spec-row"><span class="spec-name">danger</span><span class="spec-items">
+    <button class="btn btn-danger">Cancel</button>
+    <button class="btn btn-danger is-hover">hover</button>
+    <button class="btn btn-danger is-active">active</button>
+    <button class="btn btn-danger is-focus">focus</button>
+    <button class="btn btn-danger is-disabled" aria-disabled="true">disabled</button>
+  </span></div>
+  <div class="spec-row"><span class="spec-name">sizes</span><span class="spec-items">
+    <button class="btn btn-primary btn-sm">sm 32</button>
+    <button class="btn btn-primary">md 40</button>
+    <button class="btn btn-primary btn-lg">lg 48</button>
+  </span></div>
+  <div class="spec-row"><span class="spec-name">xl / mobile bar</span><span class="spec-items" style="width:100%">
+    <button class="btn btn-primary btn-xl">Download compressed.gif</button>
+  </span></div>
+</template>
+
+<template id="tpl-dz">
+  <p class="pane-label">idle</p>
+  <div class="dropzone" style="min-height:150px">
+    <svg class="dz-mark" viewBox="0 0 96 96" fill="none" style="width:52px;height:52px"><path d="M30 34a14 14 0 1 0 0 28c11.5 0 21.5-28 33-28a14 14 0 1 1 0 28c-11.5 0-21.5-28-33-28Z" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="63" cy="48" r="4" fill="var(--accent)"/></svg>
+    <span class="dz-title">Drop your GIF here or click to browse</span>
+    <span class="dz-hint"><span class="mono">.gif</span> · up to <span class="mono">150 MB</span></span>
+  </div>
+  <p class="pane-label" style="margin-top:16px">hover / keyboard focus</p>
+  <div class="dropzone is-hover is-focus" style="min-height:150px">
+    <svg class="dz-mark" viewBox="0 0 96 96" fill="none" style="width:52px;height:52px"><path d="M30 34a14 14 0 1 0 0 28c11.5 0 21.5-28 33-28a14 14 0 1 1 0 28c-11.5 0-21.5-28-33-28Z" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="63" cy="48" r="4" fill="var(--accent)"/></svg>
+    <span class="dz-title">Drop your GIF here or click to browse</span>
+    <span class="dz-hint">focus ring sits outside the dashed border</span>
+  </div>
+  <p class="pane-label" style="margin-top:16px">drag-over</p>
+  <div class="dropzone is-dragover" style="min-height:150px">
+    <svg class="dz-mark" viewBox="0 0 96 96" fill="none" style="width:52px;height:52px"><path d="M30 34a14 14 0 1 0 0 28c11.5 0 21.5-28 33-28a14 14 0 1 1 0 28c-11.5 0-21.5-28-33-28Z" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="63" cy="48" r="4" fill="var(--accent)"/></svg>
+    <span class="dz-title">Release to load</span>
+    <span class="dz-hint"><span class="mono">loop-final.gif</span> · 2.4 MB</span>
+  </div>
+  <p class="pane-label" style="margin-top:16px">invalid file</p>
+  <div class="dropzone is-invalid" style="min-height:150px">
+    <svg class="dz-mark" viewBox="0 0 96 96" fill="none" style="width:44px;height:44px"><circle cx="48" cy="48" r="26" stroke="currentColor" stroke-width="4"/><path d="M48 34v18M48 60v1" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>
+    <span class="dz-error">PNG isn't supported here.</span>
+    <span class="dz-hint">Try <a href="#">PNG to GIF</a> instead.</span>
+  </div>
+  <p class="pane-label" style="margin-top:16px">loaded (collapses to chip)</p>
+  <div class="row">
+    <span class="filechip">
+      <svg class="fc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l5 5v13H6z" stroke-linejoin="round"/><path d="M14 3v5h5" stroke-linejoin="round"/></svg>
+      <span class="fc-name">loop-final.gif</span><span class="fc-size">2.4 MB</span>
+      <button class="fc-remove" type="button" aria-label="Remove">×</button>
+    </span>
+    <button class="btn btn-ghost btn-sm" type="button">Choose a different file</button>
+  </div>
+</template>
+
+<template id="tpl-chipfile">
+  <div class="spec-row"><span class="spec-name">default</span><span class="spec-items">
+    <span class="filechip"><svg class="fc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l5 5v13H6z" stroke-linejoin="round"/></svg><span class="fc-name">loop-final.gif</span><span class="fc-size">2.4 MB</span><button class="fc-remove" type="button" aria-label="Remove">×</button></span>
+  </span></div>
+  <div class="spec-row"><span class="spec-name">hover</span><span class="spec-items">
+    <span class="filechip is-hover"><svg class="fc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l5 5v13H6z" stroke-linejoin="round"/></svg><span class="fc-name">loop-final.gif</span><span class="fc-size">2.4 MB</span><button class="fc-remove" type="button" aria-label="Remove">×</button></span>
+  </span></div>
+  <div class="spec-row"><span class="spec-name">focus on ×</span><span class="spec-items">
+    <span class="filechip"><svg class="fc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l5 5v13H6z" stroke-linejoin="round"/></svg><span class="fc-name">loop-final.gif</span><span class="fc-size">2.4 MB</span><button class="fc-remove is-focus" type="button" aria-label="Remove">×</button></span>
+  </span></div>
+  <div class="spec-row"><span class="spec-name">truncation</span><span class="spec-items">
+    <span class="filechip"><svg class="fc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l5 5v13H6z" stroke-linejoin="round"/></svg><span class="fc-name">screen-recording-2026-08-04-final-v3-really-final.gif</span><span class="fc-size">18.6 MB</span><button class="fc-remove" type="button" aria-label="Remove">×</button></span>
+  </span></div>
+  <div class="spec-row"><span class="spec-name">error</span><span class="spec-items">
+    <span class="filechip is-error"><svg class="fc-icon" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16v.5" stroke-linecap="round"/></svg><span class="fc-name">broken.gif</span><span class="fc-size" style="color:var(--danger-text)">Couldn't read this file</span><button class="fc-remove" type="button" aria-label="Remove">×</button></span>
+  </span></div>
+</template>
+
+<template id="tpl-controls">
+  <div class="field">
+    <label class="label" for="s1">Slider — default <span class="val">80</span></label>
+    <input class="range" type="range" id="s1" min="1" max="100" value="80" style="--fill:80%">
+  </div>
+  <div class="field">
+    <label class="label" for="s2">Slider — hover <span class="val">45</span></label>
+    <input class="range is-hover" type="range" id="s2" min="1" max="100" value="45" style="--fill:45%">
+  </div>
+  <div class="field">
+    <label class="label" for="s3">Slider — focus-visible <span class="val">60</span></label>
+    <input class="range is-focus" type="range" id="s3" min="1" max="100" value="60" style="--fill:60%">
+  </div>
+  <div class="field">
+    <label class="label" for="s4">Slider — disabled <span class="val">30</span></label>
+    <input class="range" type="range" id="s4" min="1" max="100" value="30" style="--fill:30%" disabled>
+  </div>
+
+  <div class="field" style="margin-top:24px">
+    <label class="label" for="sel1">Select — default</label>
+    <select class="select" id="sel1"><option>128 — good balance</option></select>
+  </div>
+  <div class="field">
+    <label class="label" for="sel2">Select — hover</label>
+    <select class="select is-hover" id="sel2"><option>128 — good balance</option></select>
+  </div>
+  <div class="field">
+    <label class="label" for="sel3">Select — open / focus</label>
+    <select class="select is-open" id="sel3"><option>128 — good balance</option></select>
+    <div class="select-menu" role="listbox" aria-label="Colors">
+      <div role="option">256 — best quality</div>
+      <div role="option" class="is-hover">128 — good balance</div>
+      <div role="option" aria-selected="true">✓ 64 — small file</div>
+      <div role="option">32 — flat art only</div>
+    </div>
+  </div>
+  <div class="field">
+    <label class="label" for="sel4">Select — disabled</label>
+    <select class="select" id="sel4" disabled><option>128 — good balance</option></select>
+  </div>
+
+  <div class="spec-row" style="margin-top:24px"><span class="spec-name">toggle</span><span class="spec-items" style="gap:20px">
+    <span class="switch" role="switch" aria-checked="false" tabindex="0"><span class="switch-track"></span><span>off</span></span>
+    <span class="switch is-on" role="switch" aria-checked="true" tabindex="0"><span class="switch-track"></span><span>on</span></span>
+    <span class="switch is-hover" role="switch" aria-checked="false" tabindex="0"><span class="switch-track"></span><span>hover</span></span>
+    <span class="switch is-on is-focus" role="switch" aria-checked="true" tabindex="0"><span class="switch-track"></span><span>focus</span></span>
+    <span class="switch is-disabled" role="switch" aria-checked="false" aria-disabled="true"><span class="switch-track"></span><span>disabled</span></span>
+  </span></div>
+
+  <div class="spec-row"><span class="spec-name">preset chip</span><span class="spec-items">
+    <button class="chip" type="button" aria-pressed="false"><span>Emoji</span><span class="chip-dim">128×128</span></button>
+    <button class="chip is-hover" type="button" aria-pressed="false"><span>Sticker</span><span class="chip-dim">320×320</span></button>
+    <button class="chip" type="button" aria-pressed="true"><span>Banner</span><span class="chip-dim">680×240</span></button>
+    <button class="chip is-focus" type="button" aria-pressed="false"><span>Avatar</span><span class="chip-dim">128×128</span></button>
+    <button class="chip is-disabled" type="button" aria-disabled="true"><span>Lottie</span><span class="chip-dim">n/a</span></button>
+  </span></div>
+</template>
+
+<template id="tpl-prog">
+  <p class="pane-label">indeterminate — "Preparing…"</p>
+  <div class="progress-wrap">
+    <div class="progress is-indeterminate" role="progressbar" aria-label="Preparing" aria-valuetext="Preparing"><i></i></div>
+    <span class="progress-pct">—</span>
+  </div>
+  <p class="pane-label" style="margin-top:20px">determinate 62% + cancel</p>
+  <div class="progress-wrap">
+    <div class="progress" role="progressbar" aria-valuenow="62" aria-valuemin="0" aria-valuemax="100" aria-label="Compression progress"><i style="width:62%"></i></div>
+    <span class="progress-pct">62%</span>
+    <button class="btn btn-danger btn-sm" type="button">Cancel</button>
+  </div>
+  <p class="pane-label" style="margin-top:20px">complete</p>
+  <div class="progress-wrap">
+    <div class="progress is-complete" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" aria-label="Compression progress"><i style="width:100%"></i></div>
+    <svg class="check-pop" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="m4 12.5 5 5 11-11" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <p class="pane-label" style="margin-top:20px">error</p>
+  <div class="progress-wrap">
+    <div class="progress is-error" role="progressbar" aria-valuenow="41" aria-valuemin="0" aria-valuemax="100" aria-label="Compression progress"><i style="width:41%"></i></div>
+    <span class="progress-pct" style="color:var(--danger-text)">41%</span>
+  </div>
+  <p class="text-sm" style="color:var(--danger-text);margin-top:8px">Compression failed — try lowering Colors to 128.</p>
+</template>
+
+<template id="tpl-ba">
+  <div class="ba" style="--pos:56%;aspect-ratio:16/10">
+    <div class="ba-layer ba-before">
+      <svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice">
+        <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B39B0"/><stop offset=".55" stop-color="#5B82F5"/><stop offset="1" stop-color="#F59E0B"/></linearGradient></defs>
+        <rect width="400" height="250" fill="url(#g1)"/><circle cx="300" cy="90" r="28" fill="#FFF4D6"/>
+        <path d="M0 190 L80 150 L150 186 L230 140 L310 180 L400 152 L400 250 L0 250Z" fill="#0A0E16" opacity=".85"/>
+      </svg>
+    </div>
+    <div class="ba-layer ba-after">
+      <svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges">
+        <rect width="400" height="55" fill="#22409F"/><rect y="55" width="400" height="50" fill="#4570EE"/>
+        <rect y="105" width="400" height="45" fill="#8E9FE0"/><rect y="150" width="400" height="45" fill="#E0A83C"/>
+        <rect y="195" width="400" height="55" fill="#C9772A"/>
+        <circle cx="300" cy="90" r="28" fill="#FFF2CC"/>
+        <path d="M0 190 L80 150 L150 186 L230 140 L310 180 L400 152 L400 250 L0 250Z" fill="#11141C"/>
+      </svg>
+    </div>
+    <div class="ba-divider"></div>
+    <span class="ba-tag ba-tag-l">Before · <span class="mono">2.4 MB</span></span>
+    <span class="ba-tag ba-tag-r">After · <span class="mono">480 KB</span></span>
+    <div class="ba-handle" role="slider" tabindex="0" aria-label="Compare before and after" aria-valuemin="0" aria-valuemax="100" aria-valuenow="56">⟷</div>
+  </div>
+  <div class="spec-row" style="margin-top:16px"><span class="spec-name">handle states</span><span class="spec-items" style="gap:24px;padding:8px 0">
+    <span style="position:relative;width:44px;height:44px"><span class="ba-handle" style="left:50%;top:50%">⟷</span></span>
+    <span style="position:relative;width:52px;height:44px"><span class="ba-handle is-hover" style="left:50%;top:50%">⟷</span></span>
+    <span style="position:relative;width:52px;height:44px"><span class="ba-handle is-focus" style="left:50%;top:50%">⟷</span></span>
+  </span></div>
+  <p class="text-sm muted" style="margin-top:8px">default · hover (scale 1.06) · focus-visible</p>
+</template>
+
+<template id="tpl-result">
+  <p class="pane-label">empty — reserves the space</p>
+  <div class="result result-empty" style="min-height:180px">
+    <div class="stack gap-2">
+      <p class="text-sm">Your compressed GIF will appear here.</p>
+      <p class="text-caption">Preview shows the first frame while you tune settings.</p>
+    </div>
+  </div>
+  <p class="pane-label" style="margin-top:20px">complete</p>
+  <div class="result" style="min-height:0">
+    <div class="row-between" style="margin-bottom:12px">
+      <div class="row" style="gap:8px">
+        <svg class="check-pop" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m4 12.5 5 5 11-11" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="panel-title">Done</span>
+      </div>
+      <span class="badge badge-neutral mono">gifski · q80</span>
+    </div>
+    <div class="size-delta">
+      <span class="from">2.4 MB</span><span class="muted">→</span><span class="to">480 KB</span>
+      <span class="badge badge-success">−80% smaller</span>
+    </div>
+    <div class="row" style="margin-top:16px;gap:10px">
+      <button class="btn btn-primary" type="button">Download</button>
+      <button class="btn btn-secondary" type="button">Re-compress</button>
+      <button class="btn btn-ghost" type="button">Start over</button>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-ad">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+    <div>
+      <p class="pane-label">product card — 16px radius, shadow, hover</p>
+      <a class="tool-card" href="#" style="min-height:250px;justify-content:center">
+        <span class="tc-name">GIF Compressor</span>
+        <span class="tc-desc">Shrink file size up to 80% with gifski.</span>
+      </a>
+    </div>
+    <div>
+      <p class="pane-label">ad slot — 6px radius, flat, no shadow, labelled</p>
+      <div class="ad-slot" style="min-height:250px;margin-block:0">
+        <span class="ad-ph">AD SLOT — 300×250 (reserved)</span>
+      </div>
+    </div>
+  </div>
+  <div class="spec-row" style="margin-top:20px"><span class="spec-name">sizes</span><span class="spec-items" style="align-items:flex-start">
+    <div class="ad-slot ad-slot--anchor" style="margin-block:0"><span class="ad-ph">320×50 anchor</span></div>
+  </span></div>
+  <p class="text-sm muted" style="margin-top:12px">
+    Anchor unit is the only permitted sticky ad, mobile only, dismissible, and <b>suppressed while the sticky action
+    bar is visible</b>.
+  </p>
+</template>
+
+<template id="tpl-toast">
+  <div class="stack gap-3">
+    <div class="toast toast-success" role="status">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.4" style="flex:none;margin-top:1px"><path d="m4 12.5 5 5 11-11" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><strong>Compressed in 4.2 s</strong><span class="muted">2.4 MB → 480 KB. Saved 1.9 MB.</span></div>
+      <button class="toast-close" type="button" aria-label="Dismiss">×</button>
+    </div>
+    <div class="toast toast-error" role="alert">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2.4" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5" stroke-linecap="round"/></svg>
+      <div><strong>Couldn't decode this GIF</strong><span class="muted">The file may be truncated. Try re-exporting it.</span></div>
+      <button class="toast-close" type="button" aria-label="Dismiss">×</button>
+    </div>
+    <div class="toast toast-warning" role="status">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2.4" style="flex:none;margin-top:1px"><path d="M12 4 2.5 20h19L12 4Z" stroke-linejoin="round"/><path d="M12 10v4M12 17v.5" stroke-linecap="round"/></svg>
+      <div><strong>This file is close to the mobile limit</strong><span class="muted">48 MB of 50 MB. It may run out of memory.</span></div>
+      <button class="toast-close" type="button" aria-label="Dismiss">×</button>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-acc">
+  <div class="accordion">
+    <div class="acc-item is-open">
+      <button class="acc-head" type="button" aria-expanded="true">Open item
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="acc-panel"><div><p>Answer copy sits at 1rem / 1.6, capped at 68ch, and stays in the DOM so crawlers and find-in-page can reach it.</p></div></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-head" type="button" aria-expanded="false">Closed item
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="acc-panel"><div><p>Hidden until opened.</p></div></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-head is-focus" type="button" aria-expanded="false">Focus-visible item
+        <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="acc-panel"><div><p>Ring is inset 2px so it does not clip against the divider.</p></div></div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-badges">
+  <div class="spec-row"><span class="spec-name">badges</span><span class="spec-items">
+    <span class="badge badge-success">−80% smaller</span>
+    <span class="badge badge-accent">Instant · in-browser</span>
+    <span class="badge badge-warning">Cutting it close</span>
+    <span class="badge badge-danger">Too big</span>
+    <span class="badge badge-neutral mono">640×360 · 20 fps</span>
+  </span></div>
+  <div class="spec-row"><span class="spec-name">trust line</span><span class="spec-items">
+    <span class="trust"><span class="lock">🔒</span><span><strong>100% in your browser.</strong> Files never leave your device.</span></span>
+  </span></div>
+  <div class="spec-row"><span class="spec-name">size delta</span><span class="spec-items">
+    <span class="size-delta"><span class="from">2.4 MB</span><span class="muted">→</span><span class="to">480 KB</span><span class="badge badge-success">−80%</span></span>
+  </span></div>
+</template>
+
+<script>
+/* Clone each template into both theme panes, rewriting ids so labels stay unique. */
+(function () {
+  var seq = 0;
+  document.querySelectorAll('[data-tpl]').forEach(function (host) {
+    var tpl = document.getElementById('tpl-' + host.getAttribute('data-tpl'));
+    if (!tpl) return;
+    var frag = tpl.content.cloneNode(true);
+    var suffix = '-c' + (++seq);
+    frag.querySelectorAll('[id]').forEach(function (el) {
+      var old = el.id;
+      el.id = old + suffix;
+      frag.querySelectorAll('[for="' + old + '"]').forEach(function (l) { l.setAttribute('for', el.id); });
+    });
+    host.appendChild(frag);
+  });
+
+  /* semantic swatches, rendered per pane so each theme resolves its own values */
+  var TOKENS = [
+    ['--bg', 'bg'], ['--surface-1', 'surface-1'], ['--surface-2', 'surface-2'],
+    ['--surface-ad', 'surface-ad'], ['--border', 'border'], ['--border-control', 'border-control'],
+    ['--text', 'text'], ['--text-secondary', 'text-secondary'], ['--text-muted', 'text-muted'],
+    ['--text-disabled', 'text-disabled'], ['--text-ad-label', 'text-ad-label'],
+    ['--primary', 'primary'], ['--primary-fill', 'primary-fill'],
+    ['--primary-fill-hover', 'primary-fill-hover'], ['--primary-hover', 'primary-hover'],
+    ['--accent', 'accent'], ['--accent-text', 'accent-text'],
+    ['--success', 'success'], ['--warning', 'warning'], ['--danger', 'danger'], ['--focus-ring', 'focus-ring']
+  ];
+  document.querySelectorAll('[data-swatches]').forEach(function (grid) {
+    TOKENS.forEach(function (t) {
+      var d = document.createElement('div');
+      d.className = 'swatch';
+      d.innerHTML = '<i style="background:var(' + t[0] + ')"></i><span>' + t[1] + '</span>';
+      grid.appendChild(d);
+    });
+  });
+
+  /* live accordion + chips inside the gallery */
+  document.querySelectorAll('.acc-head').forEach(function (h) {
+    h.addEventListener('click', function () {
+      h.setAttribute('aria-expanded', String(h.parentElement.classList.toggle('is-open')));
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

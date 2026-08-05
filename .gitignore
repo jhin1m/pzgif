@@ -1,0 +1,61 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# next.js
+.next/
+out/
+build/
+dist/
+
+# production
+*.tsbuildinfo
+next-env.d.ts
+
+# misc
+.DS_Store
+*.pem
+Thumbs.db
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files — NEVER commit
+.env
+.env.*
+!.env.example
+
+# vercel
+.vercel
+
+# testing
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# caches
+.turbo
+.eslintcache
+.cache/
+
+# local media scratch (test fixtures for encoder benchmarks)
+/tmp-media/
+*.local.gif
+*.local.mp4
+
+# wasm binaries — copied out of node_modules by scripts/copy-wasm.mjs at build
+# time. The version segment in the path is what makes the `immutable` cache
+# header safe; see src/lib/site-config.ts.
+/public/wasm/**/*.wasm
+!/public/wasm/**/.gitkeep

@@ -1,0 +1,143 @@
+---
+phase: 9
+title: "Content SEO and Legal"
+status: pending
+priority: P1
+effort: "4-6d"
+dependencies: [3]
+---
+
+# Phase 9: Content SEO and Legal
+
+## Overview
+
+Build the homepage, the SEO machinery, and the legal pages. Runs in parallel with the tool phases — none of it depends on the media engine.
+
+Two things here are load-bearing for the business rather than the product: the **≥400-word hand-written explainer on every page** (the defence against Google's scaled-content-abuse policy, whose penalty is site-wide) and the **legal + About pages** (approval prerequisites for any ad network, not a later chore).
+
+## Requirements
+
+**Functional**
+- Homepage per `docs/wireframe/index.html`
+- **6-10 genuine non-tool content pages** — the AdSense evidence pack
+- `sitemap.ts`, `robots.ts`, per-page metadata, canonical, JSON-LD
+- Legal: Terms, Privacy, Cookie Policy, Acceptable Use, About, **Contact**, **DMCA**, **Accessibility statement**
+- 404 page and a redirect strategy for future tool renames
+- FAQ accordion component with crawlable answers
+
+**Non-functional**
+- Every page statically prerendered
+- Every explainer hand-written; no page's prose derived from another's
+
+## Architecture
+
+### Structured data — what is actually alive in 2026
+
+| Type | Status | Emit? |
+|---|---|---|
+| `FAQPage` | **Dead.** Deprecated 2025-05-08, stopped appearing in Search **2026-05-07**, docs removed 2026-06-15 | **No** |
+| `HowTo` | **Dead.** Removed from mobile 2023, then desktop | **No** |
+| `BreadcrumbList` | Live, still renders in results | **Yes**, every tool and preset page |
+| `WebApplication` | Live. Rich-result eligible only with `aggregateRating`/`review` | **Yes, with `offers.price: 0` and NO rating** |
+| `WebSite` + `Organization` | Feeds site-name generation and entity understanding | **Yes, homepage only** |
+
+**On `WebApplication` without a rating — this is deliberate and must survive future audits.** Google requires a rating for rich-result eligibility. PZGIF has no reviews at launch. Fabricating them is a structured-data spam violation that risks a manual action against a site whose entire model is organic search — a catastrophic downside for a cosmetic upside. Emit the markup, accept no rich result, gain the entity benefit. **Do not let a later "SEO fix" add synthetic ratings.**
+
+**On `FAQPage`:** `design-guidelines.md` §10 mandates it. That half of the requirement is now obsolete. **Keep the FAQ UI exactly as specified** — the visible Q&A still earns long-tail impressions and feeds AI answer surfaces. Only the JSON-LD goes. Amend §10.
+
+§5.12's `hidden="until-found"` requirement is right in intent but **unsupported in Safari, where it fails closed** and makes answers unopenable. Apply it as progressive enhancement per Phase 3; the crawlability goal is met either way because the answers are in the SSG HTML in both branches.
+
+### Canonical and hreflang
+
+At one locale: **self-referential canonical only. No hreflang, no `x-default`.** Google's own guidance is that single-language sites do not need hreflang, and emitting it for one language is noise. The `alternatesFor()` helper should be written now so locale #2 is a one-line change, but it emits only the canonical today.
+
+### Non-tool content pages — this is the revenue path, not decoration
+
+The plan otherwise produces **14 tool pages and zero editorial content**. Research is explicit that an ad network wants 10-20 indexed *content* pages, and that a wall of tool pages with an embedded app is the classic "low value content" rejection shape. 400 words per tool page is the floor, not a cushion. With AdSense as the only realistic launch network and Journey's Next.js support unverified, a double rejection leaves no revenue path at all.
+
+Write 6-10 pages that need no engine, and publish them on the live domain **while the engine is being built** so they are indexed before the tools ship:
+
+- "GIF vs MP4 vs WebP — which to use for what"
+- "Every Discord asset size limit in one table" (feeds the preset cluster's internal links)
+- "Why your GIF is 6 MB, and the four levers that shrink it"
+- "gifski vs standard GIF encoders — side-by-side samples at matched file size"
+- "How to make a Discord emoji that isn't blurry"
+
+The gifski comparison page does triple duty: editorial content, link bait, and — critically — **the only surface where differentiator #1 is legible to a stranger**. The `BeforeAfterSlider` on a tool page compares the user's input to their output; it never shows gifski against a competitor, so a user cannot perceive the quality claim at the moment they decide.
+
+### The scaled-content defence
+
+14 near-identical tool pages is structurally the shape Google's policy targets. What actually differentiates them:
+
+- A genuinely different explainer answering questions specific to that conversion
+- A FAQ whose questions people actually ask about *that* tool
+- Different related-tool links, different examples, different numbers
+- A working tool — utility is itself a quality signal
+
+What does **not** differentiate them: swapping the tool name into a shared paragraph. Launch in batches and watch Search Console before scaling, per the bootstrap guidance.
+
+### Homepage
+
+Per `index.html`: h1 + value prop, trust line, hero dropzone that routes by detected file type, the 9-tool grid, "Why PZGIF" three-up, Discord preset teaser, `below-grid` ad slot, and a footer carrying the full tool list for internal linking. **The footer must list exactly the 9 shipped tools plus the Discord cluster** — the wireframe's `GIF to WebP` and `GIF for Slack` entries are out of scope.
+
+The hero dropzone routing needs the registry's accepted-formats map: drop a `.mp4` → `/mp4-to-gif`, a `.gif` → `/gif-compressor`, a `.webp` → `/webp-to-gif`.
+
+## Related Code Files
+
+- Create: `src/app/[locale]/page.tsx` — homepage
+- Create: `src/app/sitemap.ts`, `src/app/robots.ts`
+- Create: `src/app/[locale]/(legal)/terms/page.tsx`, `privacy/page.tsx`, `cookies/page.tsx`, `acceptable-use/page.tsx`, `about/page.tsx`
+- Create: `src/lib/seo/metadata.ts` (incl. `alternatesFor()`), `src/lib/seo/jsonld.ts`
+- Create: `src/components/content/faq-accordion.tsx`, `tool-grid.tsx`, `why-pzgif.tsx`, `preset-teaser.tsx`
+- Create: `src/content/legal/*.mdx`
+- Modify: `docs/design-guidelines.md` §10 — remove the `FAQPage` schema requirement
+
+## Implementation Steps
+
+1. Build the homepage per the wireframe, reusing its copy verbatim. Wire the hero dropzone's file-type routing from the registry.
+2. Build `metadata.ts`: `metadataBase`, per-page static metadata, self-referential canonical, and `alternatesFor()` stubbed for future locales.
+3. Build `sitemap.ts` with **real content dates** — a `lastModified` of "now" on every URL at every build is a negative quality signal. The date belongs with the content, so store it in each content module's frontmatter and have the registry reference it; the registry itself stays structure-only.
+4. Build `robots.ts`. `noindex` `/dev/states`, `/__bench` and any result URL.
+5. Build the JSON-LD helpers. `BreadcrumbList` + `WebApplication` on tool and preset pages; `WebSite` + `Organization` on the homepage; nothing else. No `FAQPage`, no `HowTo`.
+6. Build `FaqAccordion` with `grid-template-rows: 0fr → 1fr` (no JS height math, no CLS) and apply `hidden="until-found"` **imperatively, only where supported** (feature-detect `'onbeforematch' in document.body`). Never render it in the static HTML — in Safari that would hide the answers permanently.
+7. Write the legal pages. The Privacy Policy must disclose ad personalisation and cookies even though no network is live yet — it is easier to write once than to amend at ad-activation time. The Cookie Policy covers the CMP and analytics. Acceptable Use covers the client-side-only nature of the free tier.
+7b. Add the four pages the original legal set missed:
+   - **Contact**, with a real `contact@` address. Required by GDPR Art. 13(1)(b) for a controller processing EU visitors' analytics data, expected by every ad network, and — per Phase 4's error taxonomy — the product's only support channel. Today a user whose job is refused has nowhere to go
+   - **DMCA policy.** Genuinely low-risk with no hosting, but it is a cheap ad-network trust signal and costs an afternoon
+   - **GDPR Art. 27 EU representative** — record a decision in the Privacy Policy work item ("assessed, exemption relied on, revisit at X traffic" or "appointed"). An omission is worse than either answer
+   - **Accessibility statement.** The EAA microenterprise exemption likely applies to a solo operator, but the site genuinely earns WCAG 2.1 AA and should say so — free E-E-A-T
+7c. Add a 404 page and a redirect map for future tool renames. Redirect capability is the stated reason `output: 'export'` was rejected — use it.
+8. Write the **About page with a real named operator**. This is an E-E-A-T signal that ad reviewers specifically look for, and it is the single cheapest thing that moves an approval decision. A generic "we are a small team" page does not count.
+9. Add the AGPL **"Source"** footer link from Phase 2 alongside the legal links.
+10. Verify every page is statically prerendered in the build output. Any dynamic tool page is a build failure.
+
+## Success Criteria
+
+- [ ] Homepage matches `index.html` and the hero dropzone routes correctly by file type
+- [ ] The shared content components and JSON-LD helpers exist and are consumed — not duplicated — by Phases 5-8
+- [ ] *(Verified in Phase 11, not here:)* every tool and preset page carries ≥400 words of hand-written, page-specific explainer plus its own FAQ. This phase owns the machinery and the non-tool pages; the tool phases own their own prose
+- [ ] **6-10 non-tool content pages published and indexed**, including the gifski side-by-side comparison page
+- [ ] `sitemap.ts` emits real per-page content dates, not build timestamps
+- [ ] `BreadcrumbList` + `WebApplication` validate; `WebApplication` carries `offers.price: 0` and **no rating**
+- [ ] A CI grep fails the build on `aggregateRating`, so a future session cannot "fix" the missing rating by inventing one
+- [ ] No `FAQPage` or `HowTo` JSON-LD anywhere in the codebase
+- [ ] Self-referential canonical on every page; no hreflang while there is one locale
+- [ ] All eight legal/trust pages live — Terms, Privacy, Cookie, Acceptable Use, About, Contact, DMCA, Accessibility — with a real named operator on About and a working `contact@` address
+- [ ] 404 page and redirect map in place
+- [ ] FAQ answers present in the SSG HTML and revealed by browser find-in-page
+- [ ] Footer lists exactly the 9 shipped tools + the Discord cluster, plus the AGPL source link
+- [ ] Every route statically prerendered
+
+## Risk Assessment
+
+| Risk | Mitigation |
+|---|---|
+| Explainer copy across 14 pages drifts into templated filler | Write it in tool-family batches with the wireframe's voice rules to hand, then read all pages side by side. Duplication is only visible in comparison |
+| A later audit "fixes" the missing `aggregateRating` by inventing one | Document the reasoning in a code comment next to the JSON-LD. This is a deliberate decision, not an oversight |
+| Legal pages written as boilerplate that does not match actual behaviour | The Privacy Policy must describe what the site really does: no upload, no server copy, no account. A copy-pasted policy claiming server-side processing is worse than none |
+| Ad network approval rejected for thin content | Treat ≥400-word explainers, the five legal pages, and a real About page as **approval prerequisites**. Do not apply before they exist — a rejection costs weeks |
+
+## Open questions
+
+1. Who is the named operator on the About page? Required before any ad-network application. Blocks nothing else.
+2. ~~Domain provisional~~ — resolved. `pzgif.com` was purchased on 2026-08-05, so `metadataBase`, canonicals and sitemap URLs are final from the start. No placeholder-URL cleanup pass is needed.

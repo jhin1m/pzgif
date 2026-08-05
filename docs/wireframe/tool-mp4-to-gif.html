@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PZGIF — MP4 to GIF wireframe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="wireframe.css">
+<style>
+  /* page-local: trim timeline — only this tool needs it */
+  .trim { display:flex; flex-direction:column; gap:10px; }
+  .trim-strip {
+    position:relative; height:64px; border-radius:var(--radius-control);
+    overflow:hidden; border:1px solid var(--border); background:var(--surface-2);
+    display:grid; grid-auto-flow:column; grid-auto-columns:1fr;
+  }
+  .trim-strip .fr { height:100%; }
+  .trim-mask { position:absolute; top:0; bottom:0; background:color-mix(in srgb, var(--n-950) 62%, transparent); }
+  .trim-mask-l { left:0; width:var(--in,12%); }
+  .trim-mask-r { right:0; width:calc(100% - var(--out,72%)); }
+  .trim-window {
+    position:absolute; top:0; bottom:0; left:var(--in,12%); right:calc(100% - var(--out,72%));
+    border:2px solid var(--primary); border-radius:var(--radius-xs);
+    box-shadow:0 0 0 1px rgba(255,255,255,.5) inset;
+  }
+  .trim-grip {
+    position:absolute; top:50%; transform:translate(-50%,-50%);
+    width:14px; height:44px; border-radius:var(--radius-xs);
+    background:var(--primary); border:1px solid var(--primary-hover);
+    cursor:ew-resize; display:grid; place-items:center;
+  }
+  .trim-grip::after { content:""; width:2px; height:16px; background:rgba(255,255,255,.85); border-radius:1px; }
+  .trim-grip-l { left:var(--in,12%); }
+  .trim-grip-r { left:var(--out,72%); }
+  .trim-times { display:flex; justify-content:space-between; gap:12px; font-family:var(--font-mono); font-size:.75rem; color:var(--text-muted); }
+  .trim-times b { color:var(--text); font-weight:500; }
+  .num-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .num-row .field + .field { margin-top:0; }
+  .num-input {
+    min-height:40px; padding:0 12px; width:100%;
+    background:var(--surface-1); color:var(--text);
+    border:1px solid var(--border-control); border-radius:var(--radius-control);
+    font-family:var(--font-mono); font-size:.875rem;
+  }
+  .num-input:hover { border-color:var(--n-600); }
+  .preview-box {
+    position:relative; width:100%; aspect-ratio:16/9;
+    border-radius:var(--radius-card); overflow:hidden;
+    border:1px solid var(--border); background:var(--n-950);
+  }
+  .preview-box svg { width:100%; height:100%; }
+  .preview-badge {
+    position:absolute; top:10px; left:10px; padding:4px 10px; border-radius:var(--radius-xs);
+    background:rgba(10,14,22,.72); color:#fff; font-size:.6875rem; font-weight:600;
+    letter-spacing:.06em; text-transform:uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="wf-banner">WIREFRAME · tool-mp4-to-gif.html — video → GIF · trim / fps / width / quality</div>
+<a class="sr-only" href="#main">Skip to content</a>
+
+<header class="pz-header">
+  <div class="container">
+    <a class="brand" href="index.html">
+      <svg class="brand-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M9.5 10.5A5.5 5.5 0 1 0 9.5 21.5C14 21.5 18 10.5 22.5 10.5A5.5 5.5 0 1 1 22.5 21.5C18 21.5 14 10.5 9.5 10.5Z" stroke="var(--primary)" stroke-width="2.6" stroke-linecap="round"/>
+        <circle cx="22.5" cy="16" r="1.9" fill="var(--accent)"/>
+      </svg>
+      <span class="brand-word">PZ<span>GIF</span></span>
+    </a>
+    <nav class="pz-nav" aria-label="Tools">
+      <a href="tool-compressor.html">Compress</a>
+      <a href="#">Resize</a>
+      <a href="#">Crop</a>
+      <a href="tool-mp4-to-gif.html" aria-current="page">Convert</a>
+      <a href="discord-preset.html">Discord presets</a>
+    </nav>
+    <div class="header-tools">
+      <a class="btn btn-secondary btn-sm" href="index.html#tools">All tools</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="container" style="padding-top:32px">
+
+  <div class="stack gap-3" style="max-width:64ch">
+    <h1>MP4 to GIF converter</h1>
+    <p class="lead">
+      Turn an MP4, MOV or WebM clip into a GIF. Trim the exact seconds you want, pick a frame rate and width,
+      and export with gifski quality — without uploading the video anywhere.
+    </p>
+    <p class="trust">
+      <span class="lock" aria-hidden="true">🔒</span>
+      <span><strong>100% in your browser.</strong> Files never leave your device.</span>
+    </p>
+  </div>
+
+  <div id="job-status" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <!-- ── idle ────────────────────────────────────────────────────── -->
+  <p class="wf-h">State A — idle</p>
+  <div class="wf-state">
+    <span class="wf-tag">A · idle</span>
+    <button class="dropzone" type="button" aria-describedby="mp4-limits">
+      <svg class="dz-mark" viewBox="0 0 96 96" fill="none" aria-hidden="true">
+        <rect x="16" y="26" width="46" height="44" rx="6" stroke="currentColor" stroke-width="3"/>
+        <path d="m68 42 14-9v30l-14-9z" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+        <circle cx="39" cy="48" r="4" fill="var(--accent)"/>
+      </svg>
+      <span class="dz-title">Drop your video here or click to browse</span>
+      <span class="dz-hint">or paste with <span class="mono">Ctrl</span>+<span class="mono">V</span></span>
+      <span class="dz-hint" id="mp4-limits"><span class="mono">.mp4 .mov .webm .m4v</span> · up to <span class="mono">150 MB</span> · up to 60 seconds</span>
+    </button>
+    <p class="wf-note">
+      Long clips make enormous GIFs. The limits caption states the 60-second ceiling up front rather than failing
+      after the user waits. Over-limit files route to the Pro upsell, never to a silent failure.
+    </p>
+  </div>
+
+  <!-- ── loaded + settings ───────────────────────────────────────── -->
+  <p class="wf-h">State B — clip loaded, trim &amp; settings</p>
+  <div class="wf-state">
+    <span class="wf-tag">B · loaded</span>
+    <div class="tool-layout">
+      <div class="stack gap-4">
+        <div class="row">
+          <span class="filechip">
+            <svg class="fc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m19 9-3 3 3 3z" stroke-linejoin="round"/></svg>
+            <span class="fc-name">screen-capture-2026-08-04.mp4</span>
+            <span class="fc-size">18.6 MB</span>
+            <button class="fc-remove" type="button" aria-label="Remove file">×</button>
+          </span>
+          <span class="badge badge-neutral mono">1920×1080 · 30 fps · 0:24</span>
+          <button class="btn btn-ghost btn-sm" type="button">Choose a different file</button>
+        </div>
+
+        <div class="preview-box">
+          <span class="preview-badge">Preview · frame at 0:03.4</span>
+          <svg viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice" aria-label="Video preview placeholder">
+            <defs>
+              <linearGradient id="pv" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#1B39B0"/><stop offset="55%" stop-color="#2F5DE8"/><stop offset="100%" stop-color="#0E9C93"/>
+              </linearGradient>
+            </defs>
+            <rect width="640" height="360" fill="url(#pv)"/>
+            <g opacity=".22" stroke="#fff" stroke-width="1">
+              <path d="M0 90h640M0 180h640M0 270h640M160 0v360M320 0v360M480 0v360"/>
+            </g>
+            <circle cx="320" cy="180" r="52" fill="none" stroke="#fff" stroke-width="3" opacity=".8"/>
+            <path d="m305 158 34 22-34 22z" fill="#fff" opacity=".9"/>
+          </svg>
+        </div>
+
+        <!-- trim -->
+        <div class="card">
+          <div class="row-between" style="margin-bottom:14px">
+            <span class="panel-title">Trim</span>
+            <span class="badge badge-accent mono">3.2 s selected</span>
+          </div>
+          <div class="trim">
+            <div class="trim-strip" style="--in:12%;--out:72%" aria-hidden="true">
+              <div class="fr" style="background:#1B39B0"></div>
+              <div class="fr" style="background:#26449E"></div>
+              <div class="fr" style="background:#2F5DE8"></div>
+              <div class="fr" style="background:#4570EE"></div>
+              <div class="fr" style="background:#1F7FA8"></div>
+              <div class="fr" style="background:#0E9C93"></div>
+              <div class="fr" style="background:#2DB39F"></div>
+              <div class="fr" style="background:#4FBF8F"></div>
+              <div class="fr" style="background:#7BC97A"></div>
+              <div class="fr" style="background:#B9C95E"></div>
+              <div class="trim-mask trim-mask-l"></div>
+              <div class="trim-mask trim-mask-r"></div>
+              <div class="trim-window"></div>
+              <div class="trim-grip trim-grip-l"></div>
+              <div class="trim-grip trim-grip-r"></div>
+            </div>
+            <div class="trim-times">
+              <span>Start <b>0:02.9</b></span>
+              <span>Selected <b>3.2 s</b> of 24.0 s</span>
+              <span>End <b>0:06.1</b></span>
+            </div>
+            <div class="num-row">
+              <div class="field">
+                <label class="label" for="trim-start">Start (seconds)</label>
+                <input class="num-input" type="number" id="trim-start" value="2.9" step="0.1" min="0" max="24">
+              </div>
+              <div class="field">
+                <label class="label" for="trim-end">End (seconds)</label>
+                <input class="num-input" type="number" id="trim-end" value="6.1" step="0.1" min="0" max="24">
+              </div>
+            </div>
+            <p class="hint">
+              Drag the handles, or type exact seconds. Handles are focusable and move with ← → (Shift for 1 s steps).
+            </p>
+          </div>
+        </div>
+
+        <div class="result result-empty">
+          <div class="stack gap-2">
+            <p class="text-sm">Your GIF will appear here.</p>
+            <p class="text-caption">Estimated output: <span class="mono">≈ 1.8 MB</span> at the current settings</p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="card" aria-label="Conversion settings">
+        <div class="row-between" style="margin-bottom:16px">
+          <span class="panel-title">GIF settings</span>
+          <button class="btn btn-ghost btn-sm" type="button">Reset</button>
+        </div>
+
+        <div class="field">
+          <label class="label" for="fps">Frame rate <span class="val">15 fps</span></label>
+          <input class="range" type="range" id="fps" min="5" max="30" value="15" step="1" style="--fill:40%" aria-describedby="fps-h">
+          <span class="hint" id="fps-h">10–15 fps looks natural for most clips and roughly halves the size versus 30.</span>
+        </div>
+
+        <div class="field">
+          <label class="label" for="w">Width <span class="val">480 px</span></label>
+          <input class="range" type="range" id="w" min="120" max="1280" value="480" step="10" style="--fill:31%" aria-describedby="w-h">
+          <span class="hint" id="w-h">Height follows the source aspect ratio: <span class="mono">480 × 270</span>.</span>
+        </div>
+
+        <div class="field">
+          <label class="label" for="q">Quality <span class="val">80</span></label>
+          <input class="range" type="range" id="q" min="1" max="100" value="80" style="--fill:80%" aria-describedby="q-h">
+          <span class="hint" id="q-h">gifski quality. Below 60 you will start to see banding on gradients.</span>
+        </div>
+
+        <div class="field">
+          <label class="label" for="colors">Colors</label>
+          <select class="select" id="colors">
+            <option selected>256 — best quality</option>
+            <option>128 — good balance</option>
+            <option>64 — small file</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <span class="switch is-on" role="switch" aria-checked="true" tabindex="0">
+            <span class="switch-track" aria-hidden="true"></span>
+            <span>Loop forever</span>
+          </span>
+        </div>
+        <div class="field">
+          <span class="switch" role="switch" aria-checked="false" tabindex="0">
+            <span class="switch-track" aria-hidden="true"></span>
+            <span>Ping-pong (play, then reverse)</span>
+          </span>
+        </div>
+
+        <div class="card card-flat" style="margin-top:20px;padding:12px;background:var(--surface-2);border-radius:var(--radius-panel)">
+          <p class="text-caption muted">Estimated output</p>
+          <p class="mono" style="font-size:1.125rem;font-weight:500;margin-top:2px">≈ 1.8 MB</p>
+          <p class="hint">48 frames · 480×270 · 15 fps</p>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" type="button" style="margin-top:20px">Convert to GIF</button>
+        <p class="hint" style="margin-top:8px;text-align:center">Runs locally · nothing is uploaded</p>
+      </aside>
+
+      <div class="tool-rail">
+        <div class="ad-slot ad-slot--rail" role="complementary" aria-label="Advertisement">
+          <span class="ad-ph">AD SLOT — 300×600 (reserved)<br>right rail · ≥1280px only</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actionbar">
+      <div class="ab-meta">3.2 s selected<br><span class="mono">≈ 1.8 MB · 480×270</span></div>
+      <button class="btn btn-primary btn-xl" type="button" style="flex:1;width:auto">Convert to GIF</button>
+    </div>
+    <p class="wf-note">
+      The <b>estimated output</b> readout updates live as sliders move — it is the honest answer to "will this be
+      huge?", which is the single most common reason people abandon a video-to-GIF flow. Estimates use mono +
+      tabular figures so the number does not jitter while it recalculates.
+    </p>
+  </div>
+
+  <!-- ── processing + result (condensed) ─────────────────────────── -->
+  <p class="wf-h">State C — converting → result</p>
+  <div class="wf-state">
+    <span class="wf-tag">C · converting / result</span>
+    <div class="stack gap-4" style="max-width:720px">
+      <div class="card">
+        <div class="row-between" style="margin-bottom:14px">
+          <span class="panel-title">Decoding video · encoding GIF</span>
+          <span class="badge badge-accent mono">frame 22 / 48</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress" role="progressbar" aria-valuenow="46" aria-valuemin="0" aria-valuemax="100" aria-label="Conversion progress">
+            <i style="width:46%"></i>
+          </div>
+          <span class="progress-pct" aria-hidden="true">46%</span>
+          <button class="btn btn-danger btn-sm" type="button">Cancel</button>
+        </div>
+        <p class="hint" style="margin-top:12px">Decoding happens with your device's hardware video decoder. Keep this tab open.</p>
+      </div>
+
+      <div class="result">
+        <div class="row-between" style="margin-bottom:14px">
+          <div class="row" style="gap:8px">
+            <svg class="check-pop" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m4 12.5 5 5 11-11" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="panel-title">GIF ready</span>
+          </div>
+          <span class="badge badge-neutral mono">480×270 · 15 fps · 48 frames</span>
+        </div>
+        <div class="preview-box" style="aspect-ratio:16/9">
+          <span class="preview-badge">Output preview · loops</span>
+          <svg viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges" aria-label="GIF output preview placeholder">
+            <rect width="640" height="120" fill="#26449E"/><rect y="120" width="640" height="120" fill="#2189A6"/><rect y="240" width="640" height="120" fill="#2DB39F"/>
+            <circle cx="320" cy="180" r="52" fill="none" stroke="#fff" stroke-width="4"/>
+            <path d="m305 158 34 22-34 22z" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="row-between" style="margin-top:18px">
+          <div class="size-delta">
+            <span class="to">1.72 MB</span>
+            <span class="badge badge-success">under the 1.8 MB estimate</span>
+          </div>
+          <span class="text-caption muted mono">encoded in 6.8 s</span>
+        </div>
+        <div class="row" style="margin-top:18px;gap:12px">
+          <button class="btn btn-primary btn-lg" type="button">Download GIF</button>
+          <button class="btn btn-secondary" type="button">Adjust &amp; re-convert</button>
+          <button class="btn btn-ghost" type="button">Start over</button>
+        </div>
+        <div class="row" style="margin-top:16px;gap:8px">
+          <span class="text-caption muted">Too big for where you are posting it?</span>
+          <a class="btn btn-secondary btn-sm" href="tool-compressor.html">Compress this GIF</a>
+          <a class="btn btn-secondary btn-sm" href="discord-preset.html">Fit it to Discord</a>
+        </div>
+      </div>
+
+      <div class="ad-slot ad-slot--rect" role="complementary" aria-label="Advertisement">
+        <span class="ad-ph">AD SLOT — 300×250 (reserved)<br>tool / below-result</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SEO copy + FAQ ──────────────────────────────────────────── -->
+  <p class="wf-h">State D — SEO copy &amp; FAQ</p>
+  <div class="wf-state">
+    <span class="wf-tag">D · content</span>
+    <section class="prose">
+      <h2>How to convert MP4 to GIF</h2>
+      <p style="margin-top:12px">
+        Drop the video onto this page, drag the two trim handles around the moment you want, choose a frame rate and
+        width, then press Convert. The video is decoded by your browser's own hardware decoder and re-encoded with
+        gifski, so nothing is uploaded and there is no queue to wait in. A three-second clip at 480&nbsp;px wide
+        typically finishes in under ten seconds on a current laptop.
+      </p>
+      <p>
+        The two settings that decide your file size are <b>width</b> and <b>frame rate</b>, in that order. A GIF
+        stores complete frames, so doubling the width roughly quadruples the data and doubling the frame rate roughly
+        doubles it. Most clips look right at 12–15&nbsp;fps and 480&nbsp;px wide. Save the quality slider for the end.
+      </p>
+
+      <div class="ad-slot ad-slot--inline" role="complementary" aria-label="Advertisement">
+        <span class="ad-ph">AD SLOT — 336×280 (reserved)<br>tool / in-content · after ~150 words</span>
+      </div>
+
+      <h3>Keep the clip short</h3>
+      <p>
+        GIF has no motion compression, so length is expensive in a way it never is for video. Two to five seconds is
+        the range where GIF still makes sense. Beyond about ten seconds you are usually better off converting to MP4
+        or WebP and linking that instead — both play inline nearly everywhere GIFs do, and both are dramatically smaller.
+      </p>
+      <h3>Which formats can PZGIF read?</h3>
+      <p>
+        MP4 and MOV with H.264 or HEVC video, and WebM with VP8, VP9 or AV1 — that covers almost every phone
+        recording, screen capture and download. Unusual containers fall back to a slower path that loads on demand,
+        so the common case stays fast.
+      </p>
+    </section>
+
+    <section style="margin-top:40px">
+      <h2 style="margin-bottom:16px">MP4 to GIF FAQ</h2>
+      <div class="accordion" id="faq">
+        <div class="acc-item is-open">
+          <button class="acc-head" type="button" aria-expanded="true">
+            How long can the video be?
+            <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="acc-panel"><div><p>
+            The source file can be up to 150&nbsp;MB and 60 seconds, but you should trim the output to a few seconds.
+            A 30-second GIF at any reasonable size runs into tens of megabytes, which most platforms will reject anyway.
+          </p></div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-head" type="button" aria-expanded="false">
+            Will the GIF have sound?
+            <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="acc-panel"><div><p>
+            No. The GIF format has no audio track at all. If the sound matters, convert to MP4 or WebM instead —
+            they are also much smaller.
+          </p></div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-head" type="button" aria-expanded="false">
+            What frame rate should I pick?
+            <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="acc-panel"><div><p>
+            15&nbsp;fps for general footage, 10&nbsp;fps for talking heads and screen recordings, 20–24&nbsp;fps only
+            for fast motion where stutter would be obvious. Going above 24 rarely looks better and always costs size.
+          </p></div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-head" type="button" aria-expanded="false">
+            Is my video uploaded to a server?
+            <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="acc-panel"><div><p>
+            No. Decoding and encoding both happen in this tab. That is also why large files depend on your device's
+            memory rather than on our limits.
+          </p></div></div>
+        </div>
+        <div class="acc-item">
+          <button class="acc-head" type="button" aria-expanded="false">
+            Why is my GIF bigger than the original MP4?
+            <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="acc-panel"><div><p>
+            That is normal and expected. MP4 describes what changes between frames; GIF re-lists the pixels of every
+            frame with a 256-color palette. A GIF being several times larger than its source video is the format
+            working as designed, not a conversion error.
+          </p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section style="margin-top:40px">
+      <h2 style="margin-bottom:16px">Related tools</h2>
+      <div class="tool-grid">
+        <a class="tool-card" href="tool-compressor.html"><span class="tc-name">GIF compressor</span><span class="tc-desc">Already have a GIF that is too big? Start here.</span></a>
+        <a class="tool-card" href="#"><span class="tc-name">GIF to MP4</span><span class="tc-desc">The reverse trip, for when GIF is the wrong format.</span></a>
+        <a class="tool-card" href="discord-preset.html"><span class="tc-name">GIF for Discord</span><span class="tc-desc">Auto-fits emoji and stickers under 256 KB.</span></a>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<footer class="pz-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <span class="brand-word">PZ<span>GIF</span></span>
+        <p class="text-sm muted" style="margin-top:8px;max-width:34ch">Browser-native GIF tools. Your files stay on your device.</p>
+      </div>
+      <div><h4>Edit</h4><ul class="footer-links"><li><a href="tool-compressor.html">GIF compressor</a></li><li><a href="#">Resize GIF</a></li><li><a href="#">Crop GIF</a></li></ul></div>
+      <div><h4>Convert</h4><ul class="footer-links"><li><a href="tool-mp4-to-gif.html">MP4 to GIF</a></li><li><a href="#">GIF to MP4</a></li><li><a href="#">WebP to GIF</a></li></ul></div>
+      <div><h4>Presets &amp; info</h4><ul class="footer-links"><li><a href="discord-preset.html">GIF for Discord</a></li><li><a href="#">Privacy policy</a></li><li><a href="#">About</a></li></ul></div>
+    </div>
+    <p class="footer-legal">© 2026 PZGIF · pzgif.com · Terms · Privacy · Cookies · Acceptable use</p>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('#faq .acc-head').forEach(function (head) {
+  head.addEventListener('click', function () {
+    var item = head.parentElement;
+    head.setAttribute('aria-expanded', String(item.classList.toggle('is-open')));
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,77 @@
+PZGIF
+Copyright (c) 2026 the PZGIF operator.
+
+This product is licensed under the GNU Affero General Public License v3.0 or
+later. See LICENSE for the full text.
+
+
+THE CODE / CONTENT BOUNDARY
+===========================
+
+Two licences apply to this repository, and they cover disjoint sets of files.
+
+  LICENSE          GNU AGPL-3.0-or-later. Covers the Program: all source code,
+                   configuration, build scripts, tests and styles.
+
+  LICENSE-CONTENT  All rights reserved. Covers the SITE CONTENT: everything
+                   under `src/content/`, the wireframes under `docs/wireframe*/`,
+                   the PZGIF name and brand assets, and all explanatory prose,
+                   FAQ text and marketing copy.
+
+The SITE CONTENT is a separate work. It is not part of the Program, it is not
+required to run or modify the Program, and it is not conveyed under the AGPL.
+Site content is kept in `.md` / `.mdx` / `.json` data files rather than in `.tsx`
+modules precisely so this boundary is visible in the file tree.
+
+`messages/` is **Program**, not SITE CONTENT. Those are interface strings the
+Program cannot run without, so withholding them would break the AGPL's
+Corresponding Source requirement. Marketing and explainer prose belongs in
+`src/content/`.
+
+
+SOURCE OFFER (AGPL-3.0 §6)
+==========================
+
+AGPL-3.0 §6 requires the Corresponding Source for the version conveyed, not for
+whatever happens to be on the default branch. The footer "Source" link on every
+page therefore resolves to the exact commit the running bundle was built from,
+and `scripts/check-source-sha.mjs` fetches that commit anonymously from the
+public repository URL — no credentials, no local refs — so a commit that is
+unpushed, or a repository that is private, fails CI on `main`. Once a host is
+chosen it must be wired ahead of the deploy step.
+
+
+PERMANENCE
+==========
+
+The PZGIF frontend is AGPL permanently. A future Pro or API tier will share this
+tool registry, design system, components and copy, all AGPL by then. Monetisation
+comes from the hosted service and the API, not from code secrecy. Any closed
+component must be server-only and must invoke unmodified gifski out-of-process.
+See docs/tech-stack.md for the full rationale and the exit that was rejected.
+
+
+THIRD-PARTY COMPONENTS
+======================
+
+The following are used or planned, with their licences. Copyleft terms on the
+first two are why this project is AGPL at all.
+
+  gifski / gifski-wasm      AGPL-3.0-or-later   GIF encoder (differentiator #1)
+  imagequant                GPL-3.0-or-later    palette quantisation, via gifski
+  @ffmpeg/core              GPL-2.0-or-later    lazy-loaded container fallback
+  mediabunny                MPL-2.0             video demux / decode / mux
+  modern-gif                MIT                 animated GIF decode, all browsers
+  fflate                    MIT                 ZIP output for frame extraction
+  @jsquash/*                Apache-2.0          WebP / PNG / resize codecs
+  next, react, react-dom    MIT
+  tailwindcss               MIT
+  shadcn/ui, radix-ui       MIT
+  next-intl                 MIT
+  lucide-react              ISC
+
+Fonts are served self-hosted via next/font:
+
+  Space Grotesk             SIL Open Font License 1.1
+  Hanken Grotesk            SIL Open Font License 1.1
+  JetBrains Mono            SIL Open Font License 1.1

@@ -1,0 +1,53 @@
+PZGIF CONTENT LICENCE
+All rights reserved.
+
+Copyright (c) 2026 the PZGIF operator.
+
+This licence covers the SITE CONTENT of the PZGIF project, which is a separate
+work from the Program and is NOT distributed under the GNU Affero General Public
+Licence. See NOTICE for the boundary between the two.
+
+SITE CONTENT means, wherever it appears in this repository or on any site built
+from it:
+
+  - everything under `src/content/`
+  - everything under `docs/wireframe/` and `docs/wireframes/`
+  - the PZGIF name, wordmark, logo, favicon and any other brand asset
+  - all explanatory prose, FAQ text, marketing copy, page titles and meta
+    descriptions, whether stored as Markdown, MDX, JSON or embedded in source
+
+SITE CONTENT does NOT include `messages/`. Those are interface strings — button
+labels, ARIA labels, navigation — and the Program cannot run without them, which
+would make withholding them a violation of the AGPL's Corresponding Source
+requirement. They are part of the Program and are covered by LICENSE. Marketing
+and explainer prose must therefore live in `src/content/`, never in `messages/`.
+
+No permission is granted to copy, reproduce, republish, translate, adapt or
+redistribute the SITE CONTENT, in whole or in part, by any means.
+
+Two narrow permissions are granted, because the Program is free software and has
+to remain usable:
+
+  1. You may run, modify and self-host the Program together with the SITE
+     CONTENT for private, non-public use — including local development and
+     evaluation.
+
+  2. You may quote short excerpts of the SITE CONTENT for commentary, criticism,
+     review or reporting, with attribution, as permitted by applicable law.
+
+To publish a site built on the Program, replace the SITE CONTENT with your own.
+The Program runs without any of it — the tools work, only the prose is missing.
+
+WHY THIS SPLIT EXISTS
+`gifski-wasm` is AGPL-3.0-or-later, and shipping it to a browser is conveyance,
+so the PZGIF client code is published under the AGPL. That obligation attaches to
+the Program. It does not attach to the prose.
+
+The prose is the actual asset: this is a long-tail search product, and its moat
+is hand-written copy on an ageing domain. Releasing it would let anyone fork,
+rebrand and outrank PZGIF using PZGIF's own words — and Google's duplicate-content
+handling would penalise the newer, weaker domain, which would be PZGIF. The AGPL
+does not require that outcome, and this licence declines it.
+
+For permissions beyond this licence, contact the operator named on the About
+page.

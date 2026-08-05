@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # The governing constraint of the whole project: no page may be
+      # cross-origin isolated. Runs first so a violation fails in seconds.
+      - name: Check for cross-origin-isolation constructs
+        run: pnpm check:forbidden
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # Next 16 removed `next lint`, and `next build` no longer lints. Without
+      # this explicit step nothing would run ESLint at all.
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      # Every page is a static shell. A route that quietly turns dynamic costs
+      # the CDN cache, the LCP, and the rankings this business depends on.
+      - name: Check every route is statically prerendered
+        run: pnpm check:static
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium webkit
+
+      - name: E2E tests
+        run: pnpm test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # AGPL-3.0 §6 requires the Corresponding Source for the version conveyed.
+  # Deploying a commit that is not public would breach it, so this gates main.
+  source-offer:
+    if: github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    steps:
+      # Only the script is needed — it fetches the commit anonymously from the
+      # public URL rather than inspecting this checkout, so a shallow clone with
+      # credentials would prove nothing.
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Verify the deployed commit's source is anonymously fetchable
+        run: node scripts/check-source-sha.mjs

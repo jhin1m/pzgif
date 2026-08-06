@@ -190,7 +190,12 @@ export function Dropzone({
           offer(event.dataTransfer?.files?.[0]);
         }}
         className={cn(
-          "relative flex w-full cursor-pointer flex-col items-center justify-center gap-2.5",
+          // `isolate` is what makes the motif layer's `-z-10` land in the right
+          // place: without a stacking context here, a negative z-index child is
+          // resolved against a distant ancestor and disappears behind this box's
+          // own background. With it, the layer paints above the fill and below
+          // every glyph, which is the rule the motif is bound by.
+          "relative isolate flex w-full cursor-pointer flex-col items-center justify-center gap-2.5",
           "min-h-44 px-4 py-6 text-center md:min-h-60 lg:min-h-70",
           "rounded-card border-2 border-dashed bg-surface-2 text-fg",
           "border-brand/40",
@@ -206,6 +211,25 @@ export function Dropzone({
           forceState === "focus" && "force-focus",
         )}
       >
+        {/* The motif, as its own layer rather than a `bg-checker` class on the
+            box itself. Two reasons, and both are load-bearing:
+
+              1. `cn()` is `twMerge`, which reads `bg-checker` as a background
+                 *colour* and would drop `bg-surface-2` next to it. A separate
+                 element keeps the two properties on two elements.
+              2. It is the first child, so every piece of copy in this box paints
+                 above it. The motif's rule — never behind body text — becomes
+                 structural instead of a thing to remember.
+
+            Idle only. Drag-over and invalid both replace the fill with an
+            emphatic tint, and a pattern showing through those weakens them. */}
+        {state === "idle" ? (
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -z-10 rounded-card bg-checker"
+          />
+        ) : null}
+
         {invalid ? (
           <CircleAlert
             aria-hidden="true"

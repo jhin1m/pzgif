@@ -87,9 +87,10 @@ export function ProgressBar(props: ProgressBarProps) {
       </div>
 
       {complete ? (
-        // Same 4ch box as the readout it replaces: swapping "100%" for a tick
-        // must not move the cancel button sitting beside it.
-        <span className="flex min-w-[4ch] justify-end">
+        // Same fixed box and same start edge as the readout it replaces:
+        // swapping "100%" for a tick must move neither the cancel button beside
+        // it nor the glyphs it replaces.
+        <span className="flex w-12 justify-start">
           <Check
             aria-hidden="true"
             className="size-4.5 flex-none animate-[pz-check-pop_200ms_ease-out_1] text-success"
@@ -102,7 +103,17 @@ export function ProgressBar(props: ProgressBarProps) {
           // this readable to a screen reader as well would double-announce it.
           aria-hidden="true"
           className={cn(
-            "tabular min-w-[4ch] text-right text-label font-medium",
+            // Fixed width and **left**-aligned, where this was `min-w-[4ch]`
+            // and right-aligned. Both halves matter. `ch` is measured in the
+            // current font, so the box itself resized when the mono face
+            // replaced the fallback; and a right-aligned readout pins its right
+            // edge, so "—" becoming "12%" moved the glyphs ~19px leftward.
+            // Chromium scores an element whose *start* edge moves, and a text
+            // node counts, so that read as an un-prompted layout shift even
+            // though nothing around it had budged — 1.0e-5, the last one left
+            // on this page. Left-aligned, the start edge never moves and only
+            // the trailing edge grows, which is not a shift.
+            "tabular w-12 text-left text-label font-medium",
             errored ? "text-danger-text" : "text-fg-secondary",
           )}
         >

@@ -84,9 +84,18 @@ export function Slider({
         className="flex items-baseline justify-between gap-3 text-label font-semibold text-fg"
       >
         <span>{label}</span>
+        {/* Fixed width and left-aligned, where this was `min-w-[6ch]` and
+            right-aligned. `ch` is measured in the current font, so the box
+            narrowed the moment JetBrains Mono replaced the fallback; and a
+            right-aligned value pins its right edge, so the probe rewriting
+            "1280 px" to "480 px" moved the glyphs leftward — an un-prompted
+            shift, since the probe answers on its own schedule and not on a
+            click. Left-aligned, the start edge is fixed and a longer value only
+            grows into the trailing gap. 64px clears the widest value any
+            current control produces in either face. */}
         <span
           className={cn(
-            "tabular min-w-[6ch] text-right text-label font-medium",
+            "tabular w-16 whitespace-nowrap text-left text-label font-medium",
             disabled ? "text-fg-disabled" : "text-fg-secondary",
           )}
         >

@@ -72,6 +72,22 @@ export interface BeforeAfterSliderProps {
   afterAlt: string;
   /** Reserves the frame before either image decodes, so nothing shifts. */
   aspectRatio?: number;
+  /**
+   * Stretch to the parent's height instead of sizing from `aspectRatio`.
+   *
+   * `aspectRatio` reserves the frame against the *images* arriving, which is a
+   * different problem from the one the result panel has. The panel's height has
+   * to be known before the file is, and an aspect ratio read off a decoded frame
+   * is not — a 480x270 GIF and a 720x1280 GIF ask this frame for 317px and
+   * 1000px at the same column width. Anything below the panel then moves when
+   * the job finishes, seconds after the click that started it, so `hadRecentInput`
+   * does not excuse it. Measured on /gif-compressor: 0.0147 of the 0.0150 total.
+   *
+   * In this mode the frame takes the height its parent gives it and both layers
+   * letterbox with `object-contain`. They letterbox identically — same source
+   * dimensions, same box — so the divider still lines the two up pixel for pixel.
+   */
+  fill?: boolean;
   /** Forces the static pair. Compute it with `shouldRenderSideBySide()`. */
   sideBySide?: boolean;
   className?: string;
@@ -87,10 +103,12 @@ export function BeforeAfterSlider({
   beforeAlt,
   afterAlt,
   aspectRatio = 4 / 3,
+  fill = false,
   sideBySide = false,
   className,
   forceHandleState,
 }: BeforeAfterSliderProps) {
+  const objectFit = fill ? "object-contain" : "object-cover";
   const frameRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState(50);
   const [dragging, setDragging] = useState(false);
@@ -113,13 +131,15 @@ export function BeforeAfterSlider({
           src={beforeSrc}
           alt={beforeAlt}
           label={beforeLabel}
-          ratio={aspectRatio}
+          ratio={fill ? undefined : aspectRatio}
+          objectFit={objectFit}
         />
         <Pane
           src={afterSrc}
           alt={afterAlt}
           label={afterLabel}
-          ratio={aspectRatio}
+          ratio={fill ? undefined : aspectRatio}
+          objectFit={objectFit}
         />
       </div>
     );
@@ -139,12 +159,13 @@ export function BeforeAfterSlider({
       style={
         {
           "--pos": `${position}%`,
-          aspectRatio: `${aspectRatio}`,
+          ...(fill ? null : { aspectRatio: `${aspectRatio}` }),
         } as React.CSSProperties
       }
       className={cn(
         "relative w-full touch-none select-none overflow-hidden",
         "rounded-card border border-line bg-surface-2",
+        fill && "h-full",
         className,
       )}
       onPointerDown={(event) => {
@@ -164,12 +185,12 @@ export function BeforeAfterSlider({
       <img
         src={beforeSrc}
         alt={beforeAlt}
-        className="absolute inset-0 size-full object-cover"
+        className={cn("absolute inset-0 size-full", objectFit)}
       />
       <img
         src={afterSrc}
         alt={afterAlt}
-        className="absolute inset-0 size-full object-cover"
+        className={cn("absolute inset-0 size-full", objectFit)}
         style={{ clipPath: "inset(0 0 0 var(--pos))" }}
       />
 
@@ -238,21 +259,27 @@ function Pane({
   alt,
   label,
   ratio,
+  objectFit,
 }: {
   src: string;
   alt: string;
   label: string;
-  ratio: number;
+  /** Omitted in `fill` mode, where the pane takes the row's height instead. */
+  ratio?: number;
+  objectFit: string;
 }) {
   return (
     <div
-      style={{ aspectRatio: `${ratio}` }}
-      className="relative overflow-hidden rounded-card border border-line bg-surface-2"
+      style={ratio === undefined ? undefined : { aspectRatio: `${ratio}` }}
+      className={cn(
+        "relative overflow-hidden rounded-card border border-line bg-surface-2",
+        ratio === undefined && "h-full",
+      )}
     >
       <img
         src={src}
         alt={alt}
-        className="absolute inset-0 size-full object-cover"
+        className={cn("absolute inset-0 size-full", objectFit)}
       />
       <Tag className="left-2.5">{label}</Tag>
     </div>

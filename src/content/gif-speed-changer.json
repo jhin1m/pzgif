@@ -44,9 +44,20 @@
       "hint": "Dropping frames can only speed a GIF up by a whole number, so it is available at 2×, 3× and 4×. At this speed every frame is kept and the delays are changed."
     }
   },
+  "card": {
+    "benefit": "Quarter speed to quadruple — by restretching the timing, or by dropping frames, which are not the same file."
+  },
   "resultEmpty": {
     "message": "Your retimed GIF will appear here.",
     "hint": "The predicted frame count and duration are shown under the settings first."
+  },
+  "result": {
+    "savedLine": "Retimed, and {saved} lighter for it.",
+    "emptyRows": [
+      "Your GIF running at the speed you chose",
+      "How many frames survived, and how long it now runs",
+      "The difference dropping frames made to the file"
+    ]
   },
   "labels": {
     "progress": "Retiming progress",

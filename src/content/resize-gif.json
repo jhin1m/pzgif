@@ -41,9 +41,20 @@
       ]
     }
   },
+  "card": {
+    "benefit": "Give it an exact pixel width, or a percentage, and let the proportions look after themselves."
+  },
   "resultEmpty": {
     "message": "Your resized GIF will appear here.",
     "hint": "The output dimensions are shown under the settings before you run anything."
+  },
+  "result": {
+    "savedLine": "Fewer pixels to store — {saved} lighter.",
+    "emptyRows": [
+      "Your GIF at its new dimensions, frame for frame",
+      "The width and height it actually came out at",
+      "What the resize cost, or saved, in bytes"
+    ]
   },
   "labels": {
     "progress": "Resizing progress",

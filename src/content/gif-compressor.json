@@ -49,9 +49,20 @@
       "hint": "Halves the frame count. Fine for screen recordings, visible on fast motion."
     }
   },
+  "card": {
+    "benefit": "Trade sharpness for bytes on a slider, and see both halves of the trade side by side before you keep it."
+  },
   "resultEmpty": {
     "message": "Your compressed GIF will appear here.",
     "hint": "The preview above shows your GIF while you tune the settings."
+  },
+  "result": {
+    "savedLine": "You just cut {saved} out of it.",
+    "emptyRows": [
+      "A before/after slider you can drag across the two versions",
+      "The real byte count of the file you are about to download",
+      "Which encoder ran, and how many colours it was allowed"
+    ]
   },
   "faqHeading": "GIF compressor FAQ",
   "explainer": [

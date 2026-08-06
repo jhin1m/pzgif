@@ -27,9 +27,20 @@
       ]
     }
   },
+  "card": {
+    "benefit": "Run it backwards — or out and back again, which doubles the frames and says so first."
+  },
   "resultEmpty": {
     "message": "Your reversed GIF will appear here.",
     "hint": "The frame count the chosen direction produces is shown under the settings."
+  },
+  "result": {
+    "savedLine": "Backwards now, and {saved} lighter than it went in.",
+    "emptyRows": [
+      "The same frames, in the order you asked for",
+      "How many frames the chosen direction produced",
+      "The file size, which barely moves on a plain reverse"
+    ]
   },
   "labels": {
     "progress": "Reversing progress",

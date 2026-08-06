@@ -37,9 +37,20 @@
       "hint": "Off by default: a still is easier to place a rectangle on. Turn it on when the subject moves and you need to see where it goes."
     }
   },
+  "card": {
+    "benefit": "Drag a rectangle over the first frame; every frame after it is cut to the same region."
+  },
   "resultEmpty": {
     "message": "Your cropped GIF will appear here.",
     "hint": "The rectangle over the preview is the region every frame will be cut to."
+  },
+  "result": {
+    "savedLine": "The pixels you dropped took {saved} with them.",
+    "emptyRows": [
+      "Only the region inside your rectangle, on every frame",
+      "The dimensions the crop produced",
+      "How much of the file went with the pixels you cut away"
+    ]
   },
   "labels": {
     "progress": "Cropping progress",

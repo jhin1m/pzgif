@@ -220,6 +220,23 @@ export function liveRoutes(): readonly ToolDefinition[] {
 }
 
 /**
+ * Every input format some live route accepts.
+ *
+ * The homepage's `accept` list, and it is a union rather than an intersection on
+ * purpose: the homepage does not know which tool the visitor wants yet, so it
+ * has to take anything any live tool could work on and let the picker decide
+ * afterwards. Today every live route is GIF-only, so this is `["gif"]` — and it
+ * widens on its own when the first cross-format tool ships.
+ */
+export function liveInputFormats(): readonly MediaFormat[] {
+  const formats = new Set<MediaFormat>();
+  for (const route of liveRoutes()) {
+    for (const format of route.inputFormats) formats.add(format);
+  }
+  return [...formats];
+}
+
+/**
  * Related tools that actually exist yet.
  *
  * Kept separate from `relatedRoutes()` rather than filtering it in place: the

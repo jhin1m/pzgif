@@ -78,8 +78,30 @@ export interface ToolContent {
   };
   /** Keyed by control id from the page's schema. */
   controls: Readonly<Record<string, ControlCopy>>;
+  /**
+   * This tool's card in the homepage grid.
+   *
+   * `registry.ts` owns the name; this owns the reason to click it. One line,
+   * and it has to name something true of *this* tool alone — a line that still
+   * reads correctly with another tool's name substituted in is a noun-swap, and
+   * a grid of noun-swaps is the scaled-content pattern the whole content
+   * strategy exists to avoid. `tool-copy.test.ts` asserts it.
+   */
+  card: { benefit: string };
   /** The empty result panel — the box that reserves the space before it fills. */
   resultEmpty: { message: string; hint: string };
+  /**
+   * The completion moment and what the empty panel promises.
+   *
+   * `savedLine` is the one sentence under the size delta. It says what the
+   * visitor got, in this tool's own terms — "cut" is right for the compressor
+   * and wrong for reverse, which changes no bytes on purpose.
+   *
+   * `emptyRows` are the "what will appear here" lines in the reserved panel,
+   * which is 480px of surface that would otherwise hold one grey sentence.
+   * Three rows, describing this tool's output rather than the idea of output.
+   */
+  result: { savedLine: string; emptyRows: readonly string[] };
   /**
    * Short strings the chrome needs but that read wrong when they are generic.
    *

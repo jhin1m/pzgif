@@ -1,5 +1,5 @@
 import type { InputFormat } from "@/lib/media/types";
-import type { MediaFormat } from "./registry";
+import { liveRoutes, type MediaFormat, type ToolDefinition } from "./registry";
 
 /**
  * Cheap, synchronous format identification for the *input* boundary.
@@ -78,6 +78,26 @@ export function toInputFormat(format: MediaFormat | null): InputFormat {
     default:
       return "unknown";
   }
+}
+
+/**
+ * Live routes that would take a file the *sniffer* identified as `format`.
+ *
+ * The homepage picker's whole filter. It reads the sniffed format rather than
+ * the extension because the extension is the claim this exists to check: every
+ * "save as GIF" button on a social network hands out an MP4 named `.gif`, and
+ * offering that file to the compressor produces `decode-failed` — the generic
+ * bucket the "never a dead end" rule exists to keep files out of. Sniffed, the
+ * same file is named as a video and refused with a reason.
+ *
+ * `unknown` returns nothing, which is the correct answer rather than a missing
+ * one: the refusal that follows is the point.
+ */
+export function liveRoutesFor(format: InputFormat): readonly ToolDefinition[] {
+  if (format === "unknown") return [];
+  return liveRoutes().filter((route) =>
+    route.inputFormats.some((accepted) => toInputFormat(accepted) === format),
+  );
 }
 
 /**

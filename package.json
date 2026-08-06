@@ -19,6 +19,7 @@
     "test:e2e": "playwright test",
     "check:forbidden": "node scripts/check-forbidden-headers.mjs",
     "check:static": "node scripts/check-static-routes.mjs",
+    "check:landing": "node scripts/check-landing-bundle.mjs",
     "check:heavy": "node scripts/check-heavy-deps.mjs",
     "check:source-sha": "node scripts/check-source-sha.mjs",
     "copy:wasm": "node scripts/copy-wasm.mjs",

@@ -19,7 +19,8 @@ import { WASM_BASE_PATH } from "./src/lib/site-config";
  * Content-Security-Policy.
  *
  * `'wasm-unsafe-eval'` is the narrow directive that permits
- * `WebAssembly.instantiate`. Never widen it to `'unsafe-eval'`.
+ * `WebAssembly.instantiate`. Never widen it to `'unsafe-eval'` in a build that
+ * ships — `next dev` is the single exception, and it is gated below.
  *
  * ── Do not add a hash or a nonce to `script-src` ──────────────────────────────
  * The App Router streams its RSC payload through inline
@@ -43,9 +44,31 @@ import { WASM_BASE_PATH } from "./src/lib/site-config";
  * the ad network and the CMP. Keep the policy in this one place so that stays a
  * one-line change.
  */
+/**
+ * `'unsafe-eval'`, in `next dev` only, and never in anything that ships.
+ *
+ * React's development build calls `eval()` to rebuild a call stack that crossed
+ * the server/client boundary — the owner stacks that name the component behind
+ * an error. Blocked, every dev boot logs "eval() is not supported in this
+ * environment" and every subsequent error arrives without the frames that say
+ * where it came from. The production build never calls `eval()` at all, so the
+ * directive buys nothing there and is omitted; `e2e/app-shell.spec.ts` runs
+ * against a production build and asserts it is absent.
+ *
+ * The gate is `NODE_ENV`, which Next fixes to "production" for `next build`. It
+ * cannot be turned on by an env var, because the point is that no deployment can
+ * reach this branch by configuration.
+ */
+const isDevelopment = process.env.NODE_ENV === "development";
+
+const scriptSrc = [
+  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+  isDevelopment ? " 'unsafe-eval'" : "",
+].join("");
+
 const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+  scriptSrc,
   // Recovers most of what 'unsafe-inline' above costs: inline event-handler
   // attributes and javascript: URLs stay blocked, which is the injection shape
   // that actually shows up. Next's payload scripts are elements, not attributes.

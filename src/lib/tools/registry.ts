@@ -246,3 +246,31 @@ export function liveInputFormats(): readonly MediaFormat[] {
 export function relatedLiveRoutes(slug: string): readonly ToolDefinition[] {
   return relatedRoutes(slug).filter(isLive);
 }
+
+/**
+ * Related live routes that can decode what this tool just produced.
+ *
+ * Kept apart from `relatedLiveRoutes()` because the two answer different
+ * questions. The foot-of-page grid is written for a reader who is still
+ * browsing and holds no file, so every live sibling is a fair suggestion there
+ * and format has no bearing on it. This one is read by someone holding a
+ * finished file, and a destination that cannot open that file is worse than no
+ * destination at all.
+ *
+ * Today every live route is GIF→GIF, so the filter removes nothing. Its entire
+ * value is the first cross-format tool: without it a chip would hand the `.zip`
+ * from `split-gif-to-frames` straight to `crop-gif`, which dies as
+ * `decode-failed` — the generic bucket the "never a dead end" rule exists to
+ * keep files out of.
+ *
+ * Author order from `related` survives the filter: it is an editorial sequence,
+ * not an alphabetical accident.
+ */
+export function chainTargets(
+  slug: string,
+  produced: MediaFormat,
+): readonly ToolDefinition[] {
+  return relatedLiveRoutes(slug).filter((route) =>
+    route.inputFormats.includes(produced),
+  );
+}

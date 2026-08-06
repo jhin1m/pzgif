@@ -450,8 +450,9 @@ contents. **Re-measure whenever the done state gains or loses a row.**
 
 **ResultSummary — the completion moment.** Success mark (one `pz-check-pop`,
 `--accent-text`) · size delta · one hand-written sentence · Download as a
-*primary button*, not a link among links · a divider and up to two "Next?" chips
-from `relatedLiveRoutes()`.
+*primary button*, not a link among links · a divider and up to two "Send to"
+chips — from `chainTargets()` when a result exists, `relatedLiveRoutes()` when
+one does not.
 Three rules inside it:
 - **No count-up on the byte numbers.** It carries no information and makes a
   measured figure look estimated.
@@ -462,6 +463,23 @@ Three rules inside it:
 - **Two chips, never three.** Three is a menu, and the related-tools grid at the
   foot of the page already is one — and the third chip is a third wrapped line in
   the reservation.
+- **One chip is enough — but only when it carries the file.** A lone suggestion
+  after a divider still reads as a broken list, so the result-less row keeps its
+  two-chip minimum. A chip carrying the finished file is an action, and after
+  the format filter a cross-format tool can legitimately have exactly one valid
+  destination; hiding the row there would remove the feature.
+- **The row's label is load-bearing, not decoration.** It shares a wrapping flex
+  line with the chips, and `reverse-gif`'s two chips are the longest pair on the
+  site. "Send this to" pushed that row onto another 44px line and broke the base
+  and `min-[480px]` bands by 23px and 47px; "Send to" fits. Re-run
+  `e2e/result-panel-reservation.spec.ts` before changing this string.
+- **The chip carries the file, not just the link.** It stashes the produced blob
+  in the `pending-file` handoff addressed to that route and lets the link
+  navigate; the destination loads it on mount. Never auto-download first — the
+  Download button sits above the divider for exactly that reason. It stashes
+  only on a plain left click: a ⌘-click opens a new realm that cannot see the
+  handoff, and arming one anyway would leave this tab loading a stale file the
+  next time any link reached that same tool.
 
 **Empty state before a run:** same box, same reservation, dashed `--border`,
 `bg-checker` (§2.3), the personified loop mark, the tool's short line, and three

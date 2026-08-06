@@ -5,6 +5,7 @@ import {
   ALL_ROUTES,
   PRESET_ROUTES,
   TOOLS,
+  chainTargets,
   getRoute,
   isLive,
   liveRoutes,
@@ -99,5 +100,49 @@ describe("tool registry", () => {
       expect(route.inputFormats.length, route.slug).toBeGreaterThan(0);
       expect(route.outputFormats.length, route.slug).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("chainTargets", () => {
+  it("keeps every related live route that accepts the produced format", () => {
+    // The case that exists today: GIF in, GIF out, nothing dropped.
+    expect(chainTargets("gif-compressor", "gif").map((r) => r.slug)).toEqual(
+      relatedLiveRoutes("gif-compressor").map((r) => r.slug),
+    );
+  });
+
+  it("drops a destination that cannot decode what was produced", () => {
+    // `split-gif-to-frames` will produce these. Handing a PNG or a ZIP to a
+    // GIF-only editor is the dead end the filter exists to prevent, and it has
+    // to be closed before the tool that would expose it ships.
+    expect(chainTargets("gif-compressor", "png")).toEqual([]);
+    expect(chainTargets("gif-compressor", "zip")).toEqual([]);
+  });
+
+  it("preserves the author's order from `related`", () => {
+    // `gif-speed-changer` lists three, and the order is an editorial decision.
+    expect(chainTargets("gif-speed-changer", "gif").map((r) => r.slug)).toEqual(
+      ["reverse-gif", "gif-compressor", "resize-gif"],
+    );
+  });
+
+  it("never offers a route with no page behind it", () => {
+    for (const route of liveRoutes()) {
+      for (const target of chainTargets(route.slug, "gif")) {
+        expect(isLive(target), target.slug).toBe(true);
+      }
+    }
+  });
+
+  it("never offers the source tool itself", () => {
+    for (const route of liveRoutes()) {
+      expect(chainTargets(route.slug, "gif").map((r) => r.slug)).not.toContain(
+        route.slug,
+      );
+    }
+  });
+
+  it("returns nothing for a slug the registry does not know", () => {
+    expect(chainTargets("not-a-tool", "gif")).toEqual([]);
   });
 });

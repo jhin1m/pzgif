@@ -493,7 +493,23 @@ export function GifWorkbench({
                     ) : null}
                   </>
                 }
-                next={<NextTools slug={slug} label={t("nextTools")} />}
+                next={
+                  <NextTools
+                    slug={slug}
+                    label={t("nextTools")}
+                    // All four tools behind this workbench are GIF in, GIF out,
+                    // so the produced format is a literal rather than a lookup.
+                    result={
+                      resultBlob
+                        ? {
+                            blob: resultBlob,
+                            name: downloadName,
+                            format: "gif",
+                          }
+                        : null
+                    }
+                  />
+                }
               >
                 <Button variant="secondary" onClick={run}>
                   {content.actions.rerun}

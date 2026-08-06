@@ -80,7 +80,7 @@
     "beforeLabel": "Before · {size}",
     "afterLabel": "After · {size}",
     "relatedHeading": "Related tools",
-    "nextTools": "Next?",
+    "nextTools": "Send to",
     "encoderBadge": "{encoder} · {colours} colours",
     "announceResult": "Done. {from} became {to}, {delta}.",
     "progressLabel": "Compression progress",

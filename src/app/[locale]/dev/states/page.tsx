@@ -762,7 +762,11 @@ function Results() {
             downloadHref="#"
             downloadName="loop-final-compressed.gif"
             downloadLabel="Download GIF"
-            next={<NextTools slug="gif-compressor" label="Next?" />}
+            // No `result`: the gallery has no file, so the row falls back to
+            // the plain suggestion list. The label is the shipped one, because
+            // the point of this page is that the reservation covers what the
+            // product actually renders.
+            next={<NextTools slug="gif-compressor" label="Send to" />}
           >
             <Button variant="secondary">Re-compress</Button>
             <Button variant="ghost">Start over</Button>

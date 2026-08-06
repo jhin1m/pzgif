@@ -603,7 +603,23 @@ export function GifCompressorTool({
                     ) : null}
                   </>
                 }
-                next={<NextTools slug={SLUG} label={t("nextTools")} />}
+                next={
+                  <NextTools
+                    slug={SLUG}
+                    label={t("nextTools")}
+                    // The compressor produces a GIF and nothing else, so the
+                    // format is a literal rather than a lookup.
+                    result={
+                      resultBlob
+                        ? {
+                            blob: resultBlob,
+                            name: downloadName,
+                            format: "gif",
+                          }
+                        : null
+                    }
+                  />
+                }
               >
                 <Button variant="secondary" onClick={run}>
                   {content.actions.rerun}

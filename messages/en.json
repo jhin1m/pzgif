@@ -31,6 +31,23 @@
     "invalidNoSuggestion": "This tool takes {formats}.",
     "removeFile": "Remove file"
   },
+  "home": {
+    "reading": "Reading the first few kilobytes…",
+    "unreadableTitle": "We couldn't read that file.",
+    "unreadableBody": "Your browser refused to open it. That usually means it moved, was deleted, or lives in cloud storage and isn't on this device yet.",
+    "chooseDifferent": "Choose a different file",
+    "previewAlt": "The file you dropped, playing as it will look going in",
+    "mismatch": "Its name ends in .{extension}, but the bytes are {format}.",
+    "announcePicker": "{format}, {size}. {count, plural, one {# tool} other {# tools}} can work on this file.",
+    "announceUnsupported": "{format}. No tool here can work on this file yet.",
+    "format": {
+      "gif": "GIF",
+      "webp": "WebP",
+      "video": "Video",
+      "image": "Image",
+      "unknown": "Unrecognised file"
+    }
+  },
   "footer": {
     "source": "Source",
     "sourceTitle": "Browse the exact source of this deployment",
@@ -63,6 +80,7 @@
     "beforeLabel": "Before · {size}",
     "afterLabel": "After · {size}",
     "relatedHeading": "Related tools",
+    "nextTools": "Next?",
     "encoderBadge": "{encoder} · {colours} colours",
     "announceResult": "Done. {from} became {to}, {delta}.",
     "progressLabel": "Compression progress",

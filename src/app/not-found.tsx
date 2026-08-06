@@ -32,7 +32,15 @@ export default async function RootNotFound() {
   const t = await getTranslations({ locale, namespace: "notFound" });
 
   return (
-    <html lang={locale} data-theme-booting className={fontVariables}>
+    // Same reason as the locale layout: the theme script rewrites this element
+    // before hydration, and without the suppression React discards the server
+    // HTML over it. See src/app/[locale]/layout.tsx.
+    <html
+      lang={locale}
+      data-theme-booting
+      className={fontVariables}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>

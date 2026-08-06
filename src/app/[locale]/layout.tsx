@@ -58,7 +58,22 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} data-theme-booting className={fontVariables}>
+    // `suppressHydrationWarning` is load-bearing, not cosmetic. The theme script
+    // below runs before hydration and rewrites this element by design: it sets
+    // `data-theme` and drops `data-theme-booting`. React then hydrates, finds
+    // attributes that do not match what the server sent, and reports a mismatch
+    // it says it "won't patch up" — so it discards the server HTML and
+    // client-renders the tree instead. That fallback is what produced the
+    // "Encountered a script tag while rendering React component" warning: a
+    // `<script>` rendered on the client, which browsers never execute, so the
+    // theme boot the suppression exists to protect was itself the casualty.
+    // Scoped to this element only; it does not extend to children.
+    <html
+      lang={locale}
+      data-theme-booting
+      className={fontVariables}
+      suppressHydrationWarning
+    >
       <head>
         {/* Runs before first paint so the theme never flashes. Deliberately not
             hashed into the CSP — a hash there disables 'unsafe-inline' and kills

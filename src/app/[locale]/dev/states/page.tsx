@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { AdSlot } from "@/components/ads/ad-slot";
+import { LoopMark } from "@/components/brand/marks";
 import { ConsentBar } from "@/components/layout/consent-bar";
 import { TrustLine } from "@/components/layout/trust-line";
 import { BeforeAfterSlider } from "@/components/tool/before-after-slider";
 import { Dropzone } from "@/components/tool/dropzone";
 import { FileChip } from "@/components/tool/file-chip";
 import { ProgressBar } from "@/components/tool/progress-bar";
-import { ResultPanel, SizeDelta } from "@/components/tool/result-panel";
+import { NextTools } from "@/components/tool/next-tools";
+import {
+  ResultPanel,
+  ResultSummary,
+  SizeDelta,
+} from "@/components/tool/result-panel";
 import { SettingsPanel } from "@/components/tool/settings-panel";
 import { StickyActionBar } from "@/components/tool/sticky-action-bar";
 import { Accordion } from "@/components/ui/accordion";
@@ -87,6 +93,13 @@ export default async function DevStatesPage({
         note="6px is a reserved word: ad slots only. The mismatch against the 16px product-card radius is the visual quarantine."
       >
         <RadiusAndShadow />
+      </Section>
+
+      <Section
+        title="Brand motif & mark"
+        note="The checkerboard means 'an image belongs here' — media and empty surfaces only, never behind text. The personified mark is for surfaces that are waiting, not working."
+      >
+        <Motif />
       </Section>
 
       <Section
@@ -428,6 +441,32 @@ function RadiusAndShadow() {
 
 const BUTTON_VARIANTS = ["primary", "secondary", "ghost", "danger"] as const;
 
+function Motif() {
+  return (
+    <div className="flex flex-col gap-4">
+      <div>
+        <Label>bg-checker — over surface-2, the dropzone&apos;s fill</Label>
+        <div className="h-28 rounded-card border border-line bg-surface-2 bg-checker" />
+      </div>
+      <div>
+        <Label>bg-checker — over surface-1, the panel fill</Label>
+        <div className="h-28 rounded-card border border-line bg-surface-1 bg-checker" />
+      </div>
+      <div>
+        {/* Side by side so the tile reads as a checkerboard rather than as
+            noise. If it reads as noise here, the tile is too small — raise it
+            to 20-24px rather than raising the opacity, which would break the
+            "never behind text" rule the motif is bound by. */}
+        <Label>LoopMark — plain vs personified</Label>
+        <div className="flex flex-wrap items-center gap-8 rounded-card border border-line bg-surface-1 p-5 text-mark-muted">
+          <LoopMark />
+          <LoopMark personified />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Buttons() {
   return (
     <div>
@@ -689,15 +728,22 @@ function Results() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <Label>empty — reserves the space</Label>
+        <Label>
+          empty — reserves the space, and says what will fill it
+        </Label>
         <ResultPanel
           empty
           emptyMessage="Your compressed GIF will appear here."
-          emptyHint="The preview shows the first frame while you tune settings."
+          emptyHint="The preview above shows your GIF while you tune the settings."
+          emptyRows={[
+            "A before/after slider you can drag across the two versions",
+            "The real byte count of the file you are about to download",
+            "Which encoder ran, and how many colours it was allowed",
+          ]}
         />
       </div>
       <div>
-        <Label>complete</Label>
+        <Label>complete — check-pop, delta, primary download, next tools</Label>
         <ResultPanel>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <span className="font-sans text-h4 font-semibold">Done</span>
@@ -705,12 +751,42 @@ function Results() {
               <span className="tabular">gifski · q80</span>
             </Badge>
           </div>
-          <SizeDelta from="2.4 MB" to="480 KB" deltaLabel="−80% smaller" />
-          <div className="mt-4 flex flex-wrap gap-2.5">
-            <Button>Download</Button>
+          {/* Byte counts rather than formatted strings, because the summary
+              derives the delta and the saved figure from them — which is what
+              guarantees the badge and the sentence can never disagree. */}
+          <ResultSummary
+            fromBytes={2_400_000}
+            toBytes={480_000}
+            savedLine="You just cut {saved} out of it."
+            encodedIn="encoded in 4.2s"
+            downloadHref="#"
+            downloadName="loop-final-compressed.gif"
+            downloadLabel="Download GIF"
+            next={<NextTools slug="gif-compressor" label="Next?" />}
+          >
             <Button variant="secondary">Re-compress</Button>
             <Button variant="ghost">Start over</Button>
-          </div>
+          </ResultSummary>
+        </ResultPanel>
+      </div>
+      <div>
+        {/* The case the sentence must not claim. Re-encoding an already
+            optimised GIF at a higher quality legitimately grows it, and the
+            summary drops the "you saved" line rather than printing a negative
+            saving — while the badge still says so in words. */}
+        <Label>complete — output larger than the input</Label>
+        <ResultPanel>
+          <ResultSummary
+            fromBytes={480_000}
+            toBytes={499_200}
+            savedLine="You just cut {saved} out of it."
+            encodedIn="encoded in 3.8s"
+            downloadHref="#"
+            downloadName="loop-final-compressed.gif"
+            downloadLabel="Download GIF"
+          >
+            <Button variant="secondary">Re-compress</Button>
+          </ResultSummary>
         </ResultPanel>
       </div>
     </div>

@@ -1,25 +1,20 @@
 <div align="center">
 
-# PZGIF
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/hero-dark.svg">
+  <img alt="PZGIF — GIF tools that never upload your file" src=".github/assets/hero-light.svg" width="100%">
+</picture>
 
-**GIF tools that never upload your file.**
+<br>
 
-Every operation runs inside your own tab — no upload, no account, no server in the loop.
+[![Live](https://img.shields.io/badge/live-pzgif.com-2F5DE8?style=for-the-badge&logoColor=white)](https://pzgif.com)
+[![CI](https://img.shields.io/github/actions/workflow/status/jhin1m/pzgif/ci.yml?branch=main&style=for-the-badge&label=CI&labelColor=14171F)](https://github.com/jhin1m/pzgif/actions/workflows/ci.yml)
+[![Licence](https://img.shields.io/badge/code-AGPL--3.0-0E9C93?style=for-the-badge&labelColor=14171F)](./LICENSE)
 
-[![Live](https://img.shields.io/badge/live-pzgif.com-0f172a?style=for-the-badge)](https://pzgif.com)
-[![CI](https://img.shields.io/github/actions/workflow/status/jhin1m/pzgif/ci.yml?branch=main&style=for-the-badge&label=CI)](https://github.com/jhin1m/pzgif/actions/workflows/ci.yml)
-[![Licence](https://img.shields.io/badge/code-AGPL--3.0-blue?style=for-the-badge)](./LICENSE)
-
-<sub>
-
-Next.js 16 · React 19 · Tailwind v4 · WebCodecs · gifski-wasm · TypeScript
-
-</sub>
+<sub><b>5 of 14 routes live</b> &nbsp;·&nbsp; <a href="#tools">Tools</a> &nbsp;·&nbsp; <a href="#the-engine">Engine</a> &nbsp;·&nbsp; <a href="#getting-started">Getting started</a> &nbsp;·&nbsp; <a href="#why-the-source-is-public">Licence</a></sub>
 
 </div>
 
----
-![alt text](image.png)
 ---
 
 ## What it does
@@ -28,11 +23,12 @@ Drop a GIF or a video in. It is decoded, transformed and re-encoded by your own
 CPU, inside a Web Worker. The bytes never leave the machine — there is nothing
 to delete afterwards, because nothing was ever sent.
 
-```
-    your file ──▶ [ your browser tab ] ──▶ your file
-                         ▲
-                  no network hop here
-```
+| | Upload-based GIF site | **PZGIF** |
+|---|---|---|
+| Where the work happens | their server | **your tab** |
+| What leaves your machine | the whole file | **nothing** |
+| Retention policy you must trust | yes | **there is no copy to retain** |
+| Ceiling | their queue and rate limit | **your device's memory** |
 
 ## The three rules
 

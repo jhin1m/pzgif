@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 420" width="1280" height="420" role="img" aria-label="PZGIF — GIF tools that never upload your file">
+  <defs>
+    <linearGradient id="wordmark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2F5DE8"/>
+      <stop offset="100%" stop-color="#0B7A73"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2348D6"/>
+      <stop offset="100%" stop-color="#0E9C93"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#5B82F5" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#5B82F5" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#2DD4C0" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#2DD4C0" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="checks" width="16" height="16" patternUnits="userSpaceOnUse">
+      <rect width="16" height="16" fill="#FFFFFF"/>
+      <rect width="8" height="8" fill="#F0F1F5"/>
+      <rect x="8" y="8" width="8" height="8" fill="#F0F1F5"/>
+    </pattern>
+    <clipPath id="card">
+      <rect x="0" y="0" width="1280" height="420" rx="20"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#card)">
+    <rect width="1280" height="420" fill="#F8F9FB"/>
+    <circle cx="1010" cy="90" r="330" fill="url(#glowA)"/>
+    <circle cx="200" cy="400" r="300" fill="url(#glowB)"/>
+    <rect width="1280" height="420" fill="none" stroke="#E1E4EA" stroke-width="2" rx="20"/>
+  </g>
+
+  <!-- left column -->
+  <g font-family="Inter, 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif">
+    <text x="72" y="168" font-size="104" font-weight="800" letter-spacing="-4">
+      <tspan fill="#111827">PZ</tspan><tspan fill="url(#wordmark)">GIF</tspan>
+    </text>
+
+    <text x="76" y="222" font-size="27" font-weight="600" fill="#1F2937">GIF tools that never upload your file.</text>
+    <text x="76" y="258" font-size="19" fill="#4B5563">Decoded, transformed and re-encoded by your own CPU.</text>
+
+    <g font-size="15" font-weight="600" text-anchor="middle">
+      <rect x="76" y="292" width="124" height="36" rx="18" fill="#FFFFFF" stroke="#C7CCD6"/>
+      <text x="138" y="315" fill="#2F5DE8">no upload</text>
+      <rect x="212" y="292" width="132" height="36" rx="18" fill="#FFFFFF" stroke="#C7CCD6"/>
+      <text x="278" y="315" fill="#2F5DE8">no account</text>
+      <rect x="356" y="292" width="124" height="36" rx="18" fill="#FFFFFF" stroke="#C7CCD6"/>
+      <text x="418" y="315" fill="#2F5DE8">no server</text>
+    </g>
+
+    <text x="76" y="368" font-size="14" letter-spacing="1.4" fill="#6B7280"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">NEXT.JS 16 · WEBCODECS · GIFSKI-WASM · AGPL-3.0</text>
+  </g>
+
+  <!-- right: the tab that does the work -->
+  <g>
+    <rect x="762" y="86" width="446" height="248" rx="16" fill="#FFFFFF" stroke="#E1E4EA" stroke-width="2"/>
+    <path d="M762 102a16 16 0 0 1 16-16h414a16 16 0 0 1 16 16v34H762z" fill="#F0F1F5"/>
+    <circle cx="788" cy="119" r="5" fill="#C7CCD6"/>
+    <circle cx="806" cy="119" r="5" fill="#C7CCD6"/>
+    <circle cx="824" cy="119" r="5" fill="#C7CCD6"/>
+    <rect x="846" y="108" width="180" height="22" rx="11" fill="#FFFFFF"/>
+    <text x="862" y="124" font-size="13" fill="#6B7280"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">pzgif.com</text>
+
+    <rect x="1150" y="104" width="40" height="30" rx="6" fill="url(#checks)" stroke="#E1E4EA"/>
+
+    <!-- the loop mark, from src/components/brand/marks.tsx -->
+    <svg x="913" y="146" width="144" height="144" viewBox="0 0 96 96" fill="none">
+      <path d="M30 34a14 14 0 1 0 0 28c11.5 0 21.5-28 33-28a14 14 0 1 1 0 28c-11.5 0-21.5-28-33-28Z"
+        stroke="#2F5DE8" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="63" cy="48" r="4" fill="#0E9C93"/>
+    </svg>
+
+    <!-- frames going in, on the left of the mark -->
+    <g fill="none" stroke="#C7CCD6" stroke-width="2">
+      <rect x="800" y="176" width="34" height="34" rx="6"/>
+      <rect x="818" y="192" width="34" height="34" rx="6"/>
+    </g>
+    <rect x="836" y="208" width="34" height="34" rx="6" fill="none" stroke="#0E9C93" stroke-width="2"/>
+    <path d="M886 218h24m-9-7 9 7-9 7" fill="none" stroke="#9AA1B0" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- progress that comes from a real counter -->
+    <text x="792" y="286" font-size="13" fill="#4B5563"
+      font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">encoding · frame 214 / 348</text>
+    <rect x="792" y="298" width="386" height="10" rx="5" fill="#F0F1F5"/>
+    <rect x="792" y="298" width="237" height="10" rx="5" fill="url(#bar)"/>
+  </g>
+</svg>

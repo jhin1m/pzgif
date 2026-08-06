@@ -32,7 +32,8 @@ import {
   BeforeAfterSlider,
   shouldRenderSideBySide,
 } from "@/components/tool/before-after-slider";
-import { ResultPanel, SizeDelta } from "@/components/tool/result-panel";
+import { NextTools } from "@/components/tool/next-tools";
+import { ResultPanel, ResultSummary } from "@/components/tool/result-panel";
 import { SettingsPanel } from "@/components/tool/settings-panel";
 import { SettingsForm } from "@/components/tool/settings/settings-form";
 import {
@@ -45,12 +46,13 @@ import {
 } from "@/components/tool/settings/control-schema";
 import { StickyActionBar } from "@/components/tool/sticky-action-bar";
 import { ToolPage } from "@/components/tool/tool-page";
+import { useHandoffFile } from "@/hooks/use-handoff-file";
+import { useObjectUrl } from "@/hooks/use-object-url";
 import { useJobProgress, useMediaJob } from "@/hooks/use-media-job";
 import { resolveEncoder } from "@/lib/media/capability";
 import type { GifEncoderId, InputProbe, JobSpec } from "@/lib/media/types";
 import { formatBytes, formatDelta } from "@/lib/format-bytes";
 import type { ToolContent } from "@/lib/tools/content";
-import { cn } from "@/lib/utils";
 
 /**
  * The GIF compressor — the vertical slice every other tool is a configuration of.
@@ -120,7 +122,6 @@ export function GifCompressorTool({
   const progress = useJobProgress(job.progress);
 
   const [file, setFile] = useState<File | null>(null);
-  const [sourceUrl, setSourceUrl] = useState<string | null>(null);
   const [probe, setProbe] = useState<InputProbe | null>(null);
   const [values, setValues] = useState<ControlValues>(DEFAULT_VALUES);
   const [elapsed, setElapsed] = useState(0);
@@ -141,21 +142,9 @@ export function GifCompressorTool({
     () => "gifski" as GifEncoderId,
   );
 
-  // Object URLs are tracked in a ref, not in state: they outlive a render and
-  // have to be revoked exactly once. A state updater would revoke twice under
-  // StrictMode's double invocation and leave the second URL dangling.
-  const sourceUrlRef = useRef<string | null>(null);
-  const setSource = useCallback((next: File | null) => {
-    if (sourceUrlRef.current) URL.revokeObjectURL(sourceUrlRef.current);
-    sourceUrlRef.current = next ? URL.createObjectURL(next) : null;
-    setSourceUrl(sourceUrlRef.current);
-  }, []);
-  useEffect(
-    () => () => {
-      if (sourceUrlRef.current) URL.revokeObjectURL(sourceUrlRef.current);
-    },
-    [],
-  );
+  // Owned by the file, not by this component's mount — see `useObjectUrl` for
+  // the Strict Mode failure that shape is there to make impossible.
+  const sourceUrl = useObjectUrl(file);
 
   const flow = toolFlowState(file !== null, job.state.status);
   const locked = settingsLocked(flow);
@@ -214,7 +203,6 @@ export function GifCompressorTool({
   const handleFile = useCallback(
     (next: File) => {
       job.reset();
-      setSource(next);
       setFile(next);
       setProbe(null);
       currentFileRef.current = next;
@@ -230,17 +218,20 @@ export function GifCompressorTool({
         }));
       });
     },
-    [job, setSource],
+    [job],
   );
+
+  // A file dropped on the homepage arrives here already chosen. No-op on every
+  // other route into this page.
+  useHandoffFile(SLUG, handleFile);
 
   const startOver = useCallback(() => {
     job.reset();
-    setSource(null);
     setFile(null);
     setProbe(null);
     currentFileRef.current = null;
     setValues(DEFAULT_VALUES);
-  }, [job, setSource]);
+  }, [job]);
 
   const run = useCallback(() => {
     // Re-entrancy guard. `Button`'s `loading` state only sets
@@ -553,8 +544,16 @@ export function GifCompressorTool({
                 </Badge>
               </div>
 
+              {/* A fixed frame, for the same reason the source preview above is
+                  one: the panel's height has to be reserved before the file is
+                  known, and a frame sized from the decoded aspect ratio is not
+                  knowable then. `gif-workbench.tsx` already boxes its result
+                  image this way; the compressor was the outlier, and the 185px
+                  the panel grew by was the whole of its measured CLS. */}
+              <div className="mt-4 h-60 md:h-72">
               <BeforeAfterSlider
-                className="mt-4"
+                className="h-full"
+                fill
                 beforeSrc={sourceUrl}
                 afterSrc={resultUrl}
                 beforeLabel={t("beforeLabel", { size: formatBytes(file.size) })}
@@ -570,57 +569,49 @@ export function GifCompressorTool({
                   height: stats.height,
                 })}
               />
-
-              <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-                {/* Both counts are measured from the real blobs — the input the
-                    user dropped and the output that exists. Never the estimate. */}
-                <SizeDelta
-                  from={formatBytes(file.size)}
-                  to={formatBytes(resultBlob?.size ?? stats.outBytes)}
-                  deltaLabel={formatDelta(file.size, stats.outBytes)}
-                />
-                <span className="tabular text-caption text-fg-muted">
-                  {t("encodedIn", {
-                    seconds: (stats.totalMs / 1000).toFixed(1),
-                  })}
-                </span>
               </div>
 
-              {plan?.downgraded ? (
-                <p className="mt-3 text-caption text-fg-secondary">
-                  {tPlan("downgraded", { width: plan.width, fps: plan.fps })}
-                </p>
-              ) : null}
-              {plan?.truncated ? (
-                <p className="mt-1 text-caption text-fg-secondary">
-                  {tPlan("truncated", {
-                    seconds: (plan.frames / plan.fps).toFixed(1),
-                  })}
-                </p>
-              ) : null}
-
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                {/* Hidden below md: the sticky bar already carries this action,
-                    and §5.1 permits exactly one primary per viewport. */}
-                <a
-                  href={resultUrl}
-                  download={downloadName}
-                  className={cn(
-                    "hidden min-h-12 items-center justify-center gap-2 rounded-control px-6 md:inline-flex",
-                    "bg-brand-fill text-body font-semibold text-fg-on-primary shadow-sm",
-                    "hover:bg-brand-fill-hover",
-                  )}
-                >
-                  <Download aria-hidden="true" className="size-4.5" />
-                  {content.actions.download}
-                </a>
+              {/* Both counts are measured from the real blobs — the input the
+                  user dropped and the output that exists. Never the estimate. */}
+              <ResultSummary
+                className="mt-5"
+                fromBytes={file.size}
+                toBytes={resultBlob?.size ?? stats.outBytes}
+                savedLine={content.result.savedLine}
+                encodedIn={t("encodedIn", {
+                  seconds: (stats.totalMs / 1000).toFixed(1),
+                })}
+                downloadHref={resultUrl}
+                downloadName={downloadName}
+                downloadLabel={content.actions.download}
+                notes={
+                  <>
+                    {plan?.downgraded ? (
+                      <p className="mt-3 text-caption text-fg-secondary">
+                        {tPlan("downgraded", {
+                          width: plan.width,
+                          fps: plan.fps,
+                        })}
+                      </p>
+                    ) : null}
+                    {plan?.truncated ? (
+                      <p className="mt-1 text-caption text-fg-secondary">
+                        {tPlan("truncated", {
+                          seconds: (plan.frames / plan.fps).toFixed(1),
+                        })}
+                      </p>
+                    ) : null}
+                  </>
+                }
+                next={<NextTools slug={SLUG} label={t("nextTools")} />}
+              >
                 <Button variant="secondary" onClick={run}>
                   {content.actions.rerun}
                 </Button>
                 <Button variant="ghost" onClick={startOver}>
                   {t("startOver")}
                 </Button>
-              </div>
+              </ResultSummary>
             </ResultPanel>
           ) : flow === "processing" ? (
             <ResultPanel>
@@ -642,11 +633,15 @@ export function GifCompressorTool({
                   </Button>
                 }
               />
-              {!progress.determinate && elapsed > 0 ? (
-                <p className="tabular mt-3 text-caption text-fg-muted">
-                  {tStage("elapsed", { seconds: elapsed })}
-                </p>
-              ) : null}
+              {/* Always rendered, empty until the first second elapses. A row
+                  that appears one second into a job pushes everything under it
+                  down, and a job that has been running for a second is long past
+                  the 500 ms window that would excuse the shift as prompted. */}
+              <p className="tabular mt-3 min-h-[1.45em] text-caption text-fg-muted">
+                {!progress.determinate && elapsed > 0
+                  ? tStage("elapsed", { seconds: elapsed })
+                  : null}
+              </p>
               <p className="mt-3 text-caption text-fg-muted">
                 {t("keepTabOpen")}
               </p>
@@ -656,6 +651,7 @@ export function GifCompressorTool({
               empty
               emptyMessage={content.resultEmpty.message}
               emptyHint={content.resultEmpty.hint}
+              emptyRows={content.result.emptyRows}
             />
           )}
 

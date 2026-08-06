@@ -56,6 +56,13 @@ jobs:
       - name: Check no heavyweight decoder is bundled
         run: pnpm check:heavy
 
+      # The landing page boots no engine — no worker, no WASM loader, no
+      # capability detection — and nothing outside a client module touches the
+      # file handoff. Both erode the first time somebody imports something
+      # convenient into a shared component.
+      - name: Check the landing page stays engine-free
+        run: pnpm check:landing
+
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium webkit
 

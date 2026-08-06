@@ -1,0 +1,43 @@
+{
+  "hero": {
+    "title": "GIF tools that never see your file",
+    "lead": "Drop a GIF and pick what to do with it. The work happens in this tab, on your machine — nothing is uploaded, and there is no account to make first.",
+    "dropzoneTitle": "Drop a GIF here or click to browse",
+    "dropzoneCaption": "or paste with Ctrl+V · .gif · your file is read where it sits and goes no further",
+    "reassurance": "We read the first few kilobytes to work out what your file actually is. That happens here, in the page, and it is the only thing that happens before you choose a tool."
+  },
+  "picker": {
+    "heading": "What would you like to do with it?",
+    "unsupportedTitle": "We know what this is. We can't work on it yet.",
+    "unsupportedBody": "Every tool here takes GIFs today. Yours isn't one, so there is nothing honest to point you at — more formats are being built.",
+    "comingSoon": "Not built yet"
+  },
+  "grid": {
+    "heading": "Every tool, in your browser",
+    "subhead": "These are the ones that are finished. More are being built, and none of them will ask you to upload anything either."
+  },
+  "why": [
+    {
+      "heading": "The work happens in this tab",
+      "body": "Your GIF is decoded, changed and re-encoded by code running in your browser, on your processor. There is no queue, no upload bar, and nothing to wait behind. Close the tab mid-job and the job is simply gone — there is nowhere else for it to be."
+    },
+    {
+      "heading": "There is no server to trust",
+      "body": "This is not a promise about how we handle your files. It is a statement about the shape of the thing: no free operation on this site sends bytes anywhere, because nothing on the other end is listening for them. The privacy policy is short for the same reason."
+    },
+    {
+      "heading": "It uses gifski, and it says how long it took",
+      "body": "gifski builds a palette for every frame instead of one palette for the whole animation. A single palette has to average a gradient across the entire clip; a per-frame one only has to describe the frame in front of it. Every job shows you its real byte count and its real duration when it finishes.",
+      "evidence": "A 48-frame 320×180 GIF encoded in 0.69 s — measured in Chrome on an 8-core, 16 GB laptop. Yours will differ."
+    }
+  ],
+  "discord": {
+    "heading": "Going to Discord?",
+    "body": "Discord rejects a file for reasons it does not explain, and the usual fix is to guess at a size and try again. Presets that aim straight at the limit are the next thing being built.",
+    "cta": "Discord presets"
+  },
+  "meta": {
+    "title": "PZGIF — GIF tools that run in your browser",
+    "description": "Compress, resize, crop, speed up and reverse GIFs without uploading them. Everything runs inside your own browser tab. No account, no server copy."
+  }
+}

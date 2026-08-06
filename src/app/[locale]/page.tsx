@@ -1,20 +1,61 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
+import { setRequestLocale } from "next-intl/server";
+import { AdSlot } from "@/components/ads/ad-slot";
+import { DiscordTeaser } from "@/components/home/discord-teaser";
+import { HomeHero } from "@/components/home/home-hero";
+import { ToolGrid } from "@/components/home/tool-grid";
+import { WhyPzgif } from "@/components/home/why-pzgif";
 import { TrustLine } from "@/components/layout/trust-line";
-import { Link } from "@/i18n/navigation";
-import {
-  TOOL_GROUP_ORDER,
-  routesInGroup,
-  type ToolGroup,
-} from "@/lib/tools/registry";
+import rawContent from "@/content/home.json";
+import { homeContent } from "@/lib/content/home";
+import { SITE_URL } from "@/lib/site-config";
 
 /**
- * Homepage shell.
+ * The homepage.
  *
- * Phase 9 owns the homepage copy, the "Why PZGIF" block and the SEO machinery.
- * What exists here is the structural skeleton that proves the token layer, the
- * font stack and the registry all resolve — and that is also what serves as the
- * holding page from day one, so the domain is never parked.
+ * ── Server shell, one client island ────────────────────────────────────────
+ * Everything a crawler reads — the grid, the three reasons, the teaser — is
+ * rendered here and prerendered into static HTML. Only the hero hydrates,
+ * because only the hero has to respond to a file. `setRequestLocale()` is what
+ * keeps this route static; a `cookies()` or `headers()` call anywhere in the
+ * subtree would turn it dynamic and fail `pnpm check:static`.
+ *
+ * ── What is deliberately absent ────────────────────────────────────────────
+ * No worker boot, no WASM prefetch, no `capability.ts` call, and no ad slot
+ * above the dropzone. The first two are the landing page's performance budget:
+ * the engine belongs to the tool pages, and reading 4096 bytes of a dropped file
+ * is the whole of this page's client-side work. The third is §8.1, which is
+ * binding — the dropzone is the page, and nothing sells against it.
+ *
+ * There is also no auto-playing demo. §7.4 and §6 both forbid a preview that
+ * loops without being asked, and the honest version of "watch how fast this is"
+ * is letting the visitor drop their own file.
  */
+
+const content = homeContent(rawContent);
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  return {
+    title: content.meta.title,
+    description: content.meta.description,
+    // `localePrefix: "as-needed"` serves English prefix-free, so the bare origin
+    // is the canonical homepage and stays so when locale #2 arrives.
+    alternates: { canonical: SITE_URL },
+    openGraph: {
+      type: "website",
+      url: SITE_URL,
+      title: content.meta.title,
+      description: content.meta.description,
+    },
+  };
+}
 
 export default async function HomePage({
   params,
@@ -24,34 +65,29 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const t = await getTranslations();
-
   return (
-    <main id="main" className="mx-auto max-w-[1280px] px-4 py-12 sm:px-6">
-      <h1 className="text-display font-bold">{t("site.tagline")}</h1>
+    <main id="main" className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
+      <HomeHero content={content} />
+      <TrustLine className="mt-5" />
 
-      <TrustLine className="mt-3" />
+      <ToolGrid
+        className="mt-14"
+        heading={content.grid.heading}
+        subhead={content.grid.subhead}
+      />
 
-      {TOOL_GROUP_ORDER.map((group: ToolGroup) => (
-        <section key={group} className="mt-10">
-          {/* The group headings are the same strings the nav and footer use —
-              one label per group, read from the message catalogue, not spelled
-              again per surface. */}
-          <h2 className="text-h2 font-bold">{t(`nav.${group}`)}</h2>
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {routesInGroup(group).map((route) => (
-              <li key={route.slug}>
-                <Link
-                  href={`/${route.slug}`}
-                  className="block rounded-card border border-line bg-surface-1 p-4 shadow-sm hover:border-brand"
-                >
-                  {route.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+      {/* §8.1: the first slot on this page sits below the grid — never above the
+          dropzone — reserved from first paint and unfilled until Phase 10. */}
+      <AdSlot variant="rect" name="home-rect" />
+
+      <WhyPzgif className="mt-14" tiles={content.why} />
+
+      <DiscordTeaser
+        className="mt-14"
+        heading={content.discord.heading}
+        body={content.discord.body}
+        cta={content.discord.cta}
+      />
     </main>
   );
 }

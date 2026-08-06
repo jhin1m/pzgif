@@ -6,9 +6,15 @@ priority: P1
 effort: "11-16 weeks solo (see timeline note)"
 tags: [nextjs, webcodecs, wasm, seo, ads, mvp]
 created: 2026-08-05
-blockedBy: []
+blockedBy: [260805-2239-pzgif-homepage-soul-pass-ship-0-homepage-brand-motif-job-moments]
 blocks: []
 ---
+
+> **Ship 0's homepage slice runs in a sibling plan.**
+> `plans/260805-2239-pzgif-homepage-soul-pass-.../` executes the homepage,
+> the brand motif and the result/empty-state polish, and closes the compressor
+> CLS defect in open question 10. On its completion Phase 9 here narrows to
+> legal + non-tool content + SEO machinery.
 
 # PZGIF MVP — 9 browser-native GIF tools + Discord presets
 
@@ -256,6 +262,10 @@ Tracked live at the end of each phase file. Blocking ones at plan time:
 7. Who is the named operator on the About page? Required before any ad-network application, the Contact page, GDPR controller identification, and a DMCA agent if one is ever needed
 8. Which real devices exist for gates G3/G4? The whole memory model rests on an iPhone SE 3-class floor. Without that hardware the budgets are unvalidated fiction. **Still open and now more urgent:** G4 ran on desktop only and found no ceiling below 732 MB; G3 never ran. The iOS scope decision above was taken on an *estimated* budget, so the hardware decides where the boundary falls, not whether there is one
 9. Does Journey by Mediavine work on Next.js? It is the only fallback if AdSense rejects. One email, and it should be sent in week 1
-10. **Five browser tests fail on `main`, and four of them are Phase 3's** (surfaced when Phase 6 ran the suite on 2026-08-05; each reproduces on a tree stashed back to before Phase 6). `/dev/states` overflows 40 px at 320 px in both engines; WebKit fails the skip-link tab order and the FAQ-panel height check. The fifth is Phase 5's: the compressor measures **CLS 0.015** on Chromium, against this plan's own "CLS = 0 on every route" criterion. That one is not cosmetic — CLS is a ranking input and the tool pages are the ranking surface. It should be diagnosed before Ship 1, not deferred to Phase 11
+10. **Four browser tests fail on `main`, and all four are Phase 3's** (surfaced when Phase 6 ran the suite on 2026-08-05; each reproduces on a tree stashed back to before Phase 6). `/dev/states` overflows 40 px at 320 px in both engines; WebKit fails the skip-link tab order and the FAQ-panel height check — the last of which is a *racing assertion* rather than an engine defect: it reads the panel height while the 150 ms `grid-template-rows` transition is still running, so it flaps rather than failing reliably.
+
+    **The fifth is closed.** The compressor's **CLS 0.015** was diagnosed and fixed in the homepage soul pass: the result panel grew 320 → 505 px when a job finished, seconds after the click that started it, so `hadRecentInput` never excluded it. The panel now reserves the done state's *measured* height in four breakpoint bands, `e2e/result-panel-reservation.spec.ts` asserts the reservation still covers its contents, and the compressor's CLS test measures 0.
+
+    A sixth defect was found while verifying that work and is **not** fixed: at 375 px with a 32 px root font, `site-header.tsx` overflows by 22 px on **every** route — the wordmark grows with the text and pushes the theme toggle and menu button past the edge. WCAG 1.4.4, shared chrome, out of the soul pass's scope.
 
 <!-- slug: pzgif-mvp-9-browser-native-gif-tools-discord-presets -->

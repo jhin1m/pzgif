@@ -11,14 +11,13 @@ dependencies: [3]
 
 ## Overview
 
-Build the homepage, the SEO machinery, and the legal pages. Runs in parallel with the tool phases — none of it depends on the media engine.
+Build the SEO machinery and the legal pages. **The homepage is no longer in this phase** — it shipped in the homepage soul pass. Runs in parallel with the tool phases — none of it depends on the media engine.
 
 Two things here are load-bearing for the business rather than the product: the **≥400-word hand-written explainer on every page** (the defence against Google's scaled-content-abuse policy, whose penalty is site-wide) and the **legal + About pages** (approval prerequisites for any ad network, not a later chore).
 
 ## Requirements
 
 **Functional**
-- Homepage per `docs/wireframe/index.html`
 - **6-10 genuine non-tool content pages** — the AdSense evidence pack
 - `sitemap.ts`, `robots.ts`, per-page metadata, canonical, JSON-LD
 - Legal: Terms, Privacy, Cookie Policy, Acceptable Use, About, **Contact**, **DMCA**, **Accessibility statement**
@@ -76,25 +75,39 @@ The gifski comparison page does triple duty: editorial content, link bait, and �
 
 What does **not** differentiate them: swapping the tool name into a shared paragraph. Launch in batches and watch Search Console before scaling, per the bootstrap guidance.
 
-### Homepage
+### Homepage — **shipped elsewhere, no longer this phase's**
 
-Per `index.html`: h1 + value prop, trust line, hero dropzone that routes by detected file type, the 9-tool grid, "Why PZGIF" three-up, Discord preset teaser, `below-grid` ad slot, and a footer carrying the full tool list for internal linking. **The footer must list exactly the 9 shipped tools plus the Discord cluster** — the wireframe's `GIF to WebP` and `GIF for Slack` entries are out of scope.
+`plans/260805-2239-pzgif-homepage-soul-pass-.../` built it: hero, working
+dropzone, action picker, tool grid, "Why PZGIF" three-up, Discord teaser and the
+below-grid ad slot. Nothing about the homepage is owed here.
 
-The hero dropzone routing needs the registry's accepted-formats map: drop a `.mp4` → `/mp4-to-gif`, a `.gif` → `/gif-compressor`, a `.webp` → `/webp-to-gif`.
+Two decisions made there that this phase must not undo:
+
+- **The drop does not route by file type.** It offers. Every live route declares
+  `inputFormats: ["gif"]`, so a dropped GIF is valid input for all five and
+  auto-routing would guess wrong four times in five. The bullet this section used
+  to carry — "drop a `.mp4` → `/mp4-to-gif`" — describes a set of tools that do
+  not exist yet and a behaviour that was rejected on the evidence.
+- **The wireframe copy was not reused verbatim.** It carries five documented
+  defects, and `src/lib/content/home.test.ts` now asserts none of them can
+  reappear.
+
+The **footer** is still this phase's, and the rule stands: exactly the 9 shipped
+tools plus the Discord cluster. The wireframe's `GIF to WebP` and `GIF for Slack`
+entries are out of scope.
 
 ## Related Code Files
 
-- Create: `src/app/[locale]/page.tsx` — homepage
 - Create: `src/app/sitemap.ts`, `src/app/robots.ts`
 - Create: `src/app/[locale]/(legal)/terms/page.tsx`, `privacy/page.tsx`, `cookies/page.tsx`, `acceptable-use/page.tsx`, `about/page.tsx`
 - Create: `src/lib/seo/metadata.ts` (incl. `alternatesFor()`), `src/lib/seo/jsonld.ts`
-- Create: `src/components/content/faq-accordion.tsx`, `tool-grid.tsx`, `why-pzgif.tsx`, `preset-teaser.tsx`
+- Create: `src/components/content/faq-accordion.tsx` — `tool-grid.tsx`, `why-pzgif.tsx` and the preset teaser already exist under `src/components/home/`
 - Create: `src/content/legal/*.mdx`
 - Modify: `docs/design-guidelines.md` §10 — remove the `FAQPage` schema requirement
 
 ## Implementation Steps
 
-1. Build the homepage per the wireframe, reusing its copy verbatim. Wire the hero dropzone's file-type routing from the registry.
+1. ~~Build the homepage.~~ Shipped in the homepage soul pass — see above.
 2. Build `metadata.ts`: `metadataBase`, per-page static metadata, self-referential canonical, and `alternatesFor()` stubbed for future locales.
 3. Build `sitemap.ts` with **real content dates** — a `lastModified` of "now" on every URL at every build is a negative quality signal. The date belongs with the content, so store it in each content module's frontmatter and have the registry reference it; the registry itself stays structure-only.
 4. Build `robots.ts`. `noindex` `/dev/states`, `/__bench` and any result URL.
@@ -113,7 +126,6 @@ The hero dropzone routing needs the registry's accepted-formats map: drop a `.mp
 
 ## Success Criteria
 
-- [ ] Homepage matches `index.html` and the hero dropzone routes correctly by file type
 - [ ] The shared content components and JSON-LD helpers exist and are consumed — not duplicated — by Phases 5-8
 - [ ] *(Verified in Phase 11, not here:)* every tool and preset page carries ≥400 words of hand-written, page-specific explainer plus its own FAQ. This phase owns the machinery and the non-tool pages; the tool phases own their own prose
 - [ ] **6-10 non-tool content pages published and indexed**, including the gifski side-by-side comparison page

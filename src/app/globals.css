@@ -34,7 +34,17 @@
   --color-primary-800: oklch(47.7% 0.22 266.1); /* #2348D6 */
   --color-primary-900: oklch(41.2% 0.191 266.2); /* #1B39B0 */
 
-  /* ── accent (speed / progress ONLY, <5% of surface) ─────── */
+  /* ── accent (speed / progress ONLY, <5% of surface) ───────
+     THE ACCENT HAS ONE JOB: it is the winning number.
+
+     Concretely — the progress fill while the work happens, and the post-operation
+     size and its delta badge once it has. Nothing else in the product may use
+     teal as a fill. Before this rule the accent was spent on a lock glyph and
+     little else, which is how a reserved colour ends up meaning nothing.
+
+     It is deliberately NOT the success colour. Green already means "status: ok"
+     on JobError and the completion tick; spending a status colour on a headline
+     number makes both weaker. A result is not a status. */
   --color-accent-300: oklch(78.5% 0.132 182.5); /* #2DD4C0 */
   --color-accent-500: oklch(62.5% 0.107 187.5); /* #0E9C93 */
   --color-accent-700: oklch(52.3% 0.089 187.7); /* #0B7A73 — text-safe teal */
@@ -181,6 +191,11 @@
   --surface-disabled: var(--color-neutral-300); /* filled disabled control */
   --control-track: var(--color-neutral-400); /* switch, off */
 
+  /* The checkerboard motif's ink. Read by `@utility bg-checker` below.
+     Deliberately here and not in `@theme`: a value inside `@theme` is
+     snapshotted at build time and would stop inverting with the theme. */
+  --checker-tint: color-mix(in oklch, var(--color-neutral-900) 5%, transparent);
+
   --primary: var(--color-primary-700); /* links, brand */
   --primary-fill: var(--color-primary-800); /* button fill */
   --primary-fill-hover: var(--color-primary-900); /* keeps white ≥4.5:1 */
@@ -257,6 +272,10 @@
   --shadow-bar: 0 -4px 12px oklch(0% 0 0 / 0.5);
   --surface-disabled: var(--color-neutral-800);
   --control-track: var(--color-neutral-600);
+
+  /* A lift rather than an ink: over #14171F a darker tint is invisible, which is
+     the same reasoning §4.3 gives for swapping the shadow tints here. */
+  --checker-tint: color-mix(in oklch, var(--color-neutral-0) 6%, transparent);
 
   --primary: var(--color-primary-500);
   --primary-fill: var(--color-primary-600);
@@ -374,6 +393,37 @@
   --color-border: var(--border);
   --color-input: var(--border-control);
   --color-ring: var(--focus-ring);
+}
+
+/* ── The motif ───────────────────────────────────────────────────────────────
+   The checkerboard that marks a media surface.
+
+   It is not decoration. A checkerboard is the universal signifier for image
+   transparency — anyone who has opened an image editor reads it without being
+   told — so here it means exactly one thing: **an image belongs here**. That is
+   what the idle dropzone and the empty result panel are for, and it is why the
+   same device can repeat across the product without becoming wallpaper.
+
+   Two rules it must be used by:
+
+     1. **Never behind body text.** It goes under empty or media surfaces only.
+        Text over a repeating pattern loses contrast at the exact tiles where the
+        pattern is darkest, and the contrast floor is not negotiable (§7.1).
+     2. **Never as the only thing carrying meaning.** It is below the contrast
+        floor on purpose, and it is dropped entirely in forced-colors mode. The
+        surface it sits on keeps its border, and the copy keeps its words.
+
+   Built from `repeating-conic-gradient` against a semantic token, so it inverts
+   with the theme with no per-theme override at the call site. 16px tiles: at 8px
+   the pattern reads as noise at 200% zoom, and raising the opacity to compensate
+   would break rule 1. */
+
+@utility bg-checker {
+  background-image: repeating-conic-gradient(
+    var(--checker-tint) 0% 25%,
+    transparent 0% 50%
+  );
+  background-size: 16px 16px;
 }
 
 /* ── Base layer ──────────────────────────────────────────────────────────── */

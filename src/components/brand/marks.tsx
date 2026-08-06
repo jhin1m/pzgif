@@ -30,8 +30,27 @@ export function BrandMark({ className }: { className?: string }) {
   );
 }
 
-/** The larger mark that sits inside the dropzone (§5.2). */
-export function LoopMark({ className }: { className?: string }) {
+/**
+ * The larger mark that sits inside the dropzone (§5.2).
+ *
+ * `personified` adds two eye dots to the left lobe. Same SVG, same viewBox, no
+ * new asset and no new request — which is the whole reason this is the mascot
+ * the product gets. A full multi-pose character was costed and cut; two circles
+ * on a mark that already ships buy most of the warmth for none of the weight.
+ *
+ * Reserved for surfaces that are *waiting* rather than *working*: the empty
+ * result panel, the 404, the homepage hero watermark. A face on a busy state
+ * would be a character watching the user wait, which is the opposite of
+ * reassuring. The mark stays `aria-hidden` in both forms — the copy beside it
+ * carries the meaning, and a screen reader has no use for a wink.
+ */
+export function LoopMark({
+  className,
+  personified = false,
+}: {
+  className?: string;
+  personified?: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 96 96"
@@ -46,6 +65,12 @@ export function LoopMark({ className }: { className?: string }) {
         strokeLinecap="round"
       />
       <circle cx="63" cy="48" r="4" fill="var(--accent)" />
+      {personified ? (
+        <>
+          <circle cx="25" cy="44" r="2.4" fill="currentColor" />
+          <circle cx="34" cy="44" r="2.4" fill="currentColor" />
+        </>
+      ) : null}
     </svg>
   );
 }

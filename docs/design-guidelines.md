@@ -185,6 +185,48 @@ Wire `@theme` to semantics so Tailwind utilities resolve correctly:
 
 Dark mode ships as `data-theme` on `<html>` (no `class` strategy — avoids the FOUC dance with a `prefers-color-scheme` default and a localStorage override, set by a tiny inline script before paint).
 
+### 2.3 The motif — `bg-checker`
+
+A 16px checkerboard, built from `repeating-conic-gradient` against
+`--checker-tint`, so it inverts with the theme without a per-theme override at
+the call site.
+
+**It means one thing: an image belongs here.** A checkerboard is the universal
+signifier for image transparency — anyone who has opened an image editor reads it
+without being told — which is why the same device can repeat across the product
+without becoming wallpaper. It goes on the idle dropzone, the empty result panel
+and the 404, and nowhere else.
+
+Two rules it is bound by:
+
+1. **Never behind body text.** Text over a repeating pattern loses contrast at
+   exactly the tiles where the pattern is darkest, and the contrast floor (§7.1)
+   is not negotiable. Where copy has to sit on a motif surface, the copy gets its
+   own opaque card. In the dropzone the motif is a `-z-10` layer under an
+   `isolate` box, which makes the rule structural rather than a thing to
+   remember.
+2. **Never the only thing carrying meaning.** It is below the contrast floor on
+   purpose and it drops out entirely in forced-colors mode. The surface keeps its
+   border; the copy keeps its words.
+
+16px tiles, not 8px: at 8px it reads as noise at 200% zoom, and raising the
+opacity to compensate would break rule 1.
+
+### 2.4 What accent means
+
+Teal is the product's second colour and it was previously assigned to nothing but
+the progress fill. It now has one job in content: **accent marks the result** —
+the output byte count, the delta badge, the success check. Green stays reserved
+for *status*; blue stays the brand and the actions.
+
+`--accent-text` (`#0B7A73`, 5.19:1) is the only teal permitted on text.
+`--accent` is a fill and fails as text — see §7.1.
+
+The delta badge deliberately does **not** turn red when the output grew.
+"+4% larger" is a legitimate outcome of re-encoding an already-optimised GIF at a
+higher quality, and colouring it as an error would mislabel a correct result. The
+word carries the direction; the colour carries none of it (§7.6).
+
 ---
 
 ## 3. Typography
@@ -393,10 +435,38 @@ Two stacked layers in a `--radius-card` frame with `overflow: hidden`; the "afte
 
 ### 5.9 ResultPanel
 
-`--surface-1`, `--radius-card`, `--shadow-sm`, 1px `--border`, 24px pad. Contains: BeforeAfterSlider · size delta line (`480 KB` mono + `−80%` success pill) · Download (Primary, lg, full-width on mobile) · "Start over" (Ghost) · "Also save as WebP / MP4" secondary row.
+`--surface-1`, `--radius-card`, `--shadow-sm`, 1px `--border`, 24px pad. Contains: BeforeAfterSlider · `ResultSummary` (below) · "Start over" (Ghost).
 Reveal: 180ms ease-out, translateY 8px + fade. The container's `min-height` is reserved in the static HTML so the reveal causes no shift.
-Empty state before a run: same box, dashed `--border`, centred `--text-muted` "Your compressed GIF will appear here." — this is what reserves the space.
 Announce completion in the live region (§7.5): "Done. 2.4 megabytes reduced to 480 kilobytes, 80 percent smaller."
+
+**The reservation is four numbers, and all four are measured.** The done state's
+height is dominated by *wrapping* — the delta row, the secondary buttons and the
+next-tools chips each fold onto another 44px line as the column narrows, then the
+layout jumps back up at `md` when the inline Download button appears. One
+reservation for every width would have to be the worst of them, which puts 180px
+of blank under the widest phone. So the bands follow the measurement, and
+`e2e/result-panel-reservation.spec.ts` fails when a band stops covering its
+contents. **Re-measure whenever the done state gains or loses a row.**
+
+**ResultSummary — the completion moment.** Success mark (one `pz-check-pop`,
+`--accent-text`) · size delta · one hand-written sentence · Download as a
+*primary button*, not a link among links · a divider and up to two "Next?" chips
+from `relatedLiveRoutes()`.
+Three rules inside it:
+- **No count-up on the byte numbers.** It carries no information and makes a
+  measured figure look estimated.
+- **The saved-bytes sentence is dropped when the file grew.** Re-encoding an
+  already-optimised GIF at a higher quality legitimately produces a larger file;
+  the sentence would be false while the badge beside it said so. The slot keeps
+  its line box, so both outcomes are the same height.
+- **Two chips, never three.** Three is a menu, and the related-tools grid at the
+  foot of the page already is one — and the third chip is a third wrapped line in
+  the reservation.
+
+**Empty state before a run:** same box, same reservation, dashed `--border`,
+`bg-checker` (§2.3), the personified loop mark, the tool's short line, and three
+hand-written "what will appear here" rows on an opaque `--surface-1` card. The
+rows are content, not chrome — they describe *that tool's* output.
 
 ### 5.10 AdSlot
 
@@ -638,6 +708,19 @@ Exact string, one per page, immediately below the h1 (tool pages) or below the s
 ---
 
 ## Changelog
+
+### 2026-08-06 — the homepage soul pass
+
+| § | Change | Why |
+|---|---|---|
+| 2.3 | **New** — the checkerboard motif, its one meaning, and the two rules it is bound by | The product had no repeated visual device. A motif with no rules becomes wallpaper, and one behind text breaks the contrast floor |
+| 2.4 | **New** — accent means *the result* | Teal was reserved by the token layer and assigned to no meaning. A second colour that means nothing is not a second colour |
+| 5.9 | ResultPanel gains `ResultSummary`, a content-bearing empty state, and a four-band measured reservation | Completion was a fade and a badge. The richer state overshot the old reservation and returned 0.0029 of CLS the moment it landed — measured, not predicted |
+
+**§6 is deliberately unchanged.** Everything this pass added — the check-pop, the
+result reveal — was already specified there, and nothing it needed was missing.
+Recorded because "we did not have to touch the motion rules" is evidence the
+rules were right, and a silent non-change looks like an oversight later.
 
 ### 2026-08-05 — four corrections from building the library (Phase 3)
 

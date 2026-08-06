@@ -19,6 +19,32 @@ import { describe, expect, it } from "vitest";
  */
 
 const COMPONENTS_DIR = join(process.cwd(), "src/components");
+/**
+ * Comments stripped first. This file documents itself heavily, and several of
+ * those comments quote the very selectors and at-rules the assertions below look
+ * for — `[data-theme="dark"] { … }` appears inside the shadow note, and
+ * `@utility bg-checker` inside the token note. Searching the raw text finds the
+ * prose before it finds the rule.
+ */
+const GLOBALS_CSS = readFileSync(
+  join(process.cwd(), "src/app/globals.css"),
+  "utf8",
+).replace(/\/\*[\s\S]*?\*\//g, "");
+
+/** The text of one top-level `{ … }` block, given the text that opens it. */
+function blockAfter(source: string, opener: string): string {
+  const start = source.indexOf(opener);
+  if (start < 0) throw new Error(`No block opened by ${opener}`);
+  let depth = 0;
+  for (let index = source.indexOf("{", start); index < source.length; index++) {
+    if (source[index] === "{") depth += 1;
+    else if (source[index] === "}") {
+      depth -= 1;
+      if (depth === 0) return source.slice(start, index + 1);
+    }
+  }
+  throw new Error(`Unclosed block opened by ${opener}`);
+}
 
 /**
  * The before/after label plate sits on top of image content rather than on a
@@ -70,5 +96,37 @@ describe("theme tokens", () => {
         /(bg|text|border)-(white|black)\b/,
       );
     }
+  });
+});
+
+describe("the checkerboard motif", () => {
+  it("defines --checker-tint in both themes", () => {
+    // Both, not just light. A motif that resolves in one theme and falls back to
+    // `initial` in the other renders as nothing at all on half the site, and it
+    // is invisible in review because review happens in whichever theme is on.
+    expect(blockAfter(GLOBALS_CSS, ":root,")).toContain("--checker-tint:");
+    expect(blockAfter(GLOBALS_CSS, '[data-theme="dark"] {')).toContain(
+      "--checker-tint:",
+    );
+  });
+
+  it("keeps --checker-tint out of @theme", () => {
+    // The header comment's rule, made mechanical: a value inside `@theme` is
+    // snapshotted at build time, so a token defined there stops responding to
+    // the theme and dark mode silently stops working for it.
+    expect(blockAfter(GLOBALS_CSS, "@theme {")).not.toContain("--checker-tint");
+  });
+
+  it("builds the motif from the token rather than a literal", () => {
+    const utility = blockAfter(GLOBALS_CSS, "@utility bg-checker");
+    expect(utility).toContain("var(--checker-tint)");
+    expect(utility).toContain("repeating-conic-gradient");
+    // 16px tiles: at 8px the pattern reads as noise under 200% zoom.
+    expect(utility).toContain("background-size: 16px 16px");
+  });
+
+  it("adds no animation — the motif is a signifier, not an effect", () => {
+    const utility = blockAfter(GLOBALS_CSS, "@utility bg-checker");
+    expect(utility).not.toMatch(/animation|transition/);
   });
 });

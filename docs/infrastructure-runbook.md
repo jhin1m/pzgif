@@ -171,10 +171,19 @@ between "repo created" and "repo audited" is where it actually goes wrong.
       iPhone SE 3-class floor. Without that hardware the frame-buffer budgets are
       unvalidated fiction. This is a procurement blocker for Phase 1, not a
       Phase 11 question.
-- [ ] **Named operator for the About page.** Required before any ad-network
-      application, the Contact page, GDPR controller identification, and a DMCA
-      agent if one is ever needed. It also has to appear in `LICENSE-CONTENT`,
-      which currently says only "the PZGIF operator".
+- [x] **Named operator for the About page.** Resolved 2026-08-07: **Louis Le**,
+      an individual in **Australia**. Recorded in `src/lib/site-config.ts` as
+      `OPERATOR_NAME` / `OPERATOR_LOCATION`, and carried through `NOTICE`,
+      `LICENSE-CONTENT`, the About page, the Privacy Policy's controller section
+      and the DMCA page. Governing law for the Terms is Australia; the venue
+      clause is state-neutral until a state is chosen.
+- [ ] **Email routing for `contact@pzgif.com`.** **Required before deploy, not
+      before merge.** The Contact, Privacy, Terms and DMCA pages all publish this
+      address, and it is the product's only support channel — a live site
+      advertising an address that bounces is worse than one with no Contact page.
+      Cloudflare Email Routing, free tier: add the MX records for `pzgif.com`,
+      create the `contact@` rule, forward to the operator's inbox, then send a
+      test message and confirm it arrives.
 - [ ] **Email Mediavine about Journey** and ask whether it works on Next.js. It is
       the only fallback if AdSense rejects, and the answer takes one email.
 

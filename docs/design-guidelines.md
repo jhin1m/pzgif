@@ -665,6 +665,15 @@ Taken from the design-direction report §5 and tech-stack.md §6. These are poli
 5. **Prohibited outright:** pop-ups · prestitial/poststitial with countdown · auto-play video with sound · full-screen scroll-over · large sticky ads (mobile or desktop).
 6. **Visual quarantine** (§5.10) is itself an ad-safety measure — Better Ads flags "ads disguised as content"; a mismatched radius, absent shadow and explicit label make accidental clicks and later policy violations far less likely.
 
+**[Amended 2026-08-07] The reservation CSS in rule 2 cannot ship as written.** `min-height` plus `aspect-ratio` gives the box a *transferred minimum* on the other axis — `min-width: 250px × 300/250 = 300px` for the rect unit. That is a floor, not a preference: the slot refuses to shrink below 300px, and a 320px viewport with 16px gutters offers 288px, so the page scrolls sideways in violation of §9. Every unit now reserves the creative's exact **height** and caps its width (`height: 250px; max-width: 300px`). Height is the axis CLS is spent on, so this is the stricter reservation of the two; the width simply stops demanding room the viewport does not have.
+
+**[Amended 2026-08-07] Reservation presupposes a network.** Rule 2 above governs a slot that will hold a creative. Until an ad network is configured there is nothing arriving to reserve for, and a page of empty grey "Advertisement" boxes costs viewport, reads as broken, and is what an AdSense reviewer would see during the very application meant to turn ads on. So every slot in §8.1 is gated on `ADS_ENABLED` (`src/lib/site-config.ts`), a **build-time** constant read from `NEXT_PUBLIC_ADS_ENABLED`, default off:
+
+- **Off** — no slot node in the HTML at all, and the `xl` rail track is not declared, so no dead 300px gutter. Absence is decided before the HTML is written, so there is still no shift.
+- **On** — §8 applies exactly as written above: reserved from first paint, never injected after hydration.
+
+Flipping the flag is a redeploy, which is the same ceremony as adding the provider script. `/dev/states` passes `demo` to keep the §5.10 quarantine styling inspectable and testable while ads are off; nothing else may.
+
 ### 8.1 Approved slot map
 
 | Page type | Slot | Size | Position | Condition |

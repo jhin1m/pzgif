@@ -88,3 +88,8 @@ between "repo created" and "repo audited" is where it actually goes wrong.
 
 Sentry, the CMP account and any ad-network application are Phase 10. Nothing in
 Phase 2 depends on them.
+
+Until then `NEXT_PUBLIC_ADS_ENABLED` stays unset, and no ad slot renders at all —
+see design-guidelines §8, amended 2026-08-07. Set it to `1` **in the build
+environment** (it is inlined at build time, not read at runtime) in the same
+deploy that adds the provider script; a redeploy is required either way.

@@ -623,25 +623,36 @@
     text-transform: uppercase;
     color: var(--text-ad-label);
   }
+  /* Each unit reserves the creative's exact **height**, and caps its width at the
+     creative's width without ever demanding it.
+
+     §8.2 writes these as `min-height` + `aspect-ratio`, which cannot ship: a box
+     with a ratio and a definite min-height gets a *transferred minimum* on the
+     other axis — `min-width: 250px × 300/250 = 300px` for the rect unit. That is
+     a floor, not a preference, so the slot refuses to shrink and the whole page
+     scrolls sideways at 320px, where 16px gutters leave 288px. §9 forbids that
+     outright, and it would have hit every tool page the moment ads were enabled.
+
+     A definite height is also the stricter reservation of the two: height is the
+     axis CLS is spent on, and deriving it from a ratio makes it a function of a
+     width that varies with the container. */
   .ad-slot--rect {
-    min-height: 250px;
-    aspect-ratio: 300 / 250;
+    height: 250px;
     max-width: 300px;
     margin-inline: auto;
   }
   .ad-slot--inline {
-    min-height: 280px;
-    aspect-ratio: 336 / 280;
+    height: 280px;
     max-width: 336px;
     margin-inline: auto;
   }
+  /* The rail is xl-only, inside a 300px grid column, so it can be exact. */
   .ad-slot--rail {
-    min-height: 600px;
+    height: 600px;
     width: 300px;
   }
   .ad-slot--anchor {
-    min-height: 50px;
-    aspect-ratio: 320 / 50;
+    height: 50px;
     max-width: 320px;
     margin-inline: auto;
   }

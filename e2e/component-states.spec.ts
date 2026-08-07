@@ -76,9 +76,14 @@ test.describe("component gallery", () => {
     await closed.click();
     await expect(closed).toHaveAttribute("aria-expanded", "true");
     // The panel has real height once open — `grid-template-rows: 0fr → 1fr`.
-    expect(
-      await panel.evaluate((element) => element.getBoundingClientRect().height),
-    ).toBeGreaterThan(10);
+    // Polled, not sampled: that row change is a transition, so a single read
+    // taken the instant `aria-expanded` flips catches whatever fraction of the
+    // animation has run and passes or fails on timing rather than on behaviour.
+    await expect
+      .poll(() =>
+        panel.evaluate((element) => element.getBoundingClientRect().height),
+      )
+      .toBeGreaterThan(10);
   });
 
   test("serves every FAQ answer in the HTML, not just after hydration", async ({

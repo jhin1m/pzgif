@@ -10,6 +10,27 @@ export const SITE_NAME = "PZGIF";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pzgif.com";
 
 /**
+ * Who runs this site, and where to reach them.
+ *
+ * These are facts about the deployment rather than prose, which is why they are
+ * here and not in `src/content/`. They are also the three strings that must be
+ * identical everywhere they appear — the About page, the Privacy Policy's
+ * controller identification, the DMCA agent, `NOTICE` and `LICENSE-CONTENT`. A
+ * support address that is right on one page and stale on another is a dead
+ * channel for whoever reads the stale one, so the content files repeat these
+ * values in prose and `legal.test.ts` asserts the prose agrees with these
+ * constants.
+ *
+ * Naming a real operator is not decoration: it is what an ad-network reviewer
+ * looks for, what GDPR Art. 13(1)(a) requires of a controller, and what makes
+ * `LICENSE-CONTENT`'s "contact the operator named on the About page" mean
+ * anything.
+ */
+export const OPERATOR_NAME = "Louis Le";
+export const OPERATOR_LOCATION = "Australia";
+export const CONTACT_EMAIL = "contact@pzgif.com";
+
+/**
  * Whether an ad network is actually configured for this deployment.
  *
  * `design-guidelines.md` §8.2 requires a slot to be reserved in the initial HTML

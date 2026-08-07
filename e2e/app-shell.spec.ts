@@ -32,6 +32,13 @@ test.describe("app shell", () => {
   });
 
   test("does not ship the benchmark harness", async ({ page }) => {
+    // `pageExtensions` is one global switch, so the dev-routes flag enables this
+    // route too. Without this guard, checking the gallery against a dev-routes
+    // build fails a test about a different route.
+    test.skip(
+      process.env.PZGIF_ENABLE_DEV_ROUTES === "1",
+      "this build opted the dev routes in",
+    );
     // `/__bench` exposes the raw encoder surface and pulls gifski, mediabunny,
     // modern-gif and gifenc into its module graph. It exists only in builds that
     // set `PZGIF_ENABLE_BENCH=1`, which is how gate G5 measures the production
@@ -41,6 +48,23 @@ test.describe("app shell", () => {
     // is only a recognised page extension when the flag is on, so without it the
     // route and its imports are never compiled. This asserts that holds.
     const response = await page.goto("/__bench");
+    expect(response?.status()).toBe(404);
+  });
+
+  test("does not ship the component gallery", async ({ page }) => {
+    // The one build where a 404 here would be wrong is the one that deliberately
+    // opted the route in so the gallery suite can run against it.
+    test.skip(
+      process.env.PZGIF_ENABLE_DEV_ROUTES === "1",
+      "this build opted /dev/states in",
+    );
+    // `/dev/states` renders every component in every state, including the forced
+    // hover/focus variants that exist only for screenshots. `noindex` asks a
+    // crawler not to list it; it does not keep the route, or the gallery-only JS
+    // behind it, out of the deployment. Same structural exclusion as `/__bench`
+    // above — the page is `page.dev.tsx`, recognised only under
+    // `PZGIF_ENABLE_DEV_ROUTES=1`, which this suite's build does not set.
+    const response = await page.goto("/dev/states");
     expect(response?.status()).toBe(404);
   });
 

@@ -7,7 +7,7 @@ import { EngineConsole } from "./engine-console";
  *
  * Not a separate scaffold, on purpose. Gate G5 exists to prove the worker plus
  * `.wasm` boot path works, and the single most likely thing to break WASM
- * instantiation is the CSP — which only exists here, alongside `proxy.ts` and
+ * instantiation is the CSP — which only exists here, alongside `middleware.ts` and
  * the `/wasm/*` cache headers. A spike in a bare Next scaffold would exercise
  * none of them and would prove nothing about production.
  *

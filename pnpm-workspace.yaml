@@ -1,8 +1,12 @@
 allowBuilds:
   "@parcel/watcher": set this to true or false
   "@swc/core": set this to true or false
+  # The Cloudflare adapter bundles the worker with esbuild and runs it on
+  # workerd; both need their postinstall to fetch the platform binary.
+  esbuild: true
   sharp: false
   unrs-resolver: false
+  workerd: true
 minimumReleaseAgeExclude:
   - "@next/env@16.3.0"
   - "@next/eslint-plugin-next@16.3.0"

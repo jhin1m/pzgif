@@ -1,0 +1,40 @@
+# Cloudflare Workers Assets header rules.
+#
+# This file exists because `headers()` in next.config.ts cannot reach these
+# paths. Workers Assets answers a request that matches a static file *without
+# invoking the Worker*, so the Next server — and every header it would have set
+# — is never in the loop. Measured, not assumed: before this file,
+# `/wasm/v1/gifski_wasm_bg.wasm` came back `max-age=0, must-revalidate`.
+#
+# Cloudflare does not serve this file itself; `next start` does, harmlessly.
+#
+# `/wasm/*` and `/sw.js` have counterparts in next.config.ts, which still govern
+# them under `next start` and in the E2E suite — change one, change the other.
+# `/_next/static/*` has no counterpart there because Next sets that header
+# itself; only Workers Assets needs telling.
+
+/*
+  # `headers()` in next.config.ts sets this on every response, but only for
+  # responses the Worker produces. Assets never reach it, so the one header that
+  # actually matters on a static file — do not guess at its type — is set here
+  # too. The rest of that block (frame-ancestors, referrer policy, permissions)
+  # governs documents, and documents do come through the Worker.
+  X-Content-Type-Options: nosniff
+
+/_next/static/*
+  # Next serves these `immutable` itself, and Workers Assets was answering them
+  # `max-age=0, must-revalidate` — a conditional request per chunk per session on
+  # a JS payload this app cannot make small. The filenames are content-hashed, so
+  # a year is safe by construction: a changed file is a different URL.
+  Cache-Control: public, max-age=31536000, immutable
+
+/wasm/*
+  # The .wasm filenames carry no content hash, so the `v<n>` segment in the path
+  # is the only thing making `immutable` safe. Bump WASM_VERSION on any change to
+  # a binary — a year-long immutable cache pointed at a stale one is not
+  # something a redeploy can fix.
+  Cache-Control: public, max-age=31536000, immutable
+
+/sw.js
+  # A stale service worker would pin users to an old app shell.
+  Cache-Control: no-cache

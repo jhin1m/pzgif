@@ -96,49 +96,82 @@ const contentSecurityPolicy = [
  * values win; `git rev-parse` is the local-development fallback.
  */
 function resolveCommitSha(): string {
+  // `||`, not `??`: a host that sets one of these to the empty string means
+  // "no SHA", and `??` would short-circuit the whole chain on it.
+  // `scripts/check-source-sha.mjs` must keep the identical chain — it verifies
+  // the commit this function bakes into the footer.
   const fromHost =
-    process.env.PZGIF_COMMIT_SHA ??
-    process.env.VERCEL_GIT_COMMIT_SHA ??
-    process.env.CF_PAGES_COMMIT_SHA ??
+    process.env.PZGIF_COMMIT_SHA ||
+    // Cloudflare Workers Builds. Distinct from Pages' CF_PAGES_COMMIT_SHA below,
+    // which is why the chain missed on the host this project deploys to.
+    process.env.WORKERS_CI_COMMIT_SHA ||
+    process.env.VERCEL_GIT_COMMIT_SHA ||
+    process.env.CF_PAGES_COMMIT_SHA ||
     process.env.GITHUB_SHA;
-  if (fromHost) return fromHost.trim();
 
-  try {
-    return execFileSync("git", ["rev-parse", "HEAD"], {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
-  } catch {
+  const sha =
+    fromHost?.trim() ||
+    (() => {
+      try {
+        return execFileSync("git", ["rev-parse", "HEAD"], {
+          encoding: "utf8",
+          stdio: ["ignore", "pipe", "ignore"],
+        }).trim();
+      } catch {
+        return "";
+      }
+    })();
+
+  // A tag, a branch name or an abbreviated SHA all produce a footer link that
+  // 404s or drifts, and both failures are invisible in the built page. Falling
+  // back to the repo root is the honest degradation: less precise, still valid.
+  if (sha && !/^[0-9a-f]{40}$/i.test(sha)) {
+    console.warn(
+      `[pzgif] Ignoring "${sha}" as a build commit: not a full 40-character SHA.` +
+        " The AGPL source link will point at the repository root.",
+    );
     return "";
   }
+
+  return sha;
 }
 
 /**
- * The Phase 1 benchmark harness route.
+ * The dev-only routes: `/__bench` (Phase 1's benchmark harness) and
+ * `/dev/states` (the component gallery).
  *
- * `/__bench` must not exist in a shipped build — not merely 404, but never
- * bundled, so its raw encoder surface cannot be reached and its imports cannot
- * inflate the production JS.
+ * Neither may exist in a shipped build — not merely 404, but never bundled, so
+ * `/__bench`'s raw encoder surface cannot be reached and neither route's imports
+ * can inflate the production JS. `/dev/states` alone pulls in every component in
+ * the library plus two base64 sample frames.
  *
- * A runtime `NODE_ENV` check inside the page would not achieve that: the module
+ * A runtime `NODE_ENV` check inside a page would not achieve that: the module
  * still compiles and its imports still bundle. Extending `pageExtensions`
  * instead means `page.dev.tsx` is only *recognised as a page* when enabled. When
- * it is not, nothing in `__bench/` matches a page extension, so the route does
- * not exist and neither does its module graph.
+ * it is not, nothing in those directories matches a page extension, so the
+ * routes do not exist and neither do their module graphs.
+ *
+ * The two flags are separate names for one switch, because `pageExtensions` is
+ * global — it cannot enable one `page.dev.tsx` and not another. Keeping both
+ * names is honest about intent at the call site and costs nothing: a bench build
+ * that also carries the gallery is still a build that never ships.
  *
  * The opt-in is an explicit env var rather than `NODE_ENV === "development"`
  * alone, because gate G5 has to prove the worker and `.wasm` boot **in a
  * production build** — under the production CSP, with the real
  * `immutable`-cached `/wasm/*` headers, and through whatever Turbopack does to a
  * TypeScript module worker when it optimises. A dev-only route cannot be asked
- * that question at all. `PZGIF_ENABLE_BENCH=1 pnpm build` answers it; ordinary
- * builds do not set the flag, and `e2e/app-shell.spec.ts` asserts the 404.
+ * that question at all. `PZGIF_ENABLE_BENCH=1 pnpm build` answers it for the
+ * harness; `PZGIF_ENABLE_DEV_ROUTES=1 pnpm build` restores the gallery so its
+ * E2E suite can run. Ordinary builds set neither, and `e2e/app-shell.spec.ts`
+ * asserts both 404s.
  */
-const benchRouteEnabled =
+const devRoutesEnabled =
   process.env.NODE_ENV === "development" ||
-  process.env.PZGIF_ENABLE_BENCH === "1";
+  process.env.PZGIF_ENABLE_BENCH === "1" ||
+  process.env.PZGIF_ENABLE_DEV_ROUTES === "1";
 
-const devOnlyPageExtensions = benchRouteEnabled ? ["dev.tsx"] : [];
+const devOnlyPageExtensions = devRoutesEnabled ? ["dev.tsx"] : [];
 
 const nextConfig: NextConfig = {
   pageExtensions: [...devOnlyPageExtensions, "tsx", "ts", "jsx", "js"],

@@ -64,6 +64,13 @@ const eslintConfig = defineConfig([
     // Ours:
     "playwright-report/**",
     "test-results/**",
+    // The Cloudflare adapter's build output: a bundled copy of the Next server
+    // plus our own compiled code. Linting it reports thousands of problems in
+    // third-party bundles and, worse, reports them against files that are
+    // regenerated on every build — so `pnpm lint` would pass or fail depending
+    // on whether `pnpm cf:build` had run.
+    ".open-next/**",
+    ".wrangler/**",
   ]),
 ]);
 

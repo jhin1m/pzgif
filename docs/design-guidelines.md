@@ -674,6 +674,8 @@ Taken from the design-direction report §5 and tech-stack.md §6. These are poli
 
 Flipping the flag is a redeploy, which is the same ceremony as adding the provider script. `/dev/states` passes `demo` to keep the §5.10 quarantine styling inspectable and testable while ads are off; nothing else may.
 
+**[Amended 2026-08-07] `/dev/states` is dev-only.** It is now `page.dev.tsx`, recognised as a route only under `PZGIF_ENABLE_DEV_ROUTES=1` (or `next dev`), so a production build contains neither it nor the `demo` slots it renders. Reviewing the gallery — including the §5.10 quarantine — means `PZGIF_ENABLE_DEV_ROUTES=1 pnpm build`. `noindex` was never the point: it asks a crawler not to list the page and does nothing about the gallery-only JS in the deployment.
+
 ### 8.1 Approved slot map
 
 | Page type | Slot | Size | Position | Condition |

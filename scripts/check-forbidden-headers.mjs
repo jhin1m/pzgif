@@ -45,6 +45,9 @@ const SCAN_EXTENSIONS = new Set([
   ".mjs",
   ".cjs",
   ".json",
+  // `wrangler.jsonc` configures the host runtime — compatibility flags included.
+  // It is exactly the file class this guard exists for, and it was unscanned.
+  ".jsonc",
   ".yml",
   ".yaml",
   ".toml",

@@ -1,3 +1,4 @@
+import sourceRepo from "../../source-repo.json";
 import wasmVersion from "../../wasm-version.json";
 
 /**
@@ -28,9 +29,16 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pzgif.com";
  */
 export const ADS_ENABLED = process.env.NEXT_PUBLIC_ADS_ENABLED === "1";
 
-/** Public repository holding the Corresponding Source (AGPL-3.0 §6). */
+/**
+ * Public repository holding the Corresponding Source (AGPL-3.0 §6).
+ *
+ * The default lives in `source-repo.json` because `scripts/check-source-sha.mjs`
+ * needs the same value, and a literal in both files is what let it be wrong in
+ * both at once for the whole of Phase 2 — pointing the footer's Source link at a
+ * repository that does not exist.
+ */
 export const SOURCE_REPO_URL =
-  process.env.NEXT_PUBLIC_SOURCE_REPO_URL ?? "https://github.com/pzgif/pzgif";
+  process.env.NEXT_PUBLIC_SOURCE_REPO_URL ?? sourceRepo.url;
 
 /**
  * The commit this bundle was built from.
@@ -41,9 +49,11 @@ export const SOURCE_REPO_URL =
  * pinned to the exact SHA, and `scripts/check-source-sha.mjs` refuses to deploy
  * when that SHA is not pushed and publicly reachable.
  *
- * `VERCEL_GIT_COMMIT_SHA` and `CF_PAGES_COMMIT_SHA` are injected by the two
- * hosts under consideration; `PZGIF_COMMIT_SHA` is the explicit escape hatch for
- * any other CI.
+ * The value is resolved in `next.config.ts` and inlined through `env`, so the
+ * host variables are read at build time and nothing here reads the environment
+ * at runtime. `WORKERS_CI_COMMIT_SHA` is the one Cloudflare Workers Builds
+ * injects — distinct from Pages' `CF_PAGES_COMMIT_SHA`, and the reason this
+ * chain silently missed on the host that was actually chosen.
  */
 export const BUILD_COMMIT_SHA =
   process.env.NEXT_PUBLIC_COMMIT_SHA?.trim() || "";

@@ -1,0 +1,4 @@
+{
+  "url": "https://github.com/jhin1m/pzgif",
+  "why": "The public repository holding the Corresponding Source (AGPL-3.0 §6). Read by src/lib/site-config.ts, which builds the footer link, and by scripts/check-source-sha.mjs, which refuses to deploy a commit nobody can fetch from it. It lived as a literal in both of those and was wrong in both at once — a 404 on the footer's Source link is an actual licence violation, not a cosmetic bug. Do not duplicate the value anywhere else; NEXT_PUBLIC_SOURCE_REPO_URL overrides it per deployment."
+}

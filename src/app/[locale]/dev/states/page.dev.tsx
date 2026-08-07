@@ -45,10 +45,34 @@ import { AFTER_FRAME, BEFORE_FRAME } from "./sample-frames";
  *  3. **The keyboard sweep.** Tabbing this page reaches every interactive
  *     control in the product exactly once.
  *
- * It is `noindex` and absent from the sitemap. It is *not* excluded from the
- * build: the components it renders are the shipped ones, so a build that cannot
- * render this page is a build with a broken component library, and finding that
- * out in CI is the point.
+ * **It is dev-only.** The `.dev.tsx` extension is only recognised as a page when
+ * `PZGIF_ENABLE_DEV_ROUTES=1` (or `PZGIF_ENABLE_BENCH=1`, or `next dev`), so an
+ * ordinary production build contains neither this route nor its module graph.
+ *
+ * That reverses an earlier decision, and the reasoning it replaces is worth
+ * keeping: the components rendered here are the shipped ones, so a build that
+ * cannot render this page has a broken component library, and CI is where that
+ * should surface. True — but it argues for *building* the page, not for
+ * *serving* it. A production deployment gains nothing from a gallery of every
+ * internal state, and `noindex` only asks a crawler not to index it; it neither
+ * removes the ~40 KB of gallery-only JS from the deployment nor stops anyone
+ * reading it. The compile-time guarantee comes back with one env var, which is
+ * what CI sets.
+ *
+ * The gallery's own E2E suite is skipped without that var, so it does not travel
+ * with the ordinary build — but it is not lost. CI runs it in its own job with
+ * the flag set (`.github/workflows/ci.yml`, `component-gallery`), which is also
+ * what keeps this file compiling. Locally:
+ * `PZGIF_ENABLE_DEV_ROUTES=1 pnpm build && PZGIF_ENABLE_DEV_ROUTES=1 pnpm test:e2e component-states`.
+ *
+ * One open defect lives there: WebKit puts something ahead of the skip link in
+ * this page's tab order. Marked `test.fail()`, not skipped, so a fix announces
+ * itself. Phase 11 owns it.
+ *
+ * The other two long-standing failures on this page are gone, measured rather
+ * than assumed: the 40px overflow at 320px was the ad slot's `aspect-ratio`
+ * floor transferring a 300px minimum width, fixed in the §8 reservation change,
+ * and the FAQ-panel height check now passes repeatedly.
  */
 
 export const metadata: Metadata = {

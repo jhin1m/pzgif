@@ -1,0 +1,48 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pzgif",
+  "main": ".open-next/worker.js",
+
+  // Must be 2024-09-23 or later for the adapter. Pinned to the workerd build
+  // that ships with the wrangler version in devDependencies — a date ahead of
+  // the local runtime silently changes behaviour between preview and production.
+  "compatibility_date": "2026-08-01",
+
+  // `nodejs_compat` is what lets the Next server run at all; the adapter
+  // requires the Node.js runtime rather than the edge one.
+  //
+  // `global_fetch_strictly_public` makes `fetch()` inside the Worker go out to
+  // the public internet instead of looping back into this Worker. Next fetches
+  // its own origin during rendering, and without this the loopback is what turns
+  // a prerender into a hang.
+  //
+  // Nothing here may introduce cross-origin isolation — no COOP, no COEP, ever.
+  // That breaks Google ad serving, which is the revenue model. See CLAUDE.md.
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+
+  "assets": {
+    "directory": ".open-next/assets",
+    // The binding name is fixed by the adapter; renaming it breaks asset serving.
+    "binding": "ASSETS"
+  },
+
+  // `pzgif.<subdomain>.workers.dev` would otherwise serve the entire site from a
+  // second origin. For a product whose binding resource is index age, a
+  // crawlable duplicate is a real cost — and the `robots.txt` and `sitemap.xml`
+  // it would serve there advertise `pzgif.com` URLs, so the two disagree.
+  // Attach the custom domain in the dashboard; see the runbook §2b.
+  "workers_dev": false,
+
+  "observability": {
+    "enabled": true
+  }
+
+  // Deliberately absent:
+  //
+  // `services.WORKER_SELF_REFERENCE` and an R2 incremental cache. Both exist to
+  // serve ISR — revalidation, on-demand cache purge, a shared cache across
+  // isolates. This app has none: every route is statically prerendered at build
+  // time, `cacheComponents` is off, and there is no server data to cache.
+  // `pnpm check:static` fails the build if that ever stops being true, and that
+  // is the signal to revisit this comment.
+}

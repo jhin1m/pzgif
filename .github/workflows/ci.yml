@@ -69,12 +69,49 @@ jobs:
       - name: E2E tests
         run: pnpm test:e2e
 
+      # The adapter build is the only path that actually ships, and it is the
+      # most fragile thing here: `src/middleware.ts` is a workaround for an
+      # adapter limitation, on a removal schedule set by the Next team. Without
+      # this step the first sign of either changing would be a failed deploy.
+      #
+      # It does not assert the runtime — that needs workerd, which
+      # `playwright.config.ts` does not drive. See the runbook.
+      - name: Check the Cloudflare adapter build still succeeds
+        run: pnpm cf:build
+
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  # `/dev/states` is not in a production build, so the `verify` job above skips
+  # the whole component-gallery suite — and with it the only automated coverage
+  # of focus order, computed styles and the WebKit `hidden="until-found"`
+  # behaviour. That coverage is the reason the gallery exists; losing it silently
+  # to a deployment fix would be a bad trade made by accident.
+  #
+  # This job rebuilds with the route opted in and runs that suite alone. It also
+  # proves the page still compiles, which the main build no longer does.
+  component-gallery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PZGIF_ENABLE_DEV_ROUTES: "1"
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium webkit
+      - run: pnpm test:e2e component-states
 
   # AGPL-3.0 §6 requires the Corresponding Source for the version conveyed.
   # Deploying a commit that is not public would breach it, so this gates main.

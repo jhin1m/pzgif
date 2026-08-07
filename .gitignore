@@ -37,6 +37,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# cloudflare — adapter output and local workerd state
+.open-next/
+.wrangler/
+
 # testing
 coverage/
 test-results/

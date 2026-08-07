@@ -19,28 +19,54 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const isCI = process.env.CI === "true" || process.env.CI === "1";
-if (!isCI) {
-  console.log("Not in CI — skipping the AGPL source-offer check.");
-  process.exit(0);
+/**
+ * Must resolve to the same SHA as `resolveCommitSha()` in next.config.ts,
+ * including the `git rev-parse` fallback: this script proves the fetchability of
+ * whatever that function bakes into the footer link, and any divergence would
+ * prove it about a different commit.
+ *
+ * `||`, not `??` — a host that sets the variable to the empty string would
+ * otherwise short-circuit the chain, and `next.config.ts` treats empty as absent.
+ *
+ * `WORKERS_CI_COMMIT_SHA` is Cloudflare Workers Builds; Pages uses
+ * `CF_PAGES_COMMIT_SHA`, and the two are not interchangeable.
+ *
+ * This used to exit 0 outside CI, which quietly turned `pnpm deploy` into an
+ * ungated deploy on a developer's machine — the one path where an unpushed
+ * commit is likeliest. It now resolves the SHA the same way the build does and
+ * checks it for real, wherever it runs.
+ */
+function resolveCommitSha() {
+  const fromHost =
+    process.env.PZGIF_COMMIT_SHA ||
+    process.env.WORKERS_CI_COMMIT_SHA ||
+    process.env.VERCEL_GIT_COMMIT_SHA ||
+    process.env.CF_PAGES_COMMIT_SHA ||
+    process.env.GITHUB_SHA;
+  if (fromHost) return fromHost.trim();
+
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return "";
+  }
 }
 
-const sha = (
-  process.env.PZGIF_COMMIT_SHA ??
-  process.env.VERCEL_GIT_COMMIT_SHA ??
-  process.env.CF_PAGES_COMMIT_SHA ??
-  process.env.GITHUB_SHA ??
-  ""
-).trim();
+const sha = resolveCommitSha();
 
 if (!sha) {
   console.error(
-    "No build commit SHA in the environment. The footer source link would fall" +
-      "\nback to the repository root, which is not a version-accurate source offer.",
+    "No build commit SHA in the environment and no git checkout to fall back on." +
+      "\nThe footer source link would degrade to the repository root, which is not" +
+      "\na version-accurate source offer.",
   );
   process.exit(1);
 }
@@ -50,8 +76,13 @@ if (!/^[0-9a-f]{40}$/i.test(sha)) {
   process.exit(1);
 }
 
+// Same default as `SOURCE_REPO_URL` in src/lib/site-config.ts, from the same
+// file. Checking a different repository than the footer links to would make this
+// gate pass while the link 404s, which is the exact failure it exists to stop.
+const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const repoUrl =
-  process.env.NEXT_PUBLIC_SOURCE_REPO_URL ?? "https://github.com/pzgif/pzgif";
+  process.env.NEXT_PUBLIC_SOURCE_REPO_URL ??
+  JSON.parse(readFileSync(join(repoRoot, "source-repo.json"), "utf8")).url;
 
 const scratch = mkdtempSync(join(tmpdir(), "pzgif-source-offer-"));
 

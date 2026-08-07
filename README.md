@@ -143,7 +143,7 @@ pnpm dev          # Turbopack dev server on :3000
 
 ```
 src/app/[locale]/          SSG shells — [locale]/layout.tsx IS the root layout
-src/proxy.ts               next-intl rewrite (Next 16 renamed middleware.ts)
+src/middleware.ts          next-intl rewrite — deprecated name on purpose
 src/lib/media/             the engine — all of it inside a Web Worker
 src/lib/tools/registry.ts  one typed source: routes, nav, footer, sitemap
 src/content/               hand-written per-tool copy — data files, not .tsx

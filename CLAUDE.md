@@ -65,13 +65,23 @@ pnpm test:e2e            # playwright, against a production build
 pnpm check:forbidden     # cross-origin-isolation guard (run before build)
 pnpm check:static        # every route statically prerendered (run after build)
 pnpm copy:wasm           # copy .wasm out of node_modules into public/wasm/<version>/
+pnpm preview             # build + run on workerd locally — the real deploy target
+pnpm deploy              # check:source-sha, then build and ship to Cloudflare
 ```
+
+`pnpm start` runs the Next server; **`pnpm preview` runs workerd**, and only the
+second one is production. Header behaviour differs between them: Cloudflare
+serves static assets without invoking the Worker, so `headers()` in
+`next.config.ts` never reaches `/wasm/*` or `/_next/static/*`. `public/_headers`
+is what covers those in production — change one, change the other.
 
 ## Layout
 
 ```
 src/app/[locale]/        SSG shells. [locale]/layout.tsx IS the root layout
-src/proxy.ts             next-intl rewrite. Next 16 renamed middleware.ts → proxy.ts
+src/middleware.ts        next-intl rewrite. Next 16 renamed this to proxy.ts and
+                         made it Node-only; the Cloudflare adapter rejects that,
+                         so the deprecated name is deliberate. See the file.
 src/components/          shared components; ui/ holds shadcn primitives
 src/lib/media/           THE ENGINE — all of it inside a Web Worker (Phase 4)
 src/lib/tools/registry.ts  ONE typed source for routes, nav, footer, sitemap

@@ -5,7 +5,12 @@ import { cn } from "@/lib/utils";
  *
  * A placeholder by decision, not by omission: the brand mark does not exist yet
  * and the bootstrap decision was to ship a text wordmark rather than block on
- * one. Favicon legibility at 32px is still untested (design-guidelines §Open 3).
+ * one (design-guidelines §Open 3).
+ *
+ * `src/app/icon.svg` draws the same figure with different numbers — plate,
+ * compact lobes, heavier stroke — because 16px will not hold this one. That is
+ * an optical variant of this mark, not a second mark, and the two move
+ * together: a real logo replaces both.
  *
  * Both marks are decorative — the wordmark beside them carries the name — so
  * they are `aria-hidden` and never given a title.

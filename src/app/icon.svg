@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="PZGIF">
+  <!--
+    PZGIF favicon: the loop mark from src/components/brand/marks.tsx, redrawn
+    for a 16px tab strip. Four deliberate deviations, each because the tab strip
+    is not the site header.
+
+    1. Solid brand plate. A hairline mark on a transparent ground vanishes
+       against a white tab bar and again against a dark one; the plate is what
+       makes the icon findable at 16px in either theme.
+    2. Compact geometry. The header mark is 24 wide by 11 tall — at 16px that
+       leaves roughly six device pixels of height to spend on stroke, counter,
+       stroke, and the counters close up. This draw pulls the two lobes from 13
+       units apart to 10 and grows their radius from 5.5 to 6.4, so the same
+       figure stands 12.8 tall in the same width. It reads as the same mark and
+       measures differently, which is the trade a favicon is supposed to make.
+    3. Stroke 3.2 rather than 2.6, so the line survives the downsample.
+    4. Colours are literals. The browser serves this file standalone, where
+       globals.css does not apply. They track the primary-600 (#3D5AFE) and
+       accent-300 (#2DD4C0) primitives and must be changed by hand if those
+       move. XML comments cannot carry the CSS custom property names, which
+       contain a double hyphen.
+
+    favicon.ico is generated from this file, except for its 16px frame, which
+    comes from a thinner-stroked variant. See docs/design-guidelines.md.
+  -->
+  <rect width="32" height="32" rx="7" fill="#3D5AFE"/>
+  <path d="M11 9.6A6.4 6.4 0 1 0 11 22.4C15.2 22.4 16.8 9.6 21 9.6A6.4 6.4 0 1 1 21 22.4C16.8 22.4 15.2 9.6 11 9.6Z"
+        stroke="#FFFFFF" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+  <circle cx="21" cy="16" r="2.4" fill="#2DD4C0"/>
+</svg>

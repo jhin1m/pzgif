@@ -185,6 +185,48 @@ export const ALL_ROUTES: readonly ToolDefinition[] = [
   ...PRESET_ROUTES,
 ];
 
+/**
+ * A legal or trust page. Structure only, exactly like a tool route.
+ *
+ * ── Why these live in the registry but outside `ALL_ROUTES` ─────────────────
+ * The footer and the sitemap must not be able to disagree with reality about
+ * which pages exist, and this file is the one place that answers that question.
+ * But a legal page is not a tool: it has no input or output formats, nothing
+ * routes a file to it, and it must never appear in the tool nav, the related
+ * grid or `chainTargets()`. Keeping it a separate array and a separate type
+ * means every existing consumer of `ALL_ROUTES` keeps the exact meaning it has
+ * today, and none of them had to be audited for this addition.
+ *
+ * `name` is a nav label, not prose — same class of string as a tool's `name`.
+ * Every word of the pages themselves lives in `src/content/legal/`.
+ */
+export interface LegalRoute {
+  /** URL segment, and the filename of its content file. */
+  readonly slug: string;
+  /** Footer label. */
+  readonly name: string;
+}
+
+/**
+ * The six pages this deployment serves, in footer order.
+ *
+ * Trust-building pages first, obligations after: a visitor deciding whether to
+ * drop a file scans for "who is this", not for "what are the terms".
+ *
+ * Acceptable Use and an Accessibility statement complete the set of eight the
+ * plan calls for. They are not listed here because they are not built, and a
+ * footer link to a page that does not exist is a 404 in the internal link graph
+ * — the same rule `status: "live"` enforces for tools.
+ */
+export const LEGAL_ROUTES: readonly LegalRoute[] = [
+  { slug: "about", name: "About" },
+  { slug: "contact", name: "Contact" },
+  { slug: "terms", name: "Terms" },
+  { slug: "privacy", name: "Privacy" },
+  { slug: "cookies", name: "Cookie Policy" },
+  { slug: "dmca", name: "DMCA" },
+] as const;
+
 export const TOOL_GROUP_ORDER: readonly ToolGroup[] = [
   "edit",
   "convert",

@@ -1,0 +1,79 @@
+{
+  "slug": "dmca",
+  "title": "Copyright and takedown",
+  "updated": "2026-08-07",
+  "meta": {
+    "title": "Copyright and DMCA takedown",
+    "description": "PZGIF hosts no visitor content, so there is nothing uploaded to take down. This page explains what can be, and how to send a valid notice."
+  },
+  "lead": "**PZGIF hosts no visitor content.** Files opened in these tools are processed inside your own browser and are never uploaded, so there is no library, no gallery, no shared link and no stored copy — nothing a takedown notice could be aimed at. That makes this page shorter than most, and it is worth saying why before setting out the procedure.",
+  "sections": [
+    {
+      "heading": "Why there is nothing uploaded to take down",
+      "level": 2,
+      "paragraphs": [
+        "Most sites in this category receive your file, process it on a server and keep it for a while. That creates a hosting relationship, and with it a genuine takedown surface: a URL somebody else can open.",
+        "This site has neither. There is no upload endpoint, no storage bucket and no result URL. A GIF processed here exists in one place — the tab of the person who processed it, and their downloads folder afterwards. If material you own has been altered using these tools and then published somewhere, the place it was published is where a notice will accomplish something. A notice sent here cannot remove it, because it was never here."
+      ]
+    },
+    {
+      "heading": "What can be taken down",
+      "level": 2,
+      "paragraphs": [
+        "The site's own material: its written content, screenshots, sample or demonstration media, icons, and brand assets. If any of that infringes your copyright, it can be removed and will be, and a notice about it is genuinely useful.",
+        "The source code is separate. It is published under AGPL-3.0 in the public repository linked in the footer; a copyright claim against code in it is best raised through the repository host's own process as well as here, since that is where the copy lives."
+      ]
+    },
+    {
+      "heading": "Sending a notice",
+      "level": 2,
+      "paragraphs": [
+        "Send it to **contact@pzgif.com** with \"Copyright notice\" in the subject line. It reaches the operator directly.",
+        "To be effective under 17 U.S.C. §512(c)(3), a notice must include all six of the following. A notice missing any of them can still be acted on where the claim is clear, but the elements exist because each one is needed to identify the material and the claim:",
+        "**1.** A physical or electronic signature of the copyright owner, or of someone authorised to act on their behalf.",
+        "**2.** Identification of the copyrighted work claimed to have been infringed — or, for several works at one site, a representative list.",
+        "**3.** Identification of the material claimed to be infringing, with **enough detail to locate it**. A URL on this site is the most useful form.",
+        "**4.** Your contact details: address, telephone number and email address.",
+        "**5.** A statement that you believe in good faith that the use is not authorised by the copyright owner, its agent, or the law.",
+        "**6.** A statement that the information in the notice is accurate, and — **under penalty of perjury** — that you are the owner or are authorised to act on the owner's behalf."
+      ]
+    },
+    {
+      "heading": "What happens next",
+      "level": 2,
+      "paragraphs": [
+        "The material is reviewed and, where the claim is well-founded, removed or replaced promptly. You will get a reply either way. Since all the material on this site is the operator's own, resolving a notice is a matter of checking and editing a page rather than adjudicating between two strangers."
+      ]
+    },
+    {
+      "heading": "If you think a removal was wrong",
+      "level": 2,
+      "paragraphs": [
+        "Send a counter-notice to the same address, including your signature, identification of what was removed and where it appeared, a statement under penalty of perjury that you believe in good faith it was removed as a result of mistake or misidentification, and your contact details together with consent to the jurisdiction of an appropriate court.",
+        "In the ordinary case this path is close to theoretical here — there is no third party whose material could be removed by mistake — but it exists so the process is symmetrical rather than one-directional."
+      ]
+    },
+    {
+      "heading": "Repeat infringement",
+      "level": 2,
+      "paragraphs": [
+        "There is no account here to terminate, so a repeat-infringer policy in its usual form has nothing to operate on. What it means in practice is that material subject to a well-founded notice is not reinstated, and any contributed material from a source that has repeatedly infringed will not be accepted in future."
+      ]
+    },
+    {
+      "heading": "False claims",
+      "level": 2,
+      "paragraphs": [
+        "Under 17 U.S.C. §512(f), someone who knowingly and materially misrepresents that material is infringing — or that it was removed by mistake — can be liable for damages, including costs and legal fees. If you are not certain you hold the rights you are claiming, take advice before sending a notice."
+      ]
+    },
+    {
+      "heading": "A note on jurisdiction",
+      "level": 2,
+      "paragraphs": [
+        "The operator is in Australia, where the equivalent regime is the safe-harbour scheme in the **Copyright Act 1968 (Cth)** rather than the DMCA. The DMCA form is set out above because it is the format rights-holders and their agents already use, and notices in that form are accepted and acted on regardless of which statute is doing the work.",
+        "Nothing on this page is a waiver of any defence, and none of it is legal advice."
+      ]
+    }
+  ]
+}

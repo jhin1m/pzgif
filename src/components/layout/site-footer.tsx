@@ -3,6 +3,7 @@ import { BrandMark, Wordmark } from "@/components/brand/marks";
 import { Link } from "@/i18n/navigation";
 import { BUILD_COMMIT_SHA, sourceUrlForThisBuild } from "@/lib/site-config";
 import {
+  LEGAL_ROUTES,
   TOOL_GROUP_ORDER,
   routesInGroup,
   type ToolGroup,
@@ -79,7 +80,27 @@ export async function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line pt-5 text-caption text-fg-muted">
+        {/* Legal links sit in the bottom bar, not as a fourth column above.
+            Those three columns are the tool inventory; a legal column beside
+            them would read as "Terms is a tool you can use on a file". Here they
+            keep company with the licence line and the source offer, which is
+            what they actually are — the site's terms of engagement. */}
+        <nav aria-label={t("legal")} className="mt-8 border-t border-line pt-5">
+          <ul className="flex flex-wrap gap-x-4 gap-y-2">
+            {LEGAL_ROUTES.map((route) => (
+              <li key={route.slug}>
+                <Link
+                  href={`/${route.slug}`}
+                  className="text-caption text-fg-muted no-underline hover:text-brand hover:underline hover:underline-offset-2"
+                >
+                  {route.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-caption text-fg-muted">
           <a
             href={sourceUrlForThisBuild}
             title={t("sourceTitle")}

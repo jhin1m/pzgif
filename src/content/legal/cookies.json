@@ -1,0 +1,56 @@
+{
+  "slug": "cookies",
+  "title": "Cookie Policy",
+  "updated": "2026-08-07",
+  "meta": {
+    "title": "Cookie Policy",
+    "description": "PZGIF currently sets no cookies at all. This page explains the browser storage it does use, and what will change when advertising is switched on."
+  },
+  "lead": "**PZGIF sets no cookies.** Not \"only essential cookies\" — none. There is no cookie banner on this site today because there is nothing to ask you about. This page explains what the site does store in your browser instead, and what will change when advertising is switched on.",
+  "sections": [
+    {
+      "heading": "What a cookie is, and why there are none here",
+      "level": 2,
+      "paragraphs": [
+        "A cookie is a small piece of data a site asks your browser to store and then send back with every subsequent request. That last part — sent back automatically, to a server — is what makes cookies useful for logins and useful for tracking, and it is why they attract the law they do.",
+        "PZGIF has no login and no server that processes your work, so it has nothing to keep on a server and nothing to recognise you by between visits. The code contains no instruction to set a cookie anywhere, and the repository's test suite checks that — both for cookies written directly and for the library defaults that would otherwise set one quietly. If a cookie is ever added, that check fails until this page has been rewritten to describe it."
+      ]
+    },
+    {
+      "heading": "What the site does store on your device",
+      "level": 2,
+      "paragraphs": [
+        "Two things, neither of which is a cookie and neither of which is transmitted anywhere. If you open your browser's developer tools and look at site data, these are what you will find — listed here so that finding them is not a surprise.",
+        "**Theme preference**, in local storage. One value, light or dark, so the page does not flash the wrong colours while it loads.",
+        "**Offline cache**, in Cache Storage. This site's own pages and its WebAssembly binaries, saved by a service worker so the tools load quickly and keep working on a poor connection. It holds the site's code, never your files.",
+        "That is the complete list. In particular, **nothing you process is stored** — not in local storage, not in IndexedDB, not anywhere. Sending a result from one tool into the next passes the file through the page's own memory rather than putting it down somewhere, which is why reloading mid-handoff loses it."
+      ]
+    },
+    {
+      "heading": "Clearing them",
+      "level": 2,
+      "paragraphs": [
+        "Your browser's \"clear site data\" control removes both. Nothing breaks: you lose the saved theme, the offline cache rebuilds itself on the next visit, and there was nothing else to lose. No setting here needs to survive, which is a side effect of a site that has no account to attach settings to."
+      ]
+    },
+    {
+      "heading": "What changes when advertising starts",
+      "level": 2,
+      "paragraphs": [
+        "PZGIF is funded by display advertising. It is not running yet, and when it is, the picture on this page changes — so here is the shape of the change in advance.",
+        "**A consent choice will appear**, once, in a bar at the bottom of the page. It will not cover the tool, it will not be a full-screen overlay, and it will not be the sort of banner that makes refusing harder than accepting.",
+        "**Necessary storage** — the three items above — stays as it is and needs no consent, because none of it identifies you or follows you anywhere.",
+        "**Analytics** would let the operator see which tools people use and where they get stuck. It is off until you accept.",
+        "**Advertising** would allow an ad network to set cookies and read identifiers, potentially to personalise ads. It is off until you accept, and refusing it means you see ads that are not personalised rather than no site.",
+        "Nothing in the last two categories loads before you have chosen. The choice will be revisitable from the footer, and this page will be updated to name each provider and what it sets on the day any of it goes live."
+      ]
+    },
+    {
+      "heading": "More",
+      "level": 2,
+      "paragraphs": [
+        "The Privacy Policy covers everything else — server logs, your rights, and who is responsible. Questions about either go to contact@pzgif.com."
+      ]
+    }
+  ]
+}

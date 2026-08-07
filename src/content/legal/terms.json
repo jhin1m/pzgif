@@ -1,0 +1,120 @@
+{
+  "slug": "terms",
+  "title": "Terms of Service",
+  "updated": "2026-08-07",
+  "meta": {
+    "title": "Terms of Service",
+    "description": "The terms for using PZGIF's browser-based GIF tools. No account, no upload, no licence taken over anything you process. Governed by Australian law."
+  },
+  "lead": "These terms cover your use of pzgif.com and the tools on it. They are shorter than most because the arrangement is simpler than most: nothing is uploaded, nothing is stored, no account exists, and nothing is charged.",
+  "sections": [
+    {
+      "heading": "In plain language",
+      "level": 2,
+      "paragraphs": [
+        "This summary is here so the clauses below are read rather than scrolled past. **It is a summary, not the operative text** — where it and a clause differ, the clause is what applies.",
+        "The tools are free and you can use them for anything you have the right to use them for, including commercially. Your files stay yours, entirely, and no licence over them is taken here — that one is not standard, and it is worth noticing. The tools come without a warranty, though in Australia there are consumer guarantees that cannot be signed away and are not signed away below. Do not use the site to process material you have no right to, and do not attack it. Australian law governs any dispute."
+      ]
+    },
+    {
+      "heading": "Who these terms are with",
+      "level": 2,
+      "paragraphs": [
+        "PZGIF is operated by **Louis Le**, an individual in **Australia**, reachable at **contact@pzgif.com**. \"We\" and \"the operator\" below mean that person. \"You\" means whoever is using the site.",
+        "Using the site means you accept these terms. If you do not, the remedy is to stop using it — there is no account to close and nothing held that would need deleting."
+      ]
+    },
+    {
+      "heading": "What you are given",
+      "level": 2,
+      "paragraphs": [
+        "A personal, worldwide, non-exclusive, revocable permission to use the tools on this site for any lawful purpose, including commercial work, at no charge and without an account.",
+        "There is no usage quota, but there is a physical limit: the tools run on your own device, so what you can process is bounded by your device's memory and processor rather than by any allowance granted here. A tool that declines a job is reporting that limit, not enforcing one."
+      ]
+    },
+    {
+      "heading": "Your files stay yours",
+      "level": 2,
+      "paragraphs": [
+        "**No licence, ownership interest or other right over anything you process is granted to the operator by these terms.** Nothing you open here is transmitted to the operator or to anyone else, so there is nothing for such a licence to attach to.",
+        "This clause is unusual and it is deliberate. Most services in this category take a broad, sublicensable, worldwide licence over uploaded content, justified as a technical necessity of hosting and processing it. That justification does not exist where nothing is hosted and nothing is processed on anyone else's machine. If a future version of this site ever does receive a file, that will require a change to this section, and the change will be dated at the top of this page."
+      ]
+    },
+    {
+      "heading": "How you may not use the site",
+      "level": 2,
+      "paragraphs": [
+        "Do not use the tools on material you have no legal right to process — content that infringes copyright, that you obtained without permission, or whose processing would break a law that applies to you. The operator has no way of knowing what you are working on, which puts that judgement entirely with you.",
+        "Do not use the site to produce material that is unlawful — child sexual abuse material, content that incites violence, or anything else prohibited where you are.",
+        "Do not attack the site or degrade it for other people: no attempt to gain unauthorised access to the infrastructure, no automated scraping at a rate that burdens it, no interference with the ads or the scripts other visitors are served.",
+        "The code is AGPL-3.0 and you may run, study, modify and redistribute it under that licence. What you may not do is take the site's copy, brand and design and pass off the result as PZGIF."
+      ]
+    },
+    {
+      "heading": "Intellectual property",
+      "level": 2,
+      "paragraphs": [
+        "Two licences apply to two disjoint sets of files, and both are stated in the public repository.",
+        "**The software is licensed under AGPL-3.0.** The link in the footer resolves to the exact commit this deployment was built from, which is what the licence requires — the corresponding source of the version actually conveyed to you, not whatever happens to be on the main branch today.",
+        "**The site's written content, brand name, logo and design are all rights reserved** and are not covered by the AGPL. Running your own instance of the software is a right the licence gives you; running it under this site's name and copy is not.",
+        "Requests to use the copy or brand assets go to contact@pzgif.com."
+      ]
+    },
+    {
+      "heading": "No warranty",
+      "level": 2,
+      "paragraphs": [
+        "The tools are provided **as is** and **as available**. To the extent the law permits, no warranty is given that a tool will be uninterrupted, error-free, available at any particular time, compatible with any particular device or browser, or that its output will meet a specific need.",
+        "Two practical consequences. The tools run in your browser, so a browser update, an extension or an unusual device configuration can break something that worked yesterday, and the operator will often not know until someone writes in. And because nothing is stored here, **an output you do not download is gone** — closing the tab is the end of it. Keep your own copies of anything you care about."
+      ]
+    },
+    {
+      "heading": "Australian Consumer Law",
+      "level": 2,
+      "paragraphs": [
+        "**Nothing in these terms excludes, restricts or modifies any guarantee, right or remedy you have under the Australian Consumer Law or any other law that cannot lawfully be excluded.** If a term above appears to do so, it does not apply to that extent.",
+        "Where the Australian Consumer Law implies a guarantee into the supply of these services and the supply is not of a kind ordinarily acquired for personal, domestic or household use, liability for failing to comply with that guarantee is limited — so far as the law allows — to supplying the services again, or paying the cost of having them supplied again.",
+        "This section is not boilerplate imported from elsewhere. A liability clause drafted for another country and dropped onto an Australian operator's site is void where it conflicts with the consumer guarantees, and a void clause protects nobody."
+      ]
+    },
+    {
+      "heading": "Limitation of liability",
+      "level": 2,
+      "paragraphs": [
+        "Subject to the section above, and to the maximum extent the law allows, the operator is not liable for indirect, incidental, special or consequential loss, or for loss of data, profit, revenue or goodwill, arising from your use of the site.",
+        "Where liability cannot be excluded and is not covered by the consumer guarantees section, it is limited to AU$100 — which reflects what has been exchanged here, since the tools are free and no payment has been taken from you."
+      ]
+    },
+    {
+      "heading": "Third parties",
+      "level": 2,
+      "paragraphs": [
+        "The site is served through Cloudflare and links to third-party sites, including the source repository. The operator does not control those services or their content.",
+        "Display advertising will be introduced and is described in the Privacy Policy and the Cookie Policy. Advertisers and ad networks are independent of the operator; an ad appearing on this site is not an endorsement of it, and dealings you have with an advertiser are between you and them."
+      ]
+    },
+    {
+      "heading": "Availability and changes",
+      "level": 2,
+      "paragraphs": [
+        "Tools may be added, changed or withdrawn, and the site may be unavailable without notice. Since nothing here is paid for and no data is stored on your behalf, withdrawal costs you nothing but the inconvenience.",
+        "These terms may change. The date at the top is the date of the current text, and continuing to use the site after a change means accepting it. Every past version is in the public repository, which is a more honest change log than a line promising to keep one."
+      ]
+    },
+    {
+      "heading": "Governing law",
+      "level": 2,
+      "paragraphs": [
+        "These terms are governed by the laws of **Australia**, and you and the operator submit to the non-exclusive jurisdiction of the Australian courts.",
+        "If you are a consumer somewhere else, this clause does not deprive you of the protection of mandatory consumer law where you live."
+      ]
+    },
+    {
+      "heading": "The rest",
+      "level": 2,
+      "paragraphs": [
+        "If any provision here is unenforceable, it is severed and the rest continues to apply. A delay in enforcing a right is not a waiver of it. These terms, with the Privacy Policy and the Cookie Policy, are the whole agreement about your use of the site."
+      ]
+    }
+  ]
+}

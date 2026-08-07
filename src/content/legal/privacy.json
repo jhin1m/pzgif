@@ -1,0 +1,91 @@
+{
+  "slug": "privacy",
+  "title": "Privacy Policy",
+  "updated": "2026-08-07",
+  "meta": {
+    "title": "Privacy Policy",
+    "description": "Your files are processed inside your browser and are never uploaded. This policy sets out the small amount of ordinary web data PZGIF touches, and what happens when advertising is switched on."
+  },
+  "lead": "The short version: the files you process here never leave your device, so there is no copy of them to protect, disclose, retain or lose. What follows is about the small amount of ordinary web data any website unavoidably touches — and about advertising and analytics, which are not running yet but will be, and are described now so this page does not have to be quietly rewritten on the day they are.",
+  "sections": [
+    {
+      "heading": "Who is responsible",
+      "level": 2,
+      "paragraphs": [
+        "The controller of any personal data described here is **Louis Le**, operating PZGIF as an individual in **Australia**. Contact: **contact@pzgif.com**.",
+        "That is the whole organisation. There is no group of companies, no parent, and no affiliate this data is shared with, because there is nobody to share it with."
+      ]
+    },
+    {
+      "heading": "Your files",
+      "level": 2,
+      "paragraphs": [
+        "**Files you open in a PZGIF tool are never transmitted.** They are read by code running in your browser tab, decoded and re-encoded in a worker thread on your own processor, and handed back to you as a download. This site has no upload endpoint. There is no server in the path that could receive a file, which is a stronger statement than a promise not to look at one.",
+        "Two things are kept in your browser's storage to make the site work, and neither is a cookie, neither leaves your device, and neither contains anything you have processed:",
+        "**Cache Storage** holds this site's own pages and its WebAssembly binaries, placed there by a service worker so the tools keep working on a bad connection and load quickly on a repeat visit. It contains this site's code, never your content.",
+        "**Local storage** holds exactly one value: whether you chose the light or dark theme.",
+        "When you send a finished result from one tool straight into the next, the file is not written to storage at all — it is passed in the page's memory, from one screen to the other, and it is released the moment the second tool takes it. Reload the page and it is gone, because there was never a copy of it anywhere but in the tab.",
+        "You can clear the two stored items at any time through your browser's site-data controls. Doing so loses your theme preference and the offline cache, and nothing else."
+      ]
+    },
+    {
+      "heading": "Server logs",
+      "level": 2,
+      "paragraphs": [
+        "Pages, scripts and WebAssembly binaries are served from Cloudflare's network. Like every web server, it records the metadata of each request: the IP address it came from, the browser's user-agent string, the URL requested, the response status and a timestamp. An IP address is personal data in the EU and the UK, so this section exists even though the data is the most mundane kind a website generates.",
+        "The lawful basis is legitimate interest: serving the site at all requires answering requests, and keeping the logs briefly is what makes it possible to see that a denial-of-service attempt is happening. The logs are not used to build a profile, are not combined with anything else, are not sold, and are retained on Cloudflare's standard schedule rather than copied into any store operated by PZGIF.",
+        "Cloudflare acts as a processor for this purpose and operates internationally, so serving a page to a visitor in the EU may involve infrastructure outside it. Cloudflare's own data-protection commitments and transfer mechanisms cover that."
+      ]
+    },
+    {
+      "heading": "Analytics and advertising — not running yet",
+      "level": 2,
+      "paragraphs": [
+        "**As of the date at the top of this page, PZGIF runs no analytics, no advertising and no error reporting.** There is no third-party script on any page of this site. This section describes what will change when that is no longer true, so that the change is documented before it happens rather than after.",
+        "**A product measurement signal, without cookies or personal data.** To find out which tools are used and how often a job is refused on a phone, PZGIF will record a small event per job containing the tool name, a coarse device capability tier, whether the job succeeded, failed or was refused, and duration and input size as broad buckets. It will contain no filename, no file content, no identifier for you and no IP-derived value. It cannot be tied back to a person, which is why it will not require consent. The code that would send it is public, so that boundary is something you can check rather than something you have to accept.",
+        "**Analytics, and advertising, behind consent.** Beyond that, PZGIF intends to run a general analytics tool and a display advertising network. Both may set cookies or read identifiers, and the advertising network may use them to personalise the ads you see. Neither will be loaded until you have been asked. Where consent is required, the default is refusal: the relevant scripts stay unloaded until you choose otherwise, rather than loading first and asking afterwards.",
+        "When that happens, the Cookie Policy will name the specific providers and what each one sets, and this page will be dated accordingly."
+      ]
+    },
+    {
+      "heading": "Email you send",
+      "level": 2,
+      "paragraphs": [
+        "If you write to contact@pzgif.com, that message and your address are held in an ordinary mailbox for as long as needed to deal with what you wrote about, and longer where a legal or copyright matter makes a record necessary. Nothing is added to a mailing list; there is no mailing list."
+      ]
+    },
+    {
+      "heading": "Australian privacy law",
+      "level": 2,
+      "paragraphs": [
+        "The operator is an individual in Australia with an annual turnover well below AU$3 million, which means the small-business exemption in the **Privacy Act 1988 (Cth)** applies and the Act does not, as a matter of law, bind this site.",
+        "That exemption is stated here rather than left unmentioned, because relying quietly on one is the part that would deserve suspicion. **PZGIF handles personal information in line with the Australian Privacy Principles regardless**, and would notify affected individuals and the OAIC of an eligible data breach as though the Notifiable Data Breaches scheme applied.",
+        "This is a commitment that costs little to make, given how little data exists here to mishandle. If the operator's circumstances change so that the Act applies by law, this section will say so instead."
+      ]
+    },
+    {
+      "heading": "If you are in the EU or the UK",
+      "level": 2,
+      "paragraphs": [
+        "The GDPR and the UK GDPR apply to the processing described above. You have the right to access the personal data held about you, to have it corrected or erased, to restrict or object to its processing, to receive it in a portable form, and — once consent-based processing exists — to withdraw consent at any time without affecting what was done beforehand. Exercise any of these by writing to contact@pzgif.com.",
+        "You may complain to your national supervisory authority. In the UK that is the Information Commissioner's Office.",
+        "**On the Article 27 EU representative.** Article 27 requires a controller outside the EU to appoint a representative inside it, unless the exemption in Article 27(2)(a) applies. That exemption has been assessed and is relied on here: the processing is occasional, is limited to server request logs and — in future — consent-gated analytics, involves no special-category data and no criminal-conviction data, and is unlikely to result in a risk to the rights and freedoms of the people concerned.",
+        "This assessment is recorded rather than assumed, and it is revisited if the analytics or advertising described above move the processing beyond occasional. If a representative is appointed, this section will name them."
+      ]
+    },
+    {
+      "heading": "Children",
+      "level": 2,
+      "paragraphs": [
+        "PZGIF is not directed at children under 13 and does not knowingly collect their personal data. Since there is no account and no submitted content, there is in practice nothing collected from any visitor that identifies their age."
+      ]
+    },
+    {
+      "heading": "Changes to this policy",
+      "level": 2,
+      "paragraphs": [
+        "The date at the top is the date this text last changed. Material changes — in particular the day advertising or analytics goes live — will be reflected here at the same time as the change, not afterwards. Past versions are visible in the public source repository linked in the footer, which is a more reliable archive than a promise to keep one."
+      ]
+    }
+  ]
+}

@@ -52,6 +52,7 @@
     "source": "Source",
     "sourceTitle": "Browse the exact source of this deployment",
     "licence": "Code under AGPL-3.0. Site copy and brand assets are not.",
+    "legal": "Legal",
     "allTools": "All tools",
     "blurb": "Browser-native GIF tools. Your files stay on your device.",
     "trustShort": "No upload. No server copy."

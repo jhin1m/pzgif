@@ -1,0 +1,68 @@
+{
+  "slug": "about",
+  "title": "About PZGIF",
+  "updated": "2026-08-07",
+  "meta": {
+    "title": "About — who builds it and why it runs in your browser",
+    "description": "PZGIF is built by Louis Le, a solo developer in Australia. Every free tool runs inside your browser tab: no upload, no account, no server copy of your file."
+  },
+  "lead": "PZGIF is a set of GIF tools that never receive your file. The work happens inside the tab you already have open. This page explains who is behind that, why it was built this way, and where the money comes from — because a free tool that will not tell you how it is funded has usually answered the question in a way you would not like.",
+  "sections": [
+    {
+      "heading": "Who runs this",
+      "level": 2,
+      "paragraphs": [
+        "PZGIF is designed, written and operated by **Louis Le**, a solo developer based in Australia. Not a team, not a company with a stock-photo office page — one person, which is worth knowing before you decide how much to rely on it.",
+        "Being a solo project is also why the failure modes are stated plainly across this site rather than hidden behind a spinner. There is no support department to absorb a confusing error, so the error has to say what went wrong the first time. If something here does not, that is a bug, and the address below reaches the person who can fix it.",
+        "You can reach me at **contact@pzgif.com**. It is the same address for a broken tool, a privacy request, a copyright notice or a press question."
+      ]
+    },
+    {
+      "heading": "Why nothing is uploaded",
+      "level": 2,
+      "paragraphs": [
+        "Almost every GIF tool on the web works the same way: you hand it your file, it travels to a server in a data centre you have never heard of, something happens there, and a result comes back. That design made sense in 2012. Browsers could not decode or encode video, so the server did it.",
+        "That constraint is gone. WebAssembly runs the same C libraries the servers were running, at a speed that is a fraction slower and, on a modern laptop, still faster than the round trip would have been. WebCodecs gives the browser hardware-accelerated video decoding. The upload step survived because it was already there, not because it is still needed.",
+        "So PZGIF does not have one. Your file is read by JavaScript in your tab, decoded, processed and encoded by WebAssembly in a worker thread, and handed back to you as a download. It is never sent anywhere, because there is nowhere to send it — no upload endpoint exists in this application.",
+        "The practical difference is not philosophical. A file that never leaves your device cannot be retained by a third party, cannot be exposed by their breach, and cannot be quietly used to train something. You do not have to trust a retention policy, because there is no copy to retain."
+      ]
+    },
+    {
+      "heading": "What that costs you",
+      "level": 2,
+      "paragraphs": [
+        "This design has one real trade-off, and it would be dishonest to bury it: **your device does the work.** A laptop from the last five years will handle almost anything you throw at it. A three-year-old phone will not.",
+        "So PZGIF checks what a job will need before it starts, and refuses the ones it cannot finish rather than letting the tab crash halfway through. A refusal that arrives in two seconds is a better outcome than a browser that dies after forty, and much better than a silently truncated GIF. If you see a refusal, it is the tool being accurate about your device, not a paywall."
+      ]
+    },
+    {
+      "heading": "The code is open, permanently",
+      "level": 2,
+      "paragraphs": [
+        "The frontend — which is to say all of it, since there is no backend — is licensed under **AGPL-3.0**, and there is a link to the exact commit this page was built from at the bottom of every page.",
+        "That is partly a choice and partly an obligation. The highest-quality GIF encoder available in a browser is gifski, and it is AGPL. Shipping it to your browser counts as conveying it, so the code around it has to be AGPL too. The alternative was paying for a commercial licence to keep the source closed, and closing the source of a privacy tool to save a licence fee is the wrong trade.",
+        "It also means the central claim on this site is checkable rather than merely asserted. \"We never see your file\" is what every service says. Here you can read the code that touches the file, and you can open your browser's network tab and watch nothing leave. The licence is what guarantees that stays true in future versions.",
+        "Site copy and brand assets are not covered by the AGPL — those are all rights reserved. Two licences, two disjoint sets of files, both stated in the repository."
+      ]
+    },
+    {
+      "heading": "How this is paid for",
+      "level": 2,
+      "paragraphs": [
+        "Display advertising. That is the whole model.",
+        "There are no accounts, no sign-up wall, no credit limit, no watermark on the output, and no tool that is deliberately worse until you pay. Every tool listed on this site is the full version.",
+        "Advertising is not live yet — as of the date above, no ad network is configured and this site serves no ad code. When it is, the ad slots go where the page design already reserves room for them, so a filled ad does not shove the page around while you are reading it. Ads never appear inside a tool while it is working, and they never appear on this page or on the policy pages.",
+        "If PZGIF ever offers something paid, it will be a hosted service for people who want work done on files bigger than a browser can hold — not a lock on any of the tools here."
+      ]
+    },
+    {
+      "heading": "What it is not",
+      "level": 2,
+      "paragraphs": [
+        "It is not a storage service. Nothing you process is kept, here or anywhere else. Close the tab and it is gone, including from this site's point of view, which never had it.",
+        "It is not a batch processor or an API. One file at a time, by hand, in a browser. That is what a browser is good at.",
+        "It is not finished. The tool list is growing, and the pages that exist today are the ones that work today rather than the ones that are planned."
+      ]
+    }
+  ]
+}

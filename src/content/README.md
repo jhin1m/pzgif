@@ -1,7 +1,7 @@
 # Site content
 
-Hand-written prose lives here as `.md` / `.mdx` data files — never as `.tsx`
-modules. Two reasons, both load-bearing:
+Hand-written prose lives here as `.json` data files — never as `.tsx` modules.
+Two reasons, both load-bearing:
 
 1. **Licence boundary.** Everything in this directory is covered by
    `LICENSE-CONTENT` (all rights reserved), not by the AGPL that covers the rest
@@ -14,4 +14,17 @@ modules. Two reasons, both load-bearing:
    site-wide rather than per-page.
 
 `src/lib/tools/registry.ts` owns structure — slugs, formats, relationships. It
-must never own prose. Phase 9 fills this directory.
+must never own prose.
+
+## Layout
+
+- `*.json` at the top level — one per tool page, plus `home.json`. Schema in
+  `src/lib/tools/content.ts` and `src/lib/content/home.ts`.
+- `legal/*.json` — the legal and trust pages. Schema and validator in
+  `src/lib/content/legal.ts`; every field is checked at module scope in the
+  route, so a malformed file is a build failure rather than a page that renders
+  a heading and an empty body.
+
+`**bold**` is the only inline markup any of these files may use — see
+`src/components/content/inline-copy.tsx` for why there is no MDX here. Links go
+in the component, not in the prose.

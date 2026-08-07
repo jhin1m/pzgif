@@ -1,0 +1,51 @@
+{
+  "slug": "contact",
+  "title": "Contact",
+  "updated": "2026-08-07",
+  "meta": {
+    "title": "Contact",
+    "description": "One address for bug reports, tools that refused your file, privacy requests, copyright notices and press: contact@pzgif.com."
+  },
+  "lead": "There is no contact form here, because a form needs a server to submit to and this site does not have one. Write to **contact@pzgif.com** instead. It is read by the person who wrote the code, and it is the only support channel — so it is worth a paragraph on what to send.",
+  "sections": [
+    {
+      "heading": "What to expect",
+      "level": 2,
+      "paragraphs": [
+        "PZGIF is run by one person in Australia. Replies are best-effort and come from a single inbox, not a ticketing system. There is no service level, no queue position and no guarantee of a response, and pretending otherwise would just make a slow reply feel like a broken promise.",
+        "Anything with a legal deadline attached — a privacy request under the GDPR, a copyright notice — is handled inside that deadline. Everything else is handled in the order it arrives."
+      ]
+    },
+    {
+      "heading": "If a tool refused your file or produced something wrong",
+      "level": 2,
+      "paragraphs": [
+        "This is the most useful thing you can write in, and the report that is easiest to get wrong. A message saying \"it didn't work\" cannot be acted on, because the tool runs on your machine and nothing about the failure reaches me automatically. There are no server logs to check — that is the point of the architecture, and it is also its cost.",
+        "So please include: **which browser and version**, **which operating system and device**, roughly **how large the file was and how many frames**, the **exact wording of the message** you saw, and what you had set the controls to.",
+        "**Please do not attach the file.** Nothing you process here is ever transmitted, and an email attachment would be the first time one was — sent to an ordinary mailbox, over ordinary mail servers, which is precisely the arrangement this site exists to avoid. If the problem genuinely cannot be described without the file, say so and we will work out something better than email."
+      ]
+    },
+    {
+      "heading": "Privacy and data requests",
+      "level": 2,
+      "paragraphs": [
+        "Requests to access, correct, delete, export or object to the processing of personal data go to the same address. So does anything addressed to the operator in the capacity of data controller.",
+        "Fair warning about what an access request will return: this site holds no account, no profile and no record of anything you have processed. In most cases the honest and complete answer is that there is nothing held about you beyond ordinary web server request logs. The Privacy Policy sets out exactly what those contain."
+      ]
+    },
+    {
+      "heading": "Copyright, trademark and takedown",
+      "level": 2,
+      "paragraphs": [
+        "Notices reach the operator at the same address. The DMCA page sets out what a valid notice needs to contain and — importantly — what can actually be taken down here, given that no visitor content is ever hosted."
+      ]
+    },
+    {
+      "heading": "Everything else",
+      "level": 2,
+      "paragraphs": [
+        "Press questions, advertising enquiries, security disclosures, licensing questions about the code, and requests to use the site's copy or brand assets all go to the same place. There is one inbox; putting the topic in the subject line is enough."
+      ]
+    }
+  ]
+}

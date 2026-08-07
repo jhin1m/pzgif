@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { BottomBarProvider } from "@/components/tool/action-bar-context";
 import { AdSlot } from "./ad-slot";
 
@@ -52,5 +52,42 @@ describe("AdSlot", () => {
       );
       expect(markup).toContain(`ad-slot--${variant}`);
     }
+  });
+});
+
+describe("AdSlot with no ad network configured", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+
+  /** Re-import through a cleared flag — `ADS_ENABLED` is read at module load. */
+  async function withAdsDisabled() {
+    vi.stubEnv("NEXT_PUBLIC_ADS_ENABLED", "");
+    vi.resetModules();
+    return (await import("./ad-slot")).AdSlot;
+  }
+
+  it("renders nothing at all", async () => {
+    // The default deployment has no network behind it. An empty grey box
+    // labelled "Advertisement" costs viewport and reads as broken; there is
+    // nothing arriving later that it needs to hold a place for.
+    const Slot = await withAdsDisabled();
+    for (const variant of ["rect", "inline", "rail", "anchor"] as const) {
+      // No provider: the context defaults to "bar not visible", which is the
+      // case where the anchor unit would otherwise render.
+      const markup = renderToStaticMarkup(
+        <Slot variant={variant} name={`slot-${variant}`} />,
+      );
+      expect(markup, variant).toBe("");
+    }
+  });
+
+  it("still renders for the dev gallery, which has to show the quarantine", async () => {
+    const Slot = await withAdsDisabled();
+    const markup = renderToStaticMarkup(
+      <Slot demo variant="rect" name="gallery-rect" />,
+    );
+    expect(markup).toContain("ad-slot--rect");
   });
 });

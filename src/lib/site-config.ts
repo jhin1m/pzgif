@@ -8,6 +8,26 @@ import wasmVersion from "../../wasm-version.json";
 export const SITE_NAME = "PZGIF";
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://pzgif.com";
 
+/**
+ * Whether an ad network is actually configured for this deployment.
+ *
+ * `design-guidelines.md` §8.2 requires a slot to be reserved in the initial HTML
+ * so a fill cannot reflow the page. That law is about slots that will *hold*
+ * something. Until a network is live there is nothing to reserve for, and a page
+ * of empty grey boxes labelled "Advertisement" is worse than no box: it wastes
+ * the viewport, reads as broken, and is exactly what an AdSense reviewer sees
+ * during the application that is supposed to turn the flag on.
+ *
+ * So the decision is made **at build time**, never at runtime: the value is
+ * inlined into the bundle, the server and the client render the same tree, and
+ * the pages stay statically prerenderable. Flipping it is a redeploy, which is
+ * the same ceremony as adding the ad script itself.
+ *
+ * Default off. Phase 10 sets `NEXT_PUBLIC_ADS_ENABLED=1` when the network is
+ * approved and the slots have something to hold.
+ */
+export const ADS_ENABLED = process.env.NEXT_PUBLIC_ADS_ENABLED === "1";
+
 /** Public repository holding the Corresponding Source (AGPL-3.0 §6). */
 export const SOURCE_REPO_URL =
   process.env.NEXT_PUBLIC_SOURCE_REPO_URL ?? "https://github.com/pzgif/pzgif";

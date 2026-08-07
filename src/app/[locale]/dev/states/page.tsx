@@ -153,7 +153,7 @@ export default async function DevStatesPage({
 
       <Section
         title="AdSlot — visual quarantine"
-        note="Beside a product card at the same width. If a reviewer cannot tell them apart in under a second, the layout fails."
+        note="Beside a product card at the same width. If a reviewer cannot tell them apart in under a second, the layout fails. Rendered with `demo` so the quarantine stays inspectable while no ad network is configured — the real pages render nothing."
       >
         <Ads />
       </Section>
@@ -240,7 +240,15 @@ function Pane({
   return (
     <div
       data-theme={theme}
-      className="rounded-card border border-line bg-bg p-5 text-fg"
+      // `min-w-0` + `overflow-x-auto`: the pane is a `1fr` grid track, which is
+      // `minmax(auto, 1fr)`, so without this its widest demo becomes a floor the
+      // document has to scroll to satisfy. The action bar wants 263px of
+      // min-content and the pane offers 246px at a 320px viewport — the bar is
+      // fine on a real page, where it spans the full 288px, and only the pane's
+      // own padding makes it tight. Scrolling inside the pane keeps the gallery
+      // honest without dragging the page sideways; the real pages assert their
+      // own 320px behaviour.
+      className="min-w-0 overflow-x-auto rounded-card border border-line bg-bg p-5 text-fg"
       style={{ colorScheme: theme }}
     >
       <p className="tabular mb-3 text-micro uppercase text-fg-muted">{theme}</p>
@@ -378,8 +386,16 @@ function TypeRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-baseline gap-4 border-b border-dashed border-line py-2">
-      <span className="tabular w-[130px] flex-none text-micro text-fg-muted">
+    // Stacked below `sm`, and the token column only claims its 130px there.
+    //
+    // Side by side, this row cannot shrink below 130 + 16 + the widest word in
+    // the sample — 156px for "Compressor" at `--text-h1`, so 302px. The pane has
+    // 246px of content box at a 320px viewport, and a `1fr` grid track is
+    // `minmax(auto, 1fr)`, so that floor is not a wrap: it is the whole page
+    // scrolling sideways, which §9 forbids outright. Stacking drops the floor to
+    // the sample alone.
+    <div className="flex flex-col gap-1 border-b border-dashed border-line py-2 sm:flex-row sm:items-baseline sm:gap-4">
+      <span className="tabular text-micro text-fg-muted sm:w-[130px] sm:flex-none">
         {token}
       </span>
       {children}
@@ -814,11 +830,11 @@ function Ads() {
         </div>
         <div>
           <Label>ad slot — 6px radius, flat, no shadow, labelled</Label>
-          <AdSlot variant="rect" name="gallery-rect" className="my-0" />
+          <AdSlot demo variant="rect" name="gallery-rect" className="my-0" />
         </div>
       </div>
       <Row name="anchor">
-        <AdSlot variant="anchor" name="gallery-anchor" className="my-0" />
+        <AdSlot demo variant="anchor" name="gallery-anchor" className="my-0" />
       </Row>
       <p className="mt-3 text-sm text-fg-muted">
         The anchor unit is the only permitted sticky ad: mobile only,

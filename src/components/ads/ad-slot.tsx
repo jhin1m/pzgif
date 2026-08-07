@@ -1,14 +1,21 @@
 "use client";
 
 import { useActionBarVisible } from "@/components/tool/action-bar-context";
+import { ADS_ENABLED } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 /**
  * AdSlot — docs/design-guidelines.md §5.10 and §8 (binding).
  *
- * At MVP this renders **reserved and empty**, and that is the correct end state
- * for Phase 3: no network is activated at launch, so the box exists to prove the
- * layout holds when one is. Phase 10 adds the provider that fills it.
+ * Renders nothing at all while `ADS_ENABLED` is off, which is the default and
+ * the honest state of a deployment with no ad network behind it. The reservation
+ * law below applies to a slot that will hold a creative; reserving 250px of grey
+ * for a network nobody has signed with is just lost viewport. The flag is a
+ * build-time constant, so "off" means the box is absent from the static HTML
+ * rather than removed after hydration — no shift either way.
+ *
+ * With the flag on, the box renders **reserved and empty** until the provider
+ * script arrives; that is Phase 10's job.
  *
  * ── What this component is actually for ─────────────────────────────────────
  * Two things that are policy, not styling:
@@ -36,10 +43,24 @@ export interface AdSlotProps {
   /** Slot name from the §8.1 map, e.g. "result-rect". Instrumentation only. */
   name: string;
   className?: string;
+  /**
+   * Render even when no ad network is configured. **`/dev/states` only** — it is
+   * the component gallery, and the quarantine styling (§5.10) has to stay
+   * inspectable and testable on a deployment that ships no ads.
+   */
+  demo?: boolean;
 }
 
-export function AdSlot({ variant, name, className }: AdSlotProps) {
+export function AdSlot({
+  variant,
+  name,
+  className,
+  demo = false,
+}: AdSlotProps) {
   const actionBarVisible = useActionBarVisible();
+
+  // No network, no box. Build-time, so this is decided before the HTML exists.
+  if (!ADS_ENABLED && !demo) return null;
 
   // §8.1: the anchor unit is the one permitted sticky ad, and it is mutually
   // exclusive with the sticky action bar. Enforced here so no page can forget.

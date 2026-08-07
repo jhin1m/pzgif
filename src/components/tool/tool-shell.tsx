@@ -1,4 +1,5 @@
 import { AdSlot } from "@/components/ads/ad-slot";
+import { ADS_ENABLED } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
 
 /**
@@ -15,6 +16,11 @@ import { cn } from "@/lib/utils";
  * check: a client-side `matchMedia` would render the wrong thing on the server,
  * then correct itself after hydration — which is the shift, arriving by a
  * different route.
+ *
+ * When `ADS_ENABLED` is off the third track is not declared at all. Reserving it
+ * would leave 300px of dead gutter on every wide screen for a rail that has
+ * nothing to put in it. This is a build-time constant, so both class strings are
+ * literals Tailwind can still see, and the served HTML only ever contains one.
  *
  * ── Column sizing ──────────────────────────────────────────────────────────
  *   < lg    1 column, settings below the stage
@@ -42,7 +48,7 @@ export function ToolShell({
       className={cn(
         "grid grid-cols-1 items-start gap-6",
         "lg:grid-cols-[minmax(0,1fr)_320px]",
-        "xl:grid-cols-[minmax(0,1fr)_320px_300px]",
+        ADS_ENABLED && "xl:grid-cols-[minmax(0,1fr)_320px_300px]",
         className,
       )}
     >
@@ -52,9 +58,11 @@ export function ToolShell({
           conditional, and even those are reserved rather than empty. The unit
           itself is never sticky — §4.4 permits exactly one sticky ad on the
           site, and that is the mobile anchor. */}
-      <div className="hidden xl:block">
-        <AdSlot variant="rail" name="rail" />
-      </div>
+      {ADS_ENABLED ? (
+        <div className="hidden xl:block">
+          <AdSlot variant="rail" name="rail" />
+        </div>
+      ) : null}
     </div>
   );
 }

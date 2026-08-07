@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { ADS_ENABLED } from "./lib/ads";
 import { isGif, summariseGif } from "./lib/decode-output";
 import { frameSignature, signatureDistance } from "./lib/pixel-probe";
 
@@ -298,6 +299,7 @@ test.describe("the four pages themselves", () => {
   }
 
   test("reserves every ad slot from first paint", async ({ page }) => {
+    test.skip(!ADS_ENABLED, "no ad network in this build; no slots to reserve");
     await page.goto("/crop-gif");
     for (const name of ["result-rect", "rail"]) {
       const slot = page.locator(`[data-ad-slot="${name}"]`);

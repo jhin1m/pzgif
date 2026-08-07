@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { ADS_ENABLED } from "./lib/ads";
 import { isGif, summariseGif } from "./lib/decode-output";
 
 /**
@@ -105,12 +106,13 @@ test.describe("gif compressor", () => {
   });
 
   test("reserves every ad slot from first paint", async ({ page }) => {
+    test.skip(!ADS_ENABLED, "no ad network in this build; no slots to reserve");
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/gif-compressor");
 
-    // Reserved and unfilled is the correct MVP end state — no network is
-    // activated. What matters is that the boxes exist before anything loads, so
-    // a later fill cannot reflow the page.
+    // Reserved and unfilled is the correct state before the provider script
+    // ships. What matters is that the boxes exist before anything loads, so a
+    // later fill cannot reflow the page.
     for (const name of ["result-rect", "rail"]) {
       const slot = page.locator(`[data-ad-slot="${name}"]`);
       await expect(slot).toBeVisible();

@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
+import { ADS_ENABLED } from "./lib/ads";
 
 /**
  * The homepage, end to end.
@@ -245,6 +246,12 @@ test.describe("the homepage", () => {
     const dropzoneTop = (await hero(page).boundingBox())!.y;
     const slots = page.locator(".ad-slot");
     const count = await slots.count();
+    if (!ADS_ENABLED) {
+      // No network configured: the correct number of boxes is none. A reserved
+      // grey rectangle for an ad that is never coming is lost viewport.
+      expect(count).toBe(0);
+      return;
+    }
     expect(count).toBeGreaterThan(0);
     for (let index = 0; index < count; index += 1) {
       const box = (await slots.nth(index).boundingBox())!;

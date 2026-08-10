@@ -101,6 +101,19 @@ function frameCountsFor(
   };
 }
 
+/**
+ * The widest output this job may be planned at.
+ *
+ * `defaultMaxWidth` is a default, not the memory constraint — the constraint is
+ * `budgetBytes`, and it is enforced separately below whatever this returns. A
+ * job that states a `widthCeiling` is one whose *destination* fixes the size, so
+ * the tier's default would silently produce the wrong shape rather than a
+ * smaller version of the right one. See `JobSpec.widthCeiling`.
+ */
+function widthCapFor(spec: JobSpec, budget: TierBudget): number {
+  return Math.max(budget.defaultMaxWidth, spec.widthCeiling ?? 0);
+}
+
 function buildPlan(
   probe: InputProbe,
   spec: JobSpec,
@@ -115,7 +128,7 @@ function buildPlan(
   const geometry = new FrameGeometry(probe.width, probe.height, {
     ...spec.geometry,
     targetWidth: width,
-  }, { even: spec.output.kind === "video", maxWidth: budget.defaultMaxWidth });
+  }, { even: spec.output.kind === "video", maxWidth: widthCapFor(spec, budget) });
 
   return {
     fps,
@@ -203,13 +216,12 @@ export function admit(
   if (refusal) return { ok: false, error: refusal };
 
   const wantedFps = spec.timing.fps ?? FPS_LADDER[0];
-  const wantedWidth = Math.min(spec.geometry.targetWidth, budget.defaultMaxWidth);
+  const wantedWidth = Math.min(spec.geometry.targetWidth, widthCapFor(spec, budget));
 
   const fpsOptions = [wantedFps, ...FPS_LADDER.filter((value) => value < wantedFps)];
-  const widthOptions = [
-    wantedWidth,
-    ...WIDTH_LADDER.filter((value) => value < wantedWidth),
-  ];
+  const widthOptions = spec.geometry.pinWidth
+    ? [wantedWidth]
+    : [wantedWidth, ...WIDTH_LADDER.filter((value) => value < wantedWidth)];
 
   for (const fps of fpsOptions) {
     for (const width of widthOptions) {
@@ -278,13 +290,18 @@ export function truncatedPlan(
   budget: TierBudget = TIER_BUDGETS[capabilities.tier],
 ): AcceptedPlan | null {
   const fps = FPS_LADDER[FPS_LADDER.length - 1];
-  const width = Math.min(WIDTH_LADDER[WIDTH_LADDER.length - 1], budget.defaultMaxWidth);
+  // A pinned job keeps its size and gives up length instead — offering a
+  // narrower run would offer a file its destination rejects, which is not an
+  // offer at all.
+  const width = spec.geometry.pinWidth
+    ? Math.min(spec.geometry.targetWidth, widthCapFor(spec, budget))
+    : Math.min(WIDTH_LADDER[WIDTH_LADDER.length - 1], budget.defaultMaxWidth);
 
   const geometry = new FrameGeometry(
     probe.width,
     probe.height,
     { ...spec.geometry, targetWidth: width },
-    { even: spec.output.kind === "video", maxWidth: budget.defaultMaxWidth },
+    { even: spec.output.kind === "video", maxWidth: widthCapFor(spec, budget) },
   );
 
   const bytesPerFrame = 2 * geometry.outputWidth * geometry.outputHeight * 4;

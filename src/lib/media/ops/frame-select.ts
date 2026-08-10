@@ -13,6 +13,33 @@
 
 import type { TimingSpec } from "../types";
 
+/**
+ * The source seconds a job actually reads, after `trimSec` is clamped to the
+ * clip.
+ *
+ * One function rather than clamping at each call site, because three places have
+ * to agree on the answer or the engine contradicts itself: the decoder seeks to
+ * it, admission control budgets memory against it, and the estimator prices it.
+ * A trim that admission control sized at three seconds while the decoder read
+ * sixty is an OOM arriving after the user was told the job would fit.
+ *
+ * `durationSec` is null for a container that never stated one — some WebM. The
+ * span is then unknowable and the trim is dropped rather than guessed at; the
+ * decoder still stops at the tier's frame cap and reports the truncation.
+ */
+export function trimmedSpan(
+  durationSec: number | null,
+  timing: TimingSpec,
+): { fromSec: number; durationSec: number } | null {
+  if (durationSec === null || !Number.isFinite(durationSec)) return null;
+  const trim = timing.trimSec;
+  if (!trim) return { fromSec: 0, durationSec };
+
+  const from = Math.max(0, Math.min(trim.from, durationSec));
+  const to = Math.max(from, Math.min(trim.to, durationSec));
+  return { fromSec: from, durationSec: to - from };
+}
+
 /** Whether a decoded frame at `index` is kept, before any reordering. */
 export function selectsFrame(index: number, timing: TimingSpec): boolean {
   const { range, keepEveryNth = 1 } = timing;

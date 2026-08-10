@@ -76,6 +76,20 @@ export interface TimingSpec {
   keepEveryNth?: number;
   /** Half-open frame range `[from, to)` in decoded-frame indices. */
   range?: { from: number; to: number };
+  /**
+   * Half-open trim in *source seconds*, `[from, to)`. Video input only.
+   *
+   * Distinct from `range` because it can be honoured by seeking. A video decoder
+   * is asked for a time span and starts at the nearest keyframe before it; a
+   * frame-index range can only be enforced by decoding from zero and discarding,
+   * which on `mp4-to-gif` means decoding a whole 60-second clip to produce a
+   * three-second GIF. GIF and WebP have no seek, so they keep `range`, which is
+   * exact in frames and costs nothing to enforce.
+   *
+   * Admission control sizes the job against this span, not the clip's duration —
+   * otherwise a long source would be refused for frames the job never decodes.
+   */
+  trimSec?: { from: number; to: number };
   direction?: "forward" | "reverse" | "ping-pong";
   /** Target frame rate for video input. Ignored for GIF, which keeps its delays. */
   fps?: number;

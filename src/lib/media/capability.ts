@@ -28,8 +28,15 @@ export interface Capabilities {
   videoDecode: boolean;
   /** WebCodecs video encode, needed by `gif-to-mp4`. */
   videoEncode: boolean;
-  /** `ImageDecoder`. Absent in Safari at every version, Firefox below 133.
-   *  The only thing that can read animated WebP without a hand-rolled splitter. */
+  /**
+   * `ImageDecoder`. Absent in Safari at every version, Firefox below 133.
+   *
+   * Nothing branches on this any more. It used to gate animated WebP, which
+   * refused the format outright on Safari; Phase 7 replaced that path with the
+   * RIFF splitter in `decode/webp-riff.ts`, which works on every engine. Kept as
+   * a reported probe result because it is the thing to check first if a future
+   * format is considered for an `ImageDecoder`-only route.
+   */
   imageDecoder: boolean;
   offscreenCanvas: boolean;
   webAssembly: boolean;

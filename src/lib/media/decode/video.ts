@@ -19,7 +19,7 @@
 import { ALL_FORMATS, BlobSource, CanvasSink, Input } from "mediabunny";
 import { canDecodeCodec } from "../capability";
 import { FrameGeometry } from "../ops/geometry";
-import { selectsFrame } from "../ops/frame-select";
+import { selectsFrame, trimmedSpan } from "../ops/frame-select";
 import type { DecodedFrame, FrameSource, InputProbe, TimingSpec } from "../types";
 
 /** Matches the GIF decoder's clamp: browsers round shorter delays up to 100 ms. */
@@ -108,9 +108,15 @@ export async function videoFrameSource(
   const track = await input.getPrimaryVideoTrack();
   if (!track) throw new Error("No video track in this file");
 
-  const durationSec = await input.computeDuration();
+  const clipSec = await input.computeDuration();
   const sinkWidth = Math.max(1, Math.round(track.displayWidth * geometry.decodeScale));
   const sinkHeight = Math.max(1, Math.round(track.displayHeight * geometry.decodeScale));
+
+  // The trim is a seek, not a filter. `canvases(from, to)` starts the decoder at
+  // the nearest keyframe before `from`, so a three-second cut out of a
+  // sixty-second clip costs three seconds of decode rather than sixty.
+  const span = trimmedSpan(clipSec, timing) ?? { fromSec: 0, durationSec: clipSec };
+  const durationSec = span.durationSec;
 
   const sampled = Math.max(1, Math.floor(durationSec * fps));
   let selected = 0;
@@ -141,7 +147,18 @@ export async function videoFrameSource(
       const fallbackDurationMs = Math.round(1000 / fps);
       let sampleIndex = 0;
       let emitted = 0;
-      let nextSampleSec = 0;
+      // The clock starts at the trim, not at zero.
+      //
+      // mediabunny documents `startTimestamp` as inclusive and says nothing
+      // about whether a sample before it can be handed back — a decoder has to
+      // seek to the keyframe at or before the cut, and whether those leading
+      // frames are filtered out or yielded is an implementation detail we have
+      // not verified against its source. Starting the clock at `fromSec` is
+      // correct under either reading: the guard is load-bearing if they are
+      // yielded and a no-op if they are not, and getting it wrong the other way
+      // puts up to a keyframe interval of unrequested footage at the head of the
+      // output.
+      let nextSampleSec = span.fromSec;
       // Iterating in presentation order and sampling against a clock rather than
       // trusting decode order: Safari below 26.4 can emit H.264 out of order, and
       // a resampler that assumes monotonic timestamps silently reorders the
@@ -159,7 +176,15 @@ export async function videoFrameSource(
           outCtx.getImageData(0, 0, geometry.outputWidth, geometry.outputHeight).data.buffer,
         );
 
-      for await (const wrapped of sink.canvases()) {
+      // The range is passed only when a trim asked for one. `canvases()` treats
+      // its end as exclusive, so handing it the clip's own computed duration on
+      // an untrimmed job can drop the final frame — a behaviour change for every
+      // existing caller, in exchange for nothing.
+      const canvases = timing.trimSec
+        ? sink.canvases(span.fromSec, span.fromSec + durationSec)
+        : sink.canvases();
+
+      for await (const wrapped of canvases) {
         if (signal?.aborted) return;
         if (emitted >= total) return;
         if (wrapped.timestamp < lastTimestamp) continue;

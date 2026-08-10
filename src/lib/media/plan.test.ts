@@ -220,15 +220,31 @@ describe("admit", () => {
     expect(result.error.code).toBe("decode-failed");
   });
 
-  it("refuses animated WebP where ImageDecoder is absent", () => {
+  it("admits animated WebP where ImageDecoder is absent", () => {
+    // This used to be a refusal, and the refusal was the whole reason
+    // `webp-to-gif` was at risk of being cut: `ImageDecoder` is the only browser
+    // API that reads animated WebP and Safari has never shipped it at any
+    // version. Phase 7 replaced that decoder with the RIFF splitter in
+    // `decode/webp-riff.ts`, which feeds `createImageBitmap()` — present
+    // everywhere — so there is no longer an engine on which the format cannot be
+    // read, and no capability left to refuse on.
+    //
+    // Asserted on iOS specifically, which is the tier with `imageDecoder: false`
+    // *and* the tightest budget: a small enough job has to be admitted there, or
+    // the page is broken on the traffic it was cut for in the first place.
     const result = admit(
-      gifProbe({ format: "webp", declaredExtension: "webp" }),
-      spec({ toolSlug: "webp-to-gif" }),
+      gifProbe({
+        format: "webp",
+        declaredExtension: "webp",
+        width: 240,
+        height: 135,
+        frameCount: 24,
+        durationSec: 1.2,
+      }),
+      spec({ toolSlug: "webp-to-gif", geometry: { targetWidth: 240 } }),
       IOS,
     );
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.error.params?.reason).toBe("no-image-decoder");
+    expect(result.ok).toBe(true);
   });
 
   it("rounds video output to even dimensions", () => {

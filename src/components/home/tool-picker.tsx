@@ -25,6 +25,21 @@ import { cn } from "@/lib/utils";
  * file over — see `onPick` — but the navigation is the browser's, so a failure
  * anywhere in the handoff leaves the visitor on the tool page with their own
  * dropzone rather than nowhere.
+ *
+ * ── Why the list scrolls instead of being capped ───────────────────────────
+ * The hero reserves a fixed box so that a drop moves nothing below it, and below
+ * 640px every chip wraps onto its own 44px row — so the height this list wants
+ * grows linearly with the number of live routes. That went from five to seven
+ * when Phase 7 shipped and overflowed the reservation by exactly one row; Ship 3
+ * adds the five Discord routes, all of which accept GIF, and would overflow it
+ * by five more.
+ *
+ * A cap was the obvious alternative and is the wrong one. Every route in this
+ * list is a genuine thing to do with the file that was just dropped, and hiding
+ * some of them behind a number tuned to today's inventory is a silent
+ * truncation that comes back at every ship. Bounding the list and letting it
+ * scroll decouples the reservation from the route count permanently, and the
+ * partly-visible chip at the cut edge is what says there is more.
  */
 
 export function ToolPicker({
@@ -43,7 +58,13 @@ export function ToolPicker({
   return (
     <div className={className}>
       <h2 className="text-label font-semibold text-fg-secondary">{heading}</h2>
-      <ul className="mt-2.5 flex flex-wrap gap-2.5">
+      {/* `max-h-80` is 320px, measured: at 320 and 375 the seven GIF-accepting
+          routes want 368px and the reservation has 325px of room for them, so
+          the bound leaves a few pixels of slack and cuts mid-chip rather than
+          on a row boundary. From `sm` up the chips share rows and the list is
+          98-152px, so this never engages there. `overscroll-contain` stops a
+          flick inside the list from scrolling the page behind it. */}
+      <ul className="mt-2.5 flex max-h-80 flex-wrap gap-2.5 overflow-y-auto overscroll-contain">
         {routes.map((route) => {
           const Icon = toolIcon(route.slug);
           return (

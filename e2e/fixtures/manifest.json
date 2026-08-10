@@ -50,6 +50,11 @@
       "name": "anim.webp",
       "bytes": 343590,
       "why": "Animated WebP, from loop-small.gif so the two share content and the webp-to-gif round trip is checkable. ffmpeg has no libwebp encoder in the common Homebrew build, so this uses gif2webp from the webp package. Encoded lossy on purpose — gif2webp defaults to lossless, which is not what animated WebP on the web actually is, and lossy is what exercises the VP8 (not VP8L) branch of any ANMF splitter."
+    },
+    {
+      "name": "webp-offset-dispose.webp",
+      "bytes": 194,
+      "why": "The compositing fixture. `anim.webp`'s frames are all full-canvas, at offset 0,0, blending, never disposing — so it exercises none of the three rules that make an animated WebP a sequence of patches rather than pictures, and a decoder that ignored all three would still pass on it. This one is authored frame by frame with webpmux so each rule is isolated: frame 2 is a 16x16 patch at (32,16) with no-blend and dispose-to-background, and frame 3 is a 16x16 patch somewhere else entirely — deliberately NOT covering frame 2's rectangle, which is what makes the disposal observable at all. Three flat primaries and lossless encoding, because the test reads exact channel values."
     }
   ]
 }

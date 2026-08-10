@@ -1,0 +1,50 @@
+{
+  "slug": "accessibility",
+  "title": "Accessibility",
+  "updated": "2026-08-10",
+  "meta": {
+    "title": "Accessibility Statement",
+    "description": "PZGIF is built to WCAG 2.1 AA, tested by keyboard and screen reader rather than asserted. This statement says what that covers, where the hard parts are, and how to tell us when we have missed."
+  },
+  "lead": "PZGIF is meant to be usable whether you point a mouse at it, drive it entirely from the keyboard, or hear it read aloud. That target has a name — the Web Content Accessibility Guidelines version 2.1, at level AA — and the site is built and checked against it rather than merely gesturing at it. This statement describes what we actually test, the parts of a media tool that are genuinely harder to make accessible, and how to reach a person when something is wrong.",
+  "sections": [
+    {
+      "heading": "The standard we hold ourselves to",
+      "level": 2,
+      "paragraphs": [
+        "The conformance target is WCAG 2.1 Level AA across every page the public can reach — the homepage, each tool, the Discord presets and these policy pages. \"Conformance target\" is deliberate wording: it means the bar we build to and test against, not a certificate someone external has awarded. Where a page falls short of it, that is a defect to fix, and the section below on known limitations is where we admit the ones we are aware of.",
+        "We are almost certainly exempt from having to publish this at all. The European Accessibility Act carries a microenterprise exemption, and a site run by a single independent developer sits well inside it. We are publishing it anyway, because the site genuinely earns the standard and saying so plainly is more useful to you than an exemption you would have had to take on trust."
+      ]
+    },
+    {
+      "heading": "How it is tested, not just claimed",
+      "level": 2,
+      "paragraphs": [
+        "An accessibility claim backed only by an automated scan is close to worthless, because the failures that matter most to a real user — a focus order that jumps around, a control a screen reader announces as an unlabelled button, a progress readout that never speaks — are exactly the ones a scanner cannot see. So the checking is done by using the site the way the people it is for use it.",
+        "Every interactive flow is driven start to finish with the keyboard alone, and the visible focus indicator is required to be present at each step, so nothing can be reached only by clicking. The compressor's job flow — the most involved interaction on the site — is exercised with a screen reader, so that starting a job, hearing its progress, and being told it has finished all happen in speech and not only on screen. Colour and text are checked to remain legible at 200% zoom and down to a 320-pixel-wide screen without a horizontal scrollbar appearing."
+      ]
+    },
+    {
+      "heading": "The genuinely hard part: telling you what a tool did",
+      "level": 2,
+      "paragraphs": [
+        "A GIF is a picture, and the useful output of most of these tools is another picture. There is a real limit to how much of \"this frame now looks like that\" can be conveyed to someone who cannot see either, and we would rather name that limit than pretend it away. What we can do, and do, is make the mechanics fully operable and fully described: the size a file will become, the setting you are changing, whether a job is running and how far along it is, and whether it succeeded or was refused, are all announced rather than left to the eye.",
+        "Progress in particular is handled honestly. The bar reflects a real count of frames decoded or encoded, never an invented animation, so what a screen reader tells you about how far a job has got is true. When the true progress of a stage is genuinely unknown, the interface says it is preparing rather than reporting a number it does not have."
+      ]
+    },
+    {
+      "heading": "Known limitations",
+      "level": 2,
+      "paragraphs": [
+        "The before-and-after comparison slider is inherently visual; it exists to let a sighted user judge output quality by eye, and there is no equivalent that conveys the same thing in sound. The byte counts beside it carry the part of that comparison that can be made non-visually. If you rely on assistive technology and hit something here that this statement does not prepare you for, that gap is a bug in our testing, and we want to hear about it."
+      ]
+    },
+    {
+      "heading": "Telling us when we have missed",
+      "level": 2,
+      "paragraphs": [
+        "If any part of PZGIF is difficult or impossible for you to use, write to contact@pzgif.com and describe what you were trying to do and where it broke, including the browser and assistive technology you were using if you can. A specific report about one broken control is worth far more than a general one, and it is the fastest way to get the thing fixed. This is a single-operator site, so the reply comes from the person who can actually change the code."
+      ]
+    }
+  ]
+}

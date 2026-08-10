@@ -710,7 +710,11 @@ Hard rules: no horizontal scroll at 320px · touch targets ≥44px below `md` ·
 
 **Homepage** — h1 + one-line value prop · trust line · hero dropzone (routes to the right tool by detected file type) · 9-tool grid (`--radius-card` cards, icon + name + one-line benefit) · "Why PZGIF" three-up (in-browser / private / gifski quality) · Discord presets teaser · ad below the grid · footer with the full tool list for internal linking.
 
-**Tool page** — h1 (exact-match keyword) · trust line 🔒 immediately under it · dropzone · settings + preview · progress · result panel · **ad** · SEO explainer (≥400 words, H2/H3 structure) · **inline ad** after ~150 words · FAQ accordion (schema.org `FAQPage`) · related tools · footer.
+**Tool page** — h1 (exact-match keyword) · trust line 🔒 immediately under it · dropzone · settings + preview · progress · result panel · **ad** · SEO explainer (≥400 words, H2/H3 structure) · **inline ad** after ~150 words · FAQ accordion (visible Q&A, **no `FAQPage` JSON-LD** — see the note below) · related tools · footer.
+
+> **[Amended 2026-08-10, Phase 9] The `FAQPage` schema requirement is dropped; the visible FAQ accordion stays.**
+>
+> Google deprecated FAQ rich results on 2025-05-08, stopped showing them in Search on 2026-05-07, and removed the documentation on 2026-06-15. Emitting `FAQPage` markup now earns no result and is only a surface a parser has to discard — so the tool pages render the FAQ UI without it, and `scripts/check-structured-data.mjs` fails the build if the type (or a self-serving `aggregateRating`, or a dead `HowTo`) reappears anywhere. The visible Q&A is unaffected: it still earns long-tail impressions, feeds AI answer surfaces, and stays in the SSG HTML for crawlers. Structured data that *is* emitted is `BreadcrumbList` + `WebApplication` on tool and preset pages and `WebSite` + `Organization` on the homepage — see `src/components/content/tool-json-ld.tsx` and `site-json-ld.tsx`.
 
 **Preset page (Discord)** — same skeleton, but the settings panel is replaced by a **constraint UI**: preset chips, a live "target size" readout, and an auto-tuning quality search rather than manual sliders alone. The success criterion is explicit and binary, and it is **parameterised by the active preset** — "Fits Discord's sticker limit: 320×320, 480 KB of 512 KB ✓" — never a single sentence with one number in it.
 

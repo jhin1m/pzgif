@@ -31,6 +31,13 @@ jobs:
       - name: Check for cross-origin-isolation constructs
         run: pnpm check:forbidden
 
+      # No self-serving `aggregateRating`, and no dead `FAQPage`/`HowTo` JSON-LD.
+      # A fabricated rating is a structured-data manual-action risk on a site
+      # whose whole model is organic search; this stops a later "SEO fix" adding
+      # one. Runs early — it is a grep, and cheap.
+      - name: Check structured data stays honest
+        run: pnpm check:structured-data
+
       - name: Typecheck
         run: pnpm typecheck
 

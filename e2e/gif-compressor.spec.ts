@@ -102,7 +102,7 @@ test.describe("gif compressor", () => {
 
     // Google removed FAQ rich results on 2026-05-07 and deleted the docs on
     // 2026-06-15. The markup now buys nothing and can only be flagged.
-    expect(html).not.toContain("FAQPage");
+    expect(html).not.toContain("FAQPage"); // structured-data-guard-allow: asserts absence
   });
 
   test("reserves every ad slot from first paint", async ({ page }) => {

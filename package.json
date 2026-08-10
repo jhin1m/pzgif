@@ -18,6 +18,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "check:forbidden": "node scripts/check-forbidden-headers.mjs",
+    "check:structured-data": "node scripts/check-structured-data.mjs",
     "check:static": "node scripts/check-static-routes.mjs",
     "check:landing": "node scripts/check-landing-bundle.mjs",
     "check:heavy": "node scripts/check-heavy-deps.mjs",

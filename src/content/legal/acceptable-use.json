@@ -1,0 +1,50 @@
+{
+  "slug": "acceptable-use",
+  "title": "Acceptable Use",
+  "updated": "2026-08-10",
+  "meta": {
+    "title": "Acceptable Use Policy",
+    "description": "What PZGIF can and cannot police, given that every free-tier tool runs inside your own browser and no file ever reaches a server. The short version: you are responsible for what you process."
+  },
+  "lead": "This page is unusually short on prohibitions, and there is a technical reason for that. Every free-tier tool on PZGIF runs inside the tab in front of you. Your file is decoded, edited and re-encoded by code running on your own device, and it is never uploaded, so there is no server that sees it, stores it, or could remove it. That single fact decides almost everything below: the responsibility for what you do here is yours, because the design leaves it nowhere else to sit.",
+  "sections": [
+    {
+      "heading": "What \"acceptable\" has to mean when the work never leaves your device",
+      "level": 2,
+      "paragraphs": [
+        "A conventional acceptable-use policy is really a description of what a host will refuse to store and serve on your behalf. PZGIF hosts none of your work, so most of that document would be theatre. We cannot scan your GIF, we do not receive it, and there is no copy of it under our control to take down. What we can do is set the terms on which the site itself is offered, and be honest about where the line between the two actually falls.",
+        "So treat this page as two separate promises. Ours is that the tools do what they say and keep your files on your device. Yours is that whatever you feed them, and whatever you do with the result, is something you had the right to do in the first place."
+      ]
+    },
+    {
+      "heading": "Your files, and your responsibility for them",
+      "level": 2,
+      "paragraphs": [
+        "You may use PZGIF on any file you own or are otherwise permitted to modify. You must not use it on material you have no right to process — someone else's copyrighted work without a licence, images of a person used in a way they have not agreed to, or anything whose creation or possession is itself unlawful where you are. Because the processing happens on your device, this is not a rule we can enforce; it is a statement of the terms under which the tool is made available to you, and using it is your acceptance of them.",
+        "The output is yours to keep and to use. It is also yours to answer for. A tool that shrinks a GIF or fits it to a Discord size limit does not inspect what the GIF depicts, and a lawful edit of unlawful content is still unlawful content. Where you publish the result, and whether you were entitled to, are decisions the site takes no part in and accepts no responsibility for."
+      ]
+    },
+    {
+      "heading": "Using the site itself fairly",
+      "level": 2,
+      "paragraphs": [
+        "The one place we do run something is the website: the pages, the WebAssembly binaries they load, and the bandwidth that delivers them. Do not attack or degrade that. Automated scraping that hammers the origin, attempts to find or exploit vulnerabilities, and anything designed to deny the service to other people are all out of bounds, and they are the rare cases where we can and will act — by blocking traffic at the edge, which needs no access to your files to do.",
+        "Reverse-engineering, on the other hand, is explicitly fine, because the client is free software. The code that runs in your browser is published under the GNU Affero General Public License, and the source link in the footer points at the exact build you are using. You are welcome to read it, fork it, and run your own copy under the same licence. There is nothing here to reverse-engineer that we have not already handed you."
+      ]
+    },
+    {
+      "heading": "No warranty for a free tool that runs on your hardware",
+      "level": 2,
+      "paragraphs": [
+        "The tools are offered as they are. A browser-based media pipeline depends on your device's memory and on how faithfully your browser implements the web platform, and both vary enough that a job which succeeds on one machine can be refused on another. When a job is refused it is refused up front, with a reason, rather than failing halfway — but \"it worked for someone else\" is not a guarantee that it will work for you, and nothing here is sold or promised as fit for a particular purpose. The Terms set out the limits of liability in full."
+      ]
+    },
+    {
+      "heading": "Questions, and reporting abuse of the site",
+      "level": 2,
+      "paragraphs": [
+        "If you believe someone is abusing the website itself — the service, not content we do not hold — or if you are unsure whether something you want to do is within these terms, write to contact@pzgif.com. Reports about material published somewhere else after being processed here belong with whoever is actually hosting it; we have no copy to act on. Claims of copyright infringement are handled through the process on the DMCA page."
+      ]
+    }
+  ]
+}

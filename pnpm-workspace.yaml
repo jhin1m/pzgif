@@ -1,6 +1,10 @@
 allowBuilds:
-  "@parcel/watcher": set this to true or false
-  "@swc/core": set this to true or false
+  # Both are transitive dev-only native deps off the build/test/lint path — the
+  # full suite (tsc, vitest, next build) passes with neither binary compiled, so
+  # their postinstall is skipped. Left unresolved, pnpm 11 treats a pending
+  # build-script approval as a hard `ERR_PNPM_IGNORED_BUILDS` and fails install.
+  "@parcel/watcher": false
+  "@swc/core": false
   # The Cloudflare adapter bundles the worker with esbuild and runs it on
   # workerd; both need their postinstall to fetch the platform binary.
   esbuild: true

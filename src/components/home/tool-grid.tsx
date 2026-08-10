@@ -16,14 +16,21 @@ import { cn } from "@/lib/utils";
 /**
  * The tool grid — the homepage's index of what actually exists.
  *
- * ── It renders `liveRoutes()`, and that is a copy decision as much as a
+ * ── It renders the live *tools*, and that is a copy decision as much as a
  *    structural one ────────────────────────────────────────────────────────
- * The registry describes fourteen routes and this deployment serves nine. A card
- * linking a `planned` slug is a 404 handed to the crawler on the one page it
- * crawls first. The grid therefore grows on its own as tools ship, which is also
- * why the sub-head above it states no number — a heading built around "nine
- * tools" needs rewriting every ship, and the version nobody rewrites is the one
- * that ships a lie.
+ * A card linking a `planned` slug is a 404 handed to the crawler on the one page
+ * it crawls first, so the grid grows on its own as tools ship. That is also why
+ * the sub-head above it states no number — a heading built around "nine tools"
+ * needs rewriting every ship, and the version nobody rewrites is the one that
+ * ships a lie.
+ *
+ * The Discord preset routes are live and are deliberately **not** here. They are
+ * one cluster rather than five tools, `DiscordTeaser` is the block that
+ * introduces them, and five near-identical cards between "Reverse GIF" and the
+ * teaser that describes the same thing again would make the homepage read as
+ * padding — which is the impression the whole content strategy is spent
+ * avoiding. `design-guidelines.md` §10 wires the homepage this way for the same
+ * reason.
  *
  * ── Where each half of a card comes from ───────────────────────────────────
  * The name is structure and comes from `registry.ts`. The reason to click is
@@ -47,9 +54,7 @@ const CONTENT = [
   gifToMp4,
   splitFrames,
   webpToGif,
-].map((data) =>
-  toolContent(data, (data as { slug: string }).slug),
-);
+].map((data) => toolContent(data, (data as { slug: string }).slug));
 
 const BENEFITS = new Map(CONTENT.map((page) => [page.slug, page.card.benefit]));
 
@@ -68,36 +73,38 @@ export function ToolGrid({
       <p className="mt-2 max-w-[68ch] text-body text-fg-secondary">{subhead}</p>
 
       <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {liveRoutes().map((route) => {
-          const benefit = BENEFITS.get(route.slug);
-          if (!benefit) {
-            throw new Error(
-              `Live route "${route.slug}" has no card benefit. Write one in src/content/${route.slug}.json.`,
-            );
-          }
-          const Icon = toolIcon(route.slug);
+        {liveRoutes()
+          .filter((route) => route.group !== "presets")
+          .map((route) => {
+            const benefit = BENEFITS.get(route.slug);
+            if (!benefit) {
+              throw new Error(
+                `Live route "${route.slug}" has no card benefit. Write one in src/content/${route.slug}.json.`,
+              );
+            }
+            const Icon = toolIcon(route.slug);
 
-          return (
-            <li key={route.slug}>
-              <Link
-                href={`/${route.slug}`}
-                className={cn(
-                  "flex h-full flex-col gap-2 rounded-card border border-line bg-surface-1 p-5",
-                  "shadow-sm transition-colors duration-[120ms] ease-out",
-                  "hover:border-brand hover:bg-brand-subtle",
-                )}
-              >
-                <span className="flex size-10 items-center justify-center rounded-control bg-brand-subtle-strong text-brand">
-                  <Icon aria-hidden="true" className="size-5" />
-                </span>
-                <span className="font-display text-h4 font-medium text-fg">
-                  {route.name}
-                </span>
-                <span className="text-sm text-fg-muted">{benefit}</span>
-              </Link>
-            </li>
-          );
-        })}
+            return (
+              <li key={route.slug}>
+                <Link
+                  href={`/${route.slug}`}
+                  className={cn(
+                    "flex h-full flex-col gap-2 rounded-card border border-line bg-surface-1 p-5",
+                    "shadow-sm transition-colors duration-[120ms] ease-out",
+                    "hover:border-brand hover:bg-brand-subtle",
+                  )}
+                >
+                  <span className="flex size-10 items-center justify-center rounded-control bg-brand-subtle-strong text-brand">
+                    <Icon aria-hidden="true" className="size-5" />
+                  </span>
+                  <span className="font-display text-h4 font-medium text-fg">
+                    {route.name}
+                  </span>
+                  <span className="text-sm text-fg-muted">{benefit}</span>
+                </Link>
+              </li>
+            );
+          })}
       </ul>
     </section>
   );

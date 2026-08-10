@@ -1,0 +1,168 @@
+{
+  "slug": "discord-emoji-gif",
+  "title": "Discord emoji GIF — 128 by 128, under 256 KB, fitted for you",
+  "lead": "An animated custom emoji has to weigh 256 KB or less. Almost everyone who hits that wall reaches for the resolution first, and almost everyone is reaching for the wrong dial — the weight is in the frame count. This page resizes, then trims the loop rather than the picture.",
+  "meta": {
+    "title": "Discord emoji GIF maker — fit any animation under the 256 KB emoji limit",
+    "description": "Make an animated Discord emoji at 128×128 and under 256 KB, in your browser. Real encodes, a measured byte count, and no upload."
+  },
+  "dropzone": {
+    "title": "Drop the animation you want as an emoji",
+    "caption": "or paste with Ctrl+V · .gif .webp .mp4 .mov .webm"
+  },
+  "actions": {
+    "run": "Encode with these settings",
+    "running": "Making the emoji…",
+    "rerun": "Make it again",
+    "download": "Download the emoji",
+    "disabledReason": "Add an animation to turn into an emoji."
+  },
+  "controls": {
+    "quality": {
+      "label": "Quality",
+      "hint": "Ignored while auto-fit is driving. It matters least of the three controls here, because at this size there are not many pixels for it to act on."
+    },
+    "colours": {
+      "label": "Colours",
+      "hint": "How many distinct shades each frame may use. Emoji are usually bold, flat artwork, which survives a small palette better than a photograph would.",
+      "options": [
+        { "value": "256", "label": "256 — the full palette" },
+        { "value": "128", "label": "128 — safe for most artwork" },
+        { "value": "64", "label": "64 — bold shapes and outlines" },
+        { "value": "32", "label": "32 — logos and single-colour art" }
+      ]
+    },
+    "keepEveryNth": {
+      "label": "Keep every Nth frame",
+      "hint": "The strongest control on this page by a wide margin. At thirty-two pixels across, half the frames is very rarely a visible loss."
+    }
+  },
+  "preset": {
+    "autofit": "Make it fit 256 KB",
+    "autofitRunning": "Working through the settings…",
+    "budgetHeading": "Against Discord's 256 KB emoji limit",
+    "states": {
+      "over": "Too heavy for an emoji by about {over}. Trimming the loop is the fastest way back.",
+      "close": "The estimate spans {size}, and the top of that range would be turned away.",
+      "fits": "Under the limit with {spare} left over. Ready to upload.",
+      "unknown": "This emoji weighs {size}, with nothing to measure it against."
+    },
+    "meterLabel": "{size} against the 256 KB emoji limit",
+    "unfitted": "The smallest this device could get it is still {over} above the limit. Try a shorter loop, or crop in tighter before coming back.",
+    "previewCaption": "How it reads at emoji size",
+    "previewMessage": "ship it",
+    "previewSamples": [
+      { "px": 32, "label": "inline with a message" },
+      { "px": 48, "label": "sent on its own" },
+      { "px": 128, "label": "the file itself" }
+    ],
+    "nextStep": "Next: Server Settings → Emoji → Upload Emoji. The name needs at least two characters and may only use letters, numbers and underscores.",
+    "cropNote": "Anything that is not already square has its middle taken. Emoji reward cropping in close, so this is usually an improvement rather than a compromise.",
+    "verified": "The 256 KB ceiling and the 128 by 128 canvas are Discord's own figures, read on {date}."
+  },
+  "card": {
+    "benefit": "Squeeze a reaction down to something a server will actually accept."
+  },
+  "resultEmpty": {
+    "message": "Your emoji will appear here.",
+    "hint": "You will see it at thirty-two pixels before you commit to it — which is the size that decides whether it works."
+  },
+  "result": {
+    "savedLine": "Down {saved} from where it started, and inside the allowance.",
+    "emptyRows": [
+      "A square file no larger than the emoji canvas",
+      "The exact weight, next to the 256 KB ceiling",
+      "The same artwork shown small, where most detail disappears"
+    ]
+  },
+  "labels": {
+    "progress": "Emoji fitting progress",
+    "resultAlt": "The finished emoji",
+    "sourceAlt": "The animation you are turning into an emoji"
+  },
+  "faqHeading": "Discord emoji — common questions",
+  "explainer": [
+    {
+      "heading": "The weight is in the frames, not the resolution",
+      "level": 2,
+      "paragraphs": [
+        "This is the single most useful thing to know about animated emoji, and it is the opposite of the instinct almost everyone has. Faced with a file that is too heavy, the natural move is to make the picture smaller. But the canvas is already tiny — 128 pixels on a side is about the area of a postage stamp — and shrinking a stamp does not save much.",
+        "What does scale is how many stamps there are. Each frame is very nearly a whole picture of its own, so a loop of sixty frames is roughly six times the weight of a loop of ten at identical dimensions. That is where a file blows past the allowance, and it is why an animation captured at a high rate almost always fails while a short hand-drawn loop sails through.",
+        "The good news is that this is also the cheapest thing to give up. An emoji is drawn at around thirty-two pixels beside a line of text. Nobody is studying the motion at that size; they are reading a shape and a colour. Halving the frame count leaves the loop running for exactly the same length of time — each remaining frame is simply held twice as long — and the difference is genuinely hard to see. Halving the colour depth or the encoding quality, by contrast, shows up immediately as muddy edges on the one thing people do look at."
+      ]
+    },
+    {
+      "heading": "Why an emoji looks blurry after it uploads",
+      "level": 3,
+      "paragraphs": [
+        "Because it was scaled twice. Upload something 480 pixels across and Discord shrinks it for display using its own resizing, on top of whatever compression you had already applied. The two stack, and the result is softer than either would be alone.",
+        "Exporting at the canvas Discord expects avoids the second pass entirely. That is what happens here before compression is even considered — the picture is brought down to size first, and only then is the question of weight addressed. It is also why the same file often ends up sharper and lighter at the same time, which sounds contradictory and is not: pixels you never spend cannot cost you anything.",
+        "There is one case where it works the other way. If your source is already smaller than the emoji canvas, it is left alone rather than blown up. A crisp 64 by 64 emoji is a better result than a fuzzy 128 by 128 one made from the same drawing."
+      ]
+    },
+    {
+      "heading": "Crop tight, then decide",
+      "level": 3,
+      "paragraphs": [
+        "Emoji are square, so anything wide has to lose its sides. The middle is taken by default, which suits most subjects — but the deeper point is that cropping in close is usually the right creative choice here regardless of shape.",
+        "At thirty-two pixels, a face filling the frame is legible and a face across a room is a smudge. The emoji that work are the ones that were framed for the size rather than shrunk into it. If the crop this page takes is not the part you wanted, choosing the region yourself and coming back gives a much better result than fighting the compression will.",
+        "Tighter framing also happens to help the weight, because a close crop of a moving subject tends to hold fewer distinct colours and less background detail than a wide one. It is one of the few decisions here that improves both things at once."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "size-limit",
+      "question": "What is the maximum size for a Discord emoji?",
+      "answer": [
+        "256 KB, for animated and still emoji alike, with 128 by 128 as the canvas Discord recommends.",
+        "The limit is on the file's weight, not its dimensions. A 128 by 128 animation with sixty frames goes over it comfortably, which is why a small-looking file is often refused."
+      ]
+    },
+    {
+      "id": "still-too-big",
+      "question": "It's still too big after fitting. What now?",
+      "answer": [
+        "Shorten the loop. A cut from sixty frames to twenty takes roughly two thirds of the weight away, and at the size an emoji is drawn the shortened version is difficult to tell from the original.",
+        "The next best move is a tighter crop. Less background means fewer distinct colours to encode, and it usually makes the emoji easier to read as well."
+      ]
+    },
+    {
+      "id": "formats",
+      "question": "Which file types can I upload as an emoji?",
+      "answer": [
+        "Discord's emoji upload takes an animation, a still image, a photograph, or a WebP. That last one is frequently left off the list in guides written elsewhere.",
+        "This page always produces an animation, which is the format most certain to be accepted and displayed consistently."
+      ]
+    },
+    {
+      "id": "transparency",
+      "question": "Will the transparent background survive?",
+      "answer": [
+        "Yes, but as a hard edge rather than a soft one. An animation can only record that a pixel is either drawn or not drawn — there is no halfway.",
+        "On artwork with a crisp outline this is invisible. On something with a soft glow or a drop shadow you will see a slightly jagged rim where the fade used to be."
+      ]
+    },
+    {
+      "id": "square",
+      "question": "Does it have to be square?",
+      "answer": [
+        "Discord will accept a rectangle and letterbox it, but the result is a smaller subject with empty space around it, which at this scale is a real loss.",
+        "That is why anything non-square is cropped to a square here rather than padded. If the middle is the wrong part to keep, crop the region you want first."
+      ]
+    },
+    {
+      "id": "private",
+      "question": "Does my file get uploaded to make this work?",
+      "answer": [
+        "No. The frames are decoded and the compression attempts are run by this tab, on your own device. Closing the tab cancels the work; nothing was sent anywhere to begin with.",
+        "That is also why the search takes a moment rather than returning immediately — it is doing real encoding, several times over, to find the best result that fits."
+      ]
+    }
+  ],
+  "related": {
+    "gif-for-discord": "Uploading somewhere other than the emoji picker? The hub covers all four surfaces.",
+    "discord-sticker-gif": "Stickers are the larger cousin, with a bigger allowance and two extra rules.",
+    "resize-gif": "Want a specific canvas rather than the emoji one? Set the dimensions yourself."
+  }
+}

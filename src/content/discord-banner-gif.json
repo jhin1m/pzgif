@@ -1,0 +1,166 @@
+{
+  "slug": "discord-banner-gif",
+  "title": "Discord banner GIF — 960 by 540, and it only plays for a moment",
+  "lead": "A server banner is a wide 16:9 image across the top of the channel list. It animates briefly when somebody arrives and then holds a still frame, which makes the opening seconds the only part most people will ever see — and makes everything after them weight spent on nothing.",
+  "meta": {
+    "title": "Discord banner GIF maker — 960×540 animated server banner",
+    "description": "Make an animated Discord server banner at 960×540 from a GIF or a clip, in your browser. Correct proportions, honest weight, no upload."
+  },
+  "dropzone": {
+    "title": "Drop the animation or clip for your banner",
+    "caption": "or paste with Ctrl+V · .gif .webp .mp4 .mov .webm"
+  },
+  "actions": {
+    "run": "Encode with these settings",
+    "running": "Building the banner…",
+    "rerun": "Build it again",
+    "download": "Download the banner",
+    "disabledReason": "Add something wide to turn into a banner."
+  },
+  "controls": {
+    "quality": {
+      "label": "Quality",
+      "hint": "This canvas is far larger than any other on the site, so a small change here moves the weight a great deal."
+    },
+    "colours": {
+      "label": "Colours",
+      "hint": "Banners are often photographic or gradient-heavy, and both show banding early. Reducing this is the first thing to try and the first thing to notice.",
+      "options": [
+        { "value": "256", "label": "256 — needed for photographs" },
+        { "value": "128", "label": "128 — acceptable on illustration" },
+        { "value": "64", "label": "64 — flat artwork only" },
+        { "value": "32", "label": "32 — bold graphic panels" }
+      ]
+    },
+    "keepEveryNth": {
+      "label": "Keep every Nth frame",
+      "hint": "At this size each frame is expensive, so dropping frames buys more here than anywhere else on the site."
+    }
+  },
+  "preset": {
+    "autofit": "Fit the banner shape",
+    "autofitRunning": "Building at banner size…",
+    "budgetHeading": "Banner weight",
+    "states": {
+      "over": "Over the target by {over}.",
+      "close": "Around {size}, which is close to the target set here.",
+      "fits": "Comfortably within the target, at {spare} under.",
+      "unknown": "This weighs {size}. Discord publishes no maximum file size for a server banner, so there is no ceiling to measure against — the figure below is a sensible size for a page banner, chosen here rather than by Discord."
+    },
+    "meterLabel": "Banner weight, {size}",
+    "unfitted": "This is as small as this device could make it, at {size}. There is no published limit to be over, but a banner this heavy is slow to appear for everyone who opens the server.",
+    "previewCaption": "Roughly how wide it sits above a channel list",
+    "previewMessage": "across the top of the server",
+    "previewSamples": [
+      { "px": 240, "label": "in the sidebar" }
+    ],
+    "nextStep": "Next: Server Settings → Overview, then set the Server Banner Background. Whether that slot is available to a given server is something the Overview page itself will tell you.",
+    "cropNote": "Anything that is not already 16:9 has its middle taken. Banners crop hard, so check that nothing important was living near an edge.",
+    "verified": "The 960 by 540 canvas is Discord's published figure, read on {date}."
+  },
+  "card": {
+    "benefit": "Build the wide strip above a channel list without guessing its proportions."
+  },
+  "resultEmpty": {
+    "message": "Your banner will appear here.",
+    "hint": "Watch the first moment closely — for most visitors it is the whole of what they see."
+  },
+  "result": {
+    "savedLine": "Cut down by {saved} while keeping the wide shape intact.",
+    "emptyRows": [
+      "A wide file at the proportions the server header expects",
+      "A loop kept to the length that actually plays",
+      "The measured weight, with no invented ceiling beside it"
+    ]
+  },
+  "labels": {
+    "progress": "Banner fitting progress",
+    "resultAlt": "The finished server banner",
+    "sourceAlt": "The footage you are turning into a banner"
+  },
+  "faqHeading": "Discord server banners — common questions",
+  "explainer": [
+    {
+      "heading": "It animates on arrival, then stops",
+      "level": 2,
+      "paragraphs": [
+        "This is the fact that should shape every decision about a banner, and it is almost never mentioned. When somebody opens the server the banner plays briefly and then settles on a still frame. It does not loop for as long as they stay. It does not restart when they scroll.",
+        "Two consequences follow. The first is that a long animation is mostly wasted — the later part of the loop is weight that every visitor downloads and almost none of them watch. Keeping it short is not a compromise forced by a limit here; it is what the surface actually rewards.",
+        "The second is that the frame it comes to rest on matters more than the movement. A banner whose motion is charming but whose final state is a blur has failed at the job it will spend the rest of its life doing, which is sitting still above a channel list. Design for the still frame, and treat the motion as an entrance."
+      ]
+    },
+    {
+      "heading": "The weight is real even though nothing publishes a limit",
+      "level": 3,
+      "paragraphs": [
+        "Discord does not state a maximum file size for a server banner anywhere in its help articles. Rather than invent one, this page reports what the file actually weighs and leaves the ceiling blank — a number nobody published is not something to present as a rule.",
+        "That is not the same as saying weight does not matter. This is by far the largest canvas on the site: nearly thirty times the area of an emoji. Every frame costs proportionally more, and the file is fetched by everyone who opens the server, often on a phone connection. A heavy banner appears late, which on a first visit is a worse impression than a simpler one that arrives promptly.",
+        "The target used to steer the compression here is therefore a judgement rather than a rule, and it is labelled that way in the panel. If your artwork genuinely needs more, encode it by hand and take the larger file with your eyes open."
+      ]
+    },
+    {
+      "heading": "What survives the crop, and what sits behind the text",
+      "level": 3,
+      "paragraphs": [
+        "The banner is 16:9, so anything squarer loses its top and bottom and anything wider loses its sides. The middle is what is kept. That is the usual right answer for scenery and the usual wrong answer for a logo placed in a corner, which is worth checking before you upload rather than after.",
+        "The other thing to plan around is that the banner is not shown alone. The server name and the interface sit over the top of it, and the upper strip in particular is where that furniture lands. Detail placed there competes with text rather than complementing it. Leaving that band relatively quiet — a gradient, a plain wall, sky — gives the name something to sit on and makes the whole header easier to read.",
+        "Composition aside, quiet areas are also cheap to encode. A busy banner with movement across the full width costs far more weight than one where a single element moves against a settled background, and the settled version usually looks more considered as well."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "banner-size",
+      "question": "What size should a Discord server banner be?",
+      "answer": [
+        "960 pixels wide by 540 high, which is a 16:9 rectangle. That is the figure Discord publishes for the server banner background.",
+        "A larger image with the same proportions is scaled down rather than refused, but it costs weight for detail that is discarded on the way in."
+      ]
+    },
+    {
+      "id": "banner-limit",
+      "question": "What is the maximum file size for a banner?",
+      "answer": [
+        "Discord does not publish one, so this page does not print one. The meter shows what your file weighs and nothing beside it.",
+        "The target the fitting aims at is a judgement about what appears promptly for a visitor on a phone, not a rule handed down by Discord."
+      ]
+    },
+    {
+      "id": "profile-banner",
+      "question": "Is this the same as the banner on my profile?",
+      "answer": [
+        "No, they are separate surfaces with separate proportions. This page is for the server banner across the top of a channel list.",
+        "The profile banner is a shallower strip, and its dimensions are a convention that circulates among users rather than a figure Discord documents. Because there is nothing authoritative to target, it is not offered here as a preset."
+      ]
+    },
+    {
+      "id": "banner-slot",
+      "question": "I can't find where to set the banner.",
+      "answer": [
+        "The banner background lives under Server Settings, in the Overview section.",
+        "Not every server has that slot available, and no rule about which ones do is quoted here on purpose — the conditions have been revised more than once and are described inconsistently even in Discord's own material. The Overview page of your server is the one place that answers it correctly for you."
+      ]
+    },
+    {
+      "id": "long-clip",
+      "question": "Can I use a long clip?",
+      "answer": [
+        "You can, but the tail of it will not be seen. The banner plays briefly on arrival and then holds still, so a long source mostly adds weight.",
+        "Choosing a few seconds that end on a frame worth looking at gives a lighter file and a better result at the same time."
+      ]
+    },
+    {
+      "id": "text-in-banner",
+      "question": "Should I put the server name in the image?",
+      "answer": [
+        "Usually not. Discord already draws the name over the banner, and a second copy underneath it reads as a mistake.",
+        "It also does not survive scaling well. Lettering baked into an image at this size turns soft on a narrow window, whereas the interface's own text stays crisp at any width."
+      ]
+    }
+  ],
+  "related": {
+    "gif-for-discord": "Uploading to a different part of Discord? The hub has all four targets.",
+    "discord-avatar-gif": "The small round one beside your name is a very different problem.",
+    "crop-gif": "Choose the 16:9 region yourself instead of letting the middle be taken."
+  }
+}

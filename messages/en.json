@@ -94,6 +94,13 @@
     "directionDowngraded": "To hold that many frames this device will run the job at {width} px.",
     "directionWontFit": "{frames} frames will not fit this device at once. Try a straight reverse, or crop the frame down first."
   },
+  "preset": {
+    "manual": "Manual override",
+    "optional": "Optional",
+    "attempt": "Try {index} of up to {max}",
+    "attemptPending": "Up to {max} attempts",
+    "settled": "Settled after {attempts, plural, one {# attempt} other {# attempts}} · {width}×{height} · {frames} frames"
+  },
   "crop": {
     "moveLabel": "Crop area — arrow keys move it, Shift for 10 px",
     "readout": "{width}×{height} at {x}, {y}",

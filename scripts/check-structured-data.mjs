@@ -72,12 +72,16 @@ const RULES = [
   {
     // The other half of the same fabricated-rating path: a `review` node carries
     // a `reviewRating`, and embedded reviews earn the identical star with no
-    // `aggregateRating` in sight — which the rule above would miss. Matched by the
-    // JSON-LD shapes (a `review`/`reviewRating` key, or a `review` assigned an
-    // array/object) so backticked prose like the `review` in the header comment
-    // does not trip it.
+    // `aggregateRating` in sight — which the rule above would miss. Matches any
+    // `review` / `reviewRating` property key (quoted or bare), whatever its
+    // value: these JSON-LD graphs are built as object literals, so
+    // `review: myReviews` with a variable value is the natural shape and must be
+    // caught as surely as an inline `review: [ ... ]`. The bare-key arm does not
+    // match backticked prose like the `review` in the header comment above (no
+    // colon follows), and the pragma is the escape hatch for the rare comment or
+    // test that must write `review:` for another reason.
     pattern:
-      /["']reviewRating["']|\breviewRating\s*:|["']review["']\s*:|\breview\s*:\s*[[{]/,
+      /["']reviewRating["']|\breviewRating\s*:|["']review["']\s*:|\breview\s*:/,
     reason:
       "No reviews exist. `review` / `reviewRating` markup earns the same self-serving star rating as `aggregateRating` — the manual-action risk this guard exists to block.",
   },

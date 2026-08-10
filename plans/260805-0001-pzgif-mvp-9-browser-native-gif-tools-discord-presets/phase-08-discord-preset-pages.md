@@ -1,13 +1,19 @@
 ---
 phase: 8
 title: "Discord Preset Pages"
-status: pending
+status: complete
 priority: P1
 effort: "4-6d"
 dependencies: [5]
+completed: 2026-08-10
 ---
 
 # Phase 8: Discord Preset Pages
+
+> **Shipped 2026-08-10.** All five routes are live and statically prerendered;
+> 15/15 preset E2E pass on Chromium and WebKit with every dimension and byte
+> count read out of the produced GIF. What is **not** done is the manual upload
+> test — see "What shipped" below, which is the honest record of the gap.
 
 ## Overview
 
@@ -110,18 +116,95 @@ The hub and the four dedicated pages share one component and one engine. What di
 
 ## Success Criteria
 
-- [ ] Auto-fit produces a file under the real per-preset limit at the correct dimensions, verified by decoding it, for all five routes
-- [ ] `680×240` appears nowhere in the codebase, `design-guidelines.md`, or the wireframes
-- [ ] Sticker preset enforces 320×320 exactly, ≤512 KB, ≤5 s and ≤60 FPS
-- [ ] No shared `MAX_BYTES` constant exists — every budget is per preset
-- [ ] No unverified number is rendered as a hard limit; community-derived values are labelled as such
-- [ ] No Nitro/Boost gating rule is stated anywhere in the UI
-- [ ] Budget bar states carry icon + sentence, never colour alone
-- [ ] Auto-fit is cancellable and attempt-capped by device tier; it completes on a real iPhone without crashing
-- [ ] Five distinct sets of hand-written copy
-- [ ] A real GIF sticker upload to Discord has been tested manually before launch. **Prerequisite: custom stickers need a Boost-level-1 server, and the 960×540 server banner needs Boost level 2** — budget roughly one month of Nitro/Boost (~$5) and arrange it early, not in launch week
-- [ ] The budget bar shows a range near the limit, and no "Fits ✓" appears without a real encode behind it
-- [ ] No Nitro/Boost gating rule appears anywhere, FAQ included; the maintenance promise is replaced by a verification date; the Slack related-tools card is gone
+- [x] Auto-fit produces a file under the real per-preset limit at the correct dimensions, verified by decoding it, for all five routes
+- [x] `680×240` appears nowhere in the codebase, `design-guidelines.md`, or the wireframes
+- [x] Sticker preset enforces 320×320 exactly, ≤512 KB, ≤5 s and ≤60 FPS
+- [x] No shared `MAX_BYTES` constant exists — every budget is per preset
+- [x] No unverified number is rendered as a hard limit; community-derived values are labelled as such
+- [x] No Nitro/Boost gating rule is stated anywhere in the UI
+- [x] Budget bar states carry icon + sentence, never colour alone
+- [x] Auto-fit is cancellable and attempt-capped by device tier — **but the iPhone half is unverified**; there is still no hardware, and it is the same gap as plan-level open question 8
+- [x] Five distinct sets of hand-written copy
+- [ ] **Not done: a real GIF sticker upload to Discord has not been tested.** It needs a Boost-level-1 server for custom stickers and level 2 for the 960×540 banner — roughly one month of Nitro/Boost, and no such server exists. This is a launch-blocking manual step, not a coding one, and it stays open into Phase 11
+- [x] The budget bar shows a range near the limit, and no "Fits ✓" appears without a real encode behind it
+- [x] No Nitro/Boost gating rule appears anywhere, FAQ included; the maintenance promise is replaced by a verification date; the Slack related-tools card is gone
+
+## What shipped, 2026-08-10
+
+### The engine gained four things, and three of them exist because a preset's size is chosen by its destination
+
+Admission control was built on an assumption that is right for every tool and
+wrong for every preset: that a smaller version of the requested file is an
+acceptable substitute for it. It is not. A 240×240 Discord sticker is not a
+smaller sticker, it is a rejected upload.
+
+| Addition | Why |
+|---|---|
+| `JobSpec.widthCeiling` | Discord publishes 960×540 for the server banner, which is above **every** tier's `defaultMaxWidth`. Without it the banner silently emitted 640×360 — the right shape at the wrong size, with nothing on screen saying so. The byte budget is untouched and still decides admission; this only raises what may be *considered* |
+| `GeometrySpec.pinWidth` | Makes the search shed frame rate instead of width. Applied to **all** presets, not only the sticker: it was the banner that exposed the need, because an auto-fit job is admitted against two thirds of the frame budget |
+| `GeometrySpec.upscale` | Sticker only. Discord refuses anything but exactly 320×320, so an honest 200×200 sticker is a file the destination will not take. The copy says the result will look soft |
+| `runAutofit` + `autofit.ts` | The search. Decodes once, holds the frames resident, and encodes a **copy** per attempt in a worker of its own |
+
+### The search is seeded, and the ladder had a defect the first test caught
+
+`planSearch()` starts at the highest rung *predicted to fit* — from two real
+sample encodes, not a formula — so most files land in one or two attempts rather
+than walking down from the top. Attempt caps are 5/4/3/2 by tier, with iOS the
+point of the table.
+
+The candidate ladder is ordered quality-first and frames-second, which is the
+product decision. It is also **filtered to a strictly descending predicted
+size**, and that filter is not cosmetic: the raw preference order is not
+monotonic — the top of the stride-2 block is larger than the bottom of the
+stride-1 block — so a search walking it would have followed a failed attempt
+with a *larger* one, which cannot succeed by construction. That is a real encode,
+a real worker and real memory spent to re-establish something already known, and
+it reads as a slow tool rather than as a bug.
+
+### Memory: the auto-fit job is admitted against two thirds of the budget
+
+A normal job transfers its frames to the encoder and holds nothing. This one
+cannot — it may need them for a second attempt, and re-decoding a ten-second clip
+three times reads as a hang. So the frames stay resident and each attempt copies
+them, which is one more full-size buffer alive than `frameBufferBytes()`
+accounts for. `AUTOFIT_BUDGET_SHARE` reserves that third **before** anything is
+decoded rather than discovering it as an OOM on the device with least room.
+
+Each attempt still spawns and terminates its own encode worker, as the phase
+required — that was already `JobController`'s behaviour per `need-encoder`, so
+gifski's heap is reclaimed between attempts rather than accumulating.
+
+### Two defects found while verifying, both real
+
+1. **The homepage tool picker overflowed its reserved box by 31px at 768px.**
+   The five preset routes all accept GIF, so the picker went from seven rows to
+   twelve. Phase 7 had anticipated exactly this and bounded the list with
+   `max-h-80` — a constant measured at 320 and 375px, where a 320px ceiling is
+   *smaller* than the room available. At 768 the chips share rows and that
+   ceiling is far larger than the reservation leaves, so the bound never engaged.
+   The list is now a shrinkable flex child (`min-h-0`) that scrolls inside
+   whatever height is left at any width, so no breakpoint knows the route count
+   and the next ship cannot overflow it.
+
+2. **The Discord result panel overshot every reservation band.** It needs
+   967/933/800/764px against 736/704/588/624 — a size-budget meter and an
+   in-message preview sit above the summary every other tool ends with. It now
+   carries `PRESET_RESERVATION`, applied to all three branches, and
+   `result-panel-reservation.spec.ts` runs `discord-emoji-gif` so the next drift
+   fails the suite. That spec also stopped locating its subject by matching
+   `min-h-1\d\d` against the class string — a coupling that silently found
+   nothing the moment a page reserved a box outside that range, i.e. a test that
+   measures nothing while looking healthy.
+
+### One thing the copy could not say
+
+`phase-08` above asks the avatar page to cover "Nitro", and the same file forbids
+stating any Nitro or Boost gating rule anywhere including the FAQ. The
+prohibition wins — it is restated twice in the success criteria and the reason is
+that two Discord articles updated within a fortnight contradict each other. Both
+the avatar and banner pages now point the reader at their own client instead, and
+`tool-copy.test.ts` plus `discord-presets.spec.ts` assert the words appear
+nowhere in the content files or the rendered markup.
 
 ## Risk Assessment
 
@@ -135,7 +218,8 @@ The hub and the four dedicated pages share one component and one engine. What di
 
 ## Open questions
 
-1. Discord publishes **no** byte or pixel limit for avatars, server icons, or profile banners. Either label them "community standard" or cut those two presets from MVP. **Recommend labelling** — the keyword value is real and the honesty costs nothing.
-2. Animated-emoji gating is self-contradictory across two Discord articles. Avoid stating any rule until resolved.
-3. GIF stickers: API and blog say yes, a help article says APNG only. Test before promising.
-4. Server-banner max file size: no Discord-published figure exists.
+1. ~~Discord publishes **no** byte or pixel limit for avatars, server icons, or profile banners.~~ **Closed 2026-08-10 by making the absence a state rather than a gap.** `byteLimit: null` is a first-class value in `presets/discord.ts`, `SizeBudgetBar` renders no ceiling and no tick when it sees one, and the `unknown` sentence says plainly that Discord publishes no maximum. `targetBytes` — what the search actually aims at — is labelled as ours on the page and is never called a limit. The profile banner was cut rather than labelled: its ~600×240 is a community figure with nothing authoritative behind it, and the route now targets the 960×540 server banner Discord does publish.
+2. ~~Animated-emoji gating is self-contradictory across two Discord articles.~~ **Closed by saying nothing.** No page states any gating rule; both places that wanted to now point the reader at their own client. Asserted in two suites so it cannot come back in an edit.
+3. **GIF stickers: still open, and deliberately unresolved.** The API and Discord's blog say animated stickers work; one help article is more restrictive. The FAQ says exactly that — that the sources disagree and it is worth testing on your own server — rather than picking a side. **A real upload has not been tested and cannot be without a Boost-level-1 server.** This is the phase's one unmet success criterion and it carries into Phase 11.
+4. ~~Server-banner max file size: no Discord-published figure exists.~~ **Closed the same way as 1.** No figure is printed. The five-second target the banner aims at is justified by the surface's own animate-then-pause behaviour rather than by an invented ceiling.
+5. **New: the iOS attempt cap is unverified.** `ATTEMPT_CAP.ios` is 2, chosen against the 30 MB budget that itself carries `measured: false`. Gate G3 has never run because there is no iPhone, so "auto-fit completes on a real iPhone without crashing" is asserted by reasoning rather than by measurement. Same hardware gap as plan-level open question 8, now with one more thing riding on it.

@@ -131,7 +131,7 @@ pre-committed reversal in `phase-01` stands if judging later fails.
 | 5 | [Tool Framework and GIF Compressor](./phase-05-tool-framework-and-gif-compressor.md) | Complete 2026-08-05 · output decoded and verified in-browser | 3, 4 |
 | 6 | [GIF-to-GIF Tools](./phase-06-gif-to-gif-tools.md) | Complete 2026-08-05 · 26/26 E2E on Chromium and WebKit, outputs decoded | 5 |
 | 7 | [Cross-Format Tools](./phase-07-cross-format-tools.md) | Complete 2026-08-10 · 22/22 E2E on Chromium and WebKit, outputs decoded | 5 |
-| 8 | [Discord Preset Pages](./phase-08-discord-preset-pages.md) | Pending | 5 |
+| 8 | [Discord Preset Pages](./phase-08-discord-preset-pages.md) | Complete 2026-08-10 · 15/15 E2E on Chromium and WebKit, outputs decoded · one manual step outstanding | 5 |
 | 9 | [Content SEO and Legal](./phase-09-content-seo-and-legal.md) | Pending | 3 |
 | 10 | [Ads Consent and Analytics](./phase-10-ads-consent-and-analytics.md) | Pending | 3, 9 |
 | 11 | [QA Perf A11y and Launch](./phase-11-qa-perf-a11y-and-launch.md) | Pending | 6, 7, 8, 9, 10 |
@@ -241,9 +241,9 @@ Research proved several statements in the approved documents factually wrong. Th
 
 | Doc | Says | Reality | Fixed in |
 |---|---|---|---|
-| `design-guidelines.md` §10 | Preset "Banner 680×240" | **Matches no Discord surface.** Server banner is 960×540; profile banner ~600×240 (community, undocumented) | Phase 8 |
-| `design-guidelines.md` §10 | All presets target "under 256 KB" | 256 KB is **emoji only**. Sticker is 512 KB; Slack emoji 128 KB; banners/avatars have no published limit | Phase 8 |
-| `design-guidelines.md` §10 | (omits) | Sticker also caps at **5 s** and **60 FPS**; both are hard rejection criteria | Phase 8 |
+| `design-guidelines.md` §10 | Preset "Banner 680×240" | **Matches no Discord surface.** Server banner is 960×540; profile banner ~600×240 (community, undocumented) | ✅ Phase 8, 2026-08-10 |
+| `design-guidelines.md` §10 | All presets target "under 256 KB" | 256 KB is **emoji only**. Sticker is 512 KB; Slack emoji 128 KB; banners/avatars have no published limit | ✅ Phase 8, 2026-08-10 |
+| `design-guidelines.md` §10 | (omits) | Sticker also caps at **5 s** and **60 FPS**; both are hard rejection criteria | ✅ Phase 8, 2026-08-10 |
 | `design-guidelines.md` §10 | "FAQ accordion (schema.org `FAQPage`)" | FAQ rich results were **removed from Search on 2026-05-07**, docs deleted 2026-06-15. Keep the FAQ UI, drop the JSON-LD | Phase 9 |
 | `tech-stack.md` §6 | "Ezoic accepts new/small tool sites" | Ezoic has required **250,000+ MAU since 2026-02-19**. The launch monetisation premise is void | Phase 10 |
 | `tech-stack.md` §4 | `mp4box.js` + WebM demuxer + muxer; `ImageDecoder` for GIF; 150 MB/50 MB limits | Replaced by `mediabunny`; `modern-gif` everywhere; frame-buffer budgets | Phase 2 |
@@ -303,5 +303,23 @@ Tracked live at the end of each phase file. Blocking ones at plan time:
     the rest where they sit.
 
     A sixth defect was found while verifying that work and is **not** fixed: at 375 px with a 32 px root font, `site-header.tsx` overflows by 22 px on **every** route — the wordmark grows with the text and pushes the theme toggle and menu button past the edge. WCAG 1.4.4, shared chrome, out of the soul pass's scope.
+
+12. **A real Discord upload has never been tested, and cannot be from this
+    machine.** Phase 8 shipped all five preset routes with every dimension and
+    byte count asserted by decoding the produced GIF, but the last link in the
+    chain — Discord accepting the file — is unverified. Custom stickers need a
+    Boost-level-1 server and the 960×540 banner needs level 2, so this costs
+    roughly one month of Nitro/Boost and about five dollars. **Arrange it well
+    before launch week**, not during it: it is the only way to close phase 8's
+    open question 3 (the API and Discord's blog say animated stickers work, one
+    help article disagrees), and if the restrictive source turns out to be right
+    the sticker page needs a copy change rather than a code one.
+
+13. **Two shipped surfaces are bounded by numbers nobody measured on the
+    hardware they describe.** `ATTEMPT_CAP.ios` is 2 real encodes, chosen
+    against the 30 MB iOS frame budget — which still carries `measured: false`,
+    because gate G3 has never run for want of an iPhone. Auto-fit is the most
+    memory-hungry flow in the product and iOS is the tier least able to afford
+    it, so this is the same gap as open question 8 with more riding on it.
 
 <!-- slug: pzgif-mvp-9-browser-native-gif-tools-discord-presets -->

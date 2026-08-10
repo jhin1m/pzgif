@@ -130,7 +130,7 @@ pre-committed reversal in `phase-01` stands if judging later fails.
 | 4 | [Media Engine Core](./phase-04-media-engine-core.md) | Code complete 2026-08-05 · browser suite unrun | 1 |
 | 5 | [Tool Framework and GIF Compressor](./phase-05-tool-framework-and-gif-compressor.md) | Complete 2026-08-05 · output decoded and verified in-browser | 3, 4 |
 | 6 | [GIF-to-GIF Tools](./phase-06-gif-to-gif-tools.md) | Complete 2026-08-05 · 26/26 E2E on Chromium and WebKit, outputs decoded | 5 |
-| 7 | [Cross-Format Tools](./phase-07-cross-format-tools.md) | Pending | 5 |
+| 7 | [Cross-Format Tools](./phase-07-cross-format-tools.md) | Complete 2026-08-10 · 22/22 E2E on Chromium and WebKit, outputs decoded | 5 |
 | 8 | [Discord Preset Pages](./phase-08-discord-preset-pages.md) | Pending | 5 |
 | 9 | [Content SEO and Legal](./phase-09-content-seo-and-legal.md) | Pending | 3 |
 | 10 | [Ads Consent and Analytics](./phase-10-ads-consent-and-analytics.md) | Pending | 3, 9 |
@@ -256,7 +256,7 @@ Tracked live at the end of each phase file. Blocking ones at plan time:
 1. **Does the gifski single-thread path deadlock?** Unverified — upstream issue #5 concerns "channels and/or threads", and gifski uses `crossbeam-channel` even without rayon. **Blocks Phase 4.** Gate G1 answers it
 2. **Is gifski visibly better than `gifenc` at matched bytes?** The entire positioning and the AGPL obligation rest on yes. **Blocks Phase 4.** Gate G6 answers it
 3. **How fast is `modern-gif`?** Unbenchmarked; it was chosen for maintenance, not measured speed. Phase 1 answers it
-4. **Animated WebP on Safari** has no maintained library and no `ImageDecoder`. Phase 7 resolves it by building a ~150-line RIFF/ANMF splitter so the page works everywhere. **A knowingly-broken ranking page is not an option** — if the splitter is not built, the page and its sitemap entry are cut instead (it is in Ship 4, the last and most cuttable)
+4. ~~**Animated WebP on Safari** has no maintained library and no `ImageDecoder`.~~ **Closed 2026-08-10.** The splitter was built and the page ships whole on every engine — and it needed no library at all, which the question assumed it would. An animated WebP is a RIFF container holding one compressed *still* image per frame, and every browser including Safari decodes a still WebP natively, so `decode/webp-riff.ts` rebuilds each frame into a minimal standalone container and hands it to `createImageBitmap()`. The `ImageDecoder` path was removed rather than kept as a fast path, on the same reasoning that made `modern-gif` universal: two paths would ship the untested one to the engine that is hardest to debug. `browser-unsupported`'s `no-image-decoder` reason is deleted — there is no longer a browser it describes
 5. **The gifski Rust fork is deferred past launch** (ratified 2026-08-05). MVP ships the unforked encoder with honest progress — determinate through decode, a clearly labelled encode stage with an elapsed timer, no invented percentage. Revisit after launch with real data, or immediately if gate G1 exposes a deadlock, in which case it gets its own budget rather than being absorbed into Phase 4
 6. **If G6 fails, does the project continue?** The pre-registered decision tree in Phase 1 says reposition on presets, privacy and the size-budget UX. **Still open** — the judging pack is generated and pre-registered but unscored, so Phase 4 proceeds on the assumption gifski wins while already paying the AGPL cost for it
 7. Who is the named operator on the About page? Required before any ad-network application, the Contact page, GDPR controller identification, and a DMCA agent if one is ever needed
@@ -265,6 +265,18 @@ Tracked live at the end of each phase file. Blocking ones at plan time:
 10. **Four browser tests fail on `main`, and all four are Phase 3's** (surfaced when Phase 6 ran the suite on 2026-08-05; each reproduces on a tree stashed back to before Phase 6). `/dev/states` overflows 40 px at 320 px in both engines; WebKit fails the skip-link tab order and the FAQ-panel height check — the last of which is a *racing assertion* rather than an engine defect: it reads the panel height while the 150 ms `grid-template-rows` transition is still running, so it flaps rather than failing reliably.
 
     **The fifth is closed.** The compressor's **CLS 0.015** was diagnosed and fixed in the homepage soul pass: the result panel grew 320 → 505 px when a job finished, seconds after the click that started it, so `hadRecentInput` never excluded it. The panel now reserves the done state's *measured* height in four breakpoint bands, `e2e/result-panel-reservation.spec.ts` asserts the reservation still covers its contents, and the compressor's CLS test measures 0.
+
+11. **Animated WebP compositing is the one Phase 7 output that fails silently.**
+    `decode/webp-riff.ts`'s flag and offset decoding is unit-tested against
+    synthesised containers, but the *compositing* in `decode/webp.ts` — frame
+    offsets, `blend: "replace"`, `dispose: "background"` — is exercised only by
+    `anim.webp`, whose 48 frames are all full-canvas with neither offset nor
+    disposal. Every real WebP encoder produces all three, and a defect there
+    yields a plausible wrong animation rather than an error, which is what makes
+    it the only place in the phase where a bad output does not announce itself.
+    A fixture needs `webpmux` or `img2webp` to author. **Phase 11**, and it is
+    recorded here rather than only in `phase-07` so it does not lapse with that
+    file.
 
     A sixth defect was found while verifying that work and is **not** fixed: at 375 px with a 32 px root font, `site-header.tsx` overflows by 22 px on **every** route — the wordmark grows with the text and pushes the theme toggle and menu button past the edge. WCAG 1.4.4, shared chrome, out of the soul pass's scope.
 

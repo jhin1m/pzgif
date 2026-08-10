@@ -1,0 +1,145 @@
+{
+  "slug": "webp-to-gif",
+  "title": "WebP to GIF — for the places that still won't take WebP",
+  "lead": "An animated WebP becomes an animated GIF, with its frame timing carried across intact. Every browser can do this here, Safari included, because the conversion is assembled from parts your browser already has rather than from a decoder only some of them ship.",
+  "meta": {
+    "title": "Animated WebP to GIF converter — works in every browser",
+    "description": "Convert an animated WebP to a GIF without uploading it. Frame timing is preserved, transparency is handled, and it works in Safari as well as Chrome."
+  },
+  "dropzone": {
+    "title": "Drop the animated WebP",
+    "caption": "or paste with Ctrl+V · .webp · a still WebP has nothing to animate, so it is turned away"
+  },
+  "actions": {
+    "run": "Convert to GIF",
+    "running": "Converting…",
+    "rerun": "Convert again",
+    "download": "Download the GIF",
+    "disabledReason": "Add an animated WebP first."
+  },
+  "controls": {
+    "width": {
+      "label": "Width",
+      "hint": "Height follows the original proportions. Leaving it at the source width is usually right, since this conversion already costs enough elsewhere."
+    },
+    "quality": {
+      "label": "Quality",
+      "hint": "How much effort goes into choosing the palette. It matters more here than on most conversions, because the palette is where the picture is being squeezed."
+    }
+  },
+  "notes": {
+    "source": "This animation holds {frames} frames over {seconds} seconds. Each one becomes a full picture in the GIF."
+  },
+  "card": {
+    "benefit": "Go back to the older format when somewhere important refuses the newer one."
+  },
+  "resultEmpty": {
+    "message": "Your GIF will appear here.",
+    "hint": "The frame timing comes across exactly, so the loop keeps its original rhythm."
+  },
+  "result": {
+    "savedLine": "Converted, and it landed {saved} lighter than expected for this format.",
+    "emptyRows": [
+      "The same loop, with each frame's own timing preserved",
+      "A palette of at most two hundred and fifty-six colours",
+      "A file that will be accepted where the original was refused"
+    ]
+  },
+  "labels": {
+    "progress": "Conversion progress",
+    "resultAlt": "The GIF made from your animated WebP",
+    "sourceAlt": "The animated WebP you are converting"
+  },
+  "faqHeading": "WebP to GIF — common questions",
+  "explainer": [
+    {
+      "heading": "This conversion makes things worse. Do it anyway, if you have to",
+      "level": 2,
+      "paragraphs": [
+        "It is worth being direct: WebP is better than GIF at almost everything. It has the full colour range where GIF has a palette of at most two hundred and fifty-six entries. It compresses far harder, so the same animation is a fraction of the weight. It supports partial transparency, where GIF can only say that a pixel is either fully there or fully absent. Converting from one to the other is a downgrade in every measurable direction.",
+        "There is exactly one good reason to do it, and it is a good one: something you need to use will not accept the better format. Older chat clients, some forum software, a fair few content systems, and the odd piece of desktop software all still want a GIF and will not be argued with. When that is the situation, the conversion is not a mistake — it is the price of the destination.",
+        "What that means in practice is that you should keep the original. Convert a copy, send the copy, and let the WebP remain the version you work from. Converting back later recovers nothing; the colours discarded on the way out do not come home."
+      ]
+    },
+    {
+      "heading": "Where the colour goes",
+      "level": 3,
+      "paragraphs": [
+        "A GIF frame indexes into a table of at most two hundred and fifty-six colours. Everything in the source that is not one of those has to become one that is, and choosing which is the whole art of GIF encoding. Photographic content and smooth gradients suffer most, because a subtle transition across thousands of shades has to be approximated by a handful — which shows up as visible bands, or as a fine speckle where the encoder has traded banding for noise.",
+        "Flat illustration, line art, screen recordings and anything with large areas of solid colour come through nearly untouched, because they never used many colours to begin with. If your animation is one of those, this conversion costs you almost nothing but weight.",
+        "The Quality control is how much effort goes into the palette decision. Raising it helps on the difficult content and does very little on the easy content, which is the opposite of how a quality slider usually behaves and worth knowing before you reach for it."
+      ]
+    },
+    {
+      "heading": "Transparency becomes a yes-or-no question",
+      "level": 3,
+      "paragraphs": [
+        "WebP stores an alpha value per pixel, so an edge can be half-transparent and a shadow can fade out smoothly. GIF has one bit: a pixel is drawn or it is not. Everything in between has to fall to one side.",
+        "The visible result is a hard edge where there was a soft one, which reads as a jagged outline on a shape that was smoothly antialiased. On a sticker or a cut-out logo this is the most noticeable thing about the conversion, more so than any colour loss. If the destination will take a WebP at all, that is the reason to push for it."
+      ]
+    },
+    {
+      "heading": "Why this works in Safari when most converters do not",
+      "level": 3,
+      "paragraphs": [
+        "Browsers offer one API that reads an animated WebP as a sequence of frames, and Safari has never implemented it — at any version. That is why so many in-browser converters either refuse this format outright or quietly fail on it, and why doing it properly usually means sending your file to a server.",
+        "The way around it is that an animated WebP is a container holding one compressed still image per frame, plus instructions about where each goes and what to erase afterwards. Every browser, Safari included, decodes a still WebP without complaint. So the file is taken apart, each frame is rebuilt into a small standalone image, and the animation is reassembled by following those instructions on a canvas.",
+        "The practical consequence is that there is no browser on which this page tells you to go elsewhere, and no version in which your animation is uploaded to make it work. It is the same code path everywhere, which also means it is the same code path being tested everywhere."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "still-webp",
+      "question": "My WebP won't load. Is it broken?",
+      "answer": [
+        "Most likely it is a still image rather than an animation. The two share a file extension and look identical in a folder, but only one of them has frames to convert.",
+        "A still WebP would produce a single-frame GIF, which is not an animation and is a worse still image than the file you already have, so it is turned away rather than converted."
+      ]
+    },
+    {
+      "id": "quality-loss",
+      "question": "Why does the GIF look worse than the WebP?",
+      "answer": [
+        "Because it is worse, and unavoidably so. GIF allows at most two hundred and fifty-six colours per frame and only fully-on or fully-off transparency, while WebP has the full colour range and smooth alpha.",
+        "Raising the Quality control helps on photographic content. On flat illustration there is usually very little difference to recover, because the source was already within what a palette can express."
+      ]
+    },
+    {
+      "id": "file-size",
+      "question": "The GIF is much bigger than the WebP. Is that expected?",
+      "answer": [
+        "Yes, and usually by a lot. WebP compresses animation with the same techniques modern video uses; GIF compresses each frame independently with a scheme from 1987. Several times the size is normal, and much more than that is not unusual.",
+        "Reducing the width is the most effective lever if the result has to fit a limit somewhere. The compressor can take it further afterwards."
+      ]
+    },
+    {
+      "id": "timing",
+      "question": "Does the animation play at the same speed?",
+      "answer": [
+        "Yes. Each frame's own duration is read out of the file and carried into the GIF, so an animation with varying delays keeps its rhythm rather than being flattened to a constant rate.",
+        "One small difference is unavoidable: GIF measures delays in hundredths of a second, so a duration that does not divide evenly is rounded to the nearest one."
+      ]
+    },
+    {
+      "id": "safari",
+      "question": "Does this work on an iPhone?",
+      "answer": [
+        "Yes. The decoding method here does not depend on the API that mobile Safari lacks, so the conversion runs the same way it does on a desktop.",
+        "The limit on a phone is memory rather than capability: a long or large animation may be refused before it starts, with a smaller width offered that would fit."
+      ]
+    },
+    {
+      "id": "reverse",
+      "question": "Can I convert a GIF to WebP here?",
+      "answer": [
+        "No. That direction is not one of the tools on this site, and it was left out deliberately rather than forgotten — the set here is kept small enough that each one is worth using.",
+        "If the goal is a smaller file rather than the WebP format specifically, converting to a looping video usually beats both, and that one is here."
+      ]
+    }
+  ],
+  "related": {
+    "gif-compressor": "The result will be heavy. This is where you take the weight back off.",
+    "mp4-to-gif": "Starting from a clip instead of an animation? Begin here."
+  }
+}

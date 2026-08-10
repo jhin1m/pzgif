@@ -2,7 +2,11 @@ import compressor from "@/content/gif-compressor.json";
 import crop from "@/content/crop-gif.json";
 import resize from "@/content/resize-gif.json";
 import reverse from "@/content/reverse-gif.json";
+import gifToMp4 from "@/content/gif-to-mp4.json";
+import mp4ToGif from "@/content/mp4-to-gif.json";
 import speed from "@/content/gif-speed-changer.json";
+import splitFrames from "@/content/split-gif-to-frames.json";
+import webpToGif from "@/content/webp-to-gif.json";
 import { toolIcon } from "@/components/home/tool-icons";
 import { Link } from "@/i18n/navigation";
 import { toolContent } from "@/lib/tools/content";
@@ -14,7 +18,7 @@ import { cn } from "@/lib/utils";
  *
  * ── It renders `liveRoutes()`, and that is a copy decision as much as a
  *    structural one ────────────────────────────────────────────────────────
- * The registry describes fourteen routes and this deployment serves five. A card
+ * The registry describes fourteen routes and this deployment serves nine. A card
  * linking a `planned` slug is a 404 handed to the crawler on the one page it
  * crawls first. The grid therefore grows on its own as tools ship, which is also
  * why the sub-head above it states no number — a heading built around "nine
@@ -25,15 +29,25 @@ import { cn } from "@/lib/utils";
  * The name is structure and comes from `registry.ts`. The reason to click is
  * prose and comes from that tool's own content file. The split is the same one
  * the whole content strategy rests on: one line per tool, hand-written, never a
- * template with the noun swapped — `tool-copy.test.ts` asserts the five real
- * lines do not share a vocabulary.
+ * template with the noun swapped — `tool-copy.test.ts` asserts the real lines do
+ * not share a vocabulary.
  *
  * A live route with no content file throws here rather than rendering a card
  * with an empty line under it. The grid is prerendered, so that is a build
  * failure and not a blank card in front of a visitor.
  */
 
-const CONTENT = [compressor, resize, crop, speed, reverse].map((data) =>
+const CONTENT = [
+  compressor,
+  resize,
+  crop,
+  speed,
+  reverse,
+  mp4ToGif,
+  gifToMp4,
+  splitFrames,
+  webpToGif,
+].map((data) =>
   toolContent(data, (data as { slug: string }).slug),
 );
 

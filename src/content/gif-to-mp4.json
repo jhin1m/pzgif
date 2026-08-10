@@ -1,0 +1,154 @@
+{
+  "slug": "gif-to-mp4",
+  "title": "GIF to MP4 — make a heavy loop light again",
+  "lead": "The same animation, in a video container, at a fraction of the weight — and with the embed code you need to drop it into a page so it behaves exactly like the GIF it replaces. Encoding happens on your own machine; the file is never uploaded.",
+  "meta": {
+    "title": "GIF to MP4 converter — private, no upload, with embed code",
+    "description": "Convert an animated GIF to a looping MP4 in your browser. Includes the video tag that makes it autoplay silently like a GIF. Nothing is uploaded to a server."
+  },
+  "dropzone": {
+    "title": "Drop the GIF you want to shrink",
+    "caption": "or paste with Ctrl+V · .gif · the animation keeps its own timing, frame for frame"
+  },
+  "actions": {
+    "run": "Convert to MP4",
+    "running": "Encoding…",
+    "rerun": "Encode again",
+    "download": "Download the video",
+    "disabledReason": "Add a GIF first."
+  },
+  "controls": {
+    "width": {
+      "label": "Width",
+      "hint": "Height follows the animation's own proportions. Both are rounded down to an even number, which the video codec requires."
+    },
+    "quality": {
+      "label": "Visual quality",
+      "hint": "Sets how many bits each second of picture is allowed. Crisp suits screen recordings with text; Small suits anything filmed, where the eye forgives far more.",
+      "options": [
+        { "value": "balanced", "label": "Balanced" },
+        { "value": "crisp", "label": "Crisp — for text and line art" },
+        { "value": "small", "label": "Small — for filmed footage" }
+      ]
+    }
+  },
+  "notes": {
+    "dimensions": "Output {width}×{height} px. Both axes round down to even numbers because the codec stores colour at half resolution and refuses odd ones.",
+    "embedLabel": "The tag that makes it behave like a GIF",
+    "embedCaption": "Replace the filename with wherever you host the file. Every one of those four words is doing something: without muted no browser will start it on its own, and without playsinline an iPhone takes over the whole screen when it does.",
+    "embedFileName": "your-animation.mp4",
+    "unavailableTitle": "This browser cannot encode video",
+    "unavailableBody": "Video encoding needs the WebCodecs API, and this browser does not provide the encoding half of it — Firefox on Android is the usual case. Nothing on this page can work around that, because the missing piece is the encoder itself. A desktop browser, or Chrome on the same phone, will do it."
+  },
+  "card": {
+    "benefit": "Trade an oversized loop for a video file, and copy the tag that makes it behave the same."
+  },
+  "resultEmpty": {
+    "message": "Your video will appear here, already looping.",
+    "hint": "It plays here under the same conditions it will play under on a page — muted, looping, started by itself."
+  },
+  "result": {
+    "savedLine": "That is {saved} of page weight that no longer has to load.",
+    "emptyRows": [
+      "A muted loop that starts by itself, exactly like the original did",
+      "The tag to paste, with all four attributes already on it",
+      "How much lighter the video is than the animation it replaces"
+    ]
+  },
+  "labels": {
+    "progress": "Encoding progress",
+    "resultAlt": "The video made from your GIF, playing on a loop",
+    "sourceAlt": "The GIF you are converting"
+  },
+  "faqHeading": "Replacing GIFs with video — common questions",
+  "explainer": [
+    {
+      "heading": "Why the same animation weighs so much less as video",
+      "level": 2,
+      "paragraphs": [
+        "A GIF stores every frame as a complete picture drawn from a palette of at most two hundred and fifty-six colours. Nothing in the format knows that most of one frame is identical to the one before it, so a slow pan across a still background costs almost as much as a scene where everything moves. That design is from 1987 and it has aged exactly as well as you would expect.",
+        "A modern video codec does the opposite. It stores a handful of complete frames and describes everything between them as differences — which block moved, and by how much. On the animations people actually share, where a great deal stays put from frame to frame, that difference is enormous. It also has the whole colour range available rather than a palette, so gradients and skin tones stop banding.",
+        "The catch has always been that a video file did not behave like a GIF. It waited for a click, it showed a control bar, it made noise. That stopped being true years ago, and the four attributes below are how you get the old behaviour back."
+      ]
+    },
+    {
+      "heading": "The four attributes, and what each one prevents",
+      "level": 3,
+      "paragraphs": [
+        "**autoplay** asks the browser to start without a click. On its own it is not enough, and this is where most attempts fail.",
+        "**muted** is what makes autoplay actually happen. Every browser blocks unmuted autoplay, and has done for years, because the alternative was pages that shouted at you. A video with no audio track still has to say so explicitly — the browser will not infer it.",
+        "**loop** restarts at the end. A GIF loops by default and a video does not, so leaving this off produces an animation that plays once and then sits on its final frame, which reads as broken.",
+        "**playsinline** keeps it in the page on iOS. Without it, iPhone Safari hands playback to the fullscreen player, so a small decorative loop takes over the entire screen. It is the attribute most often forgotten and the one whose absence is most obvious to the person it happens to."
+      ]
+    },
+    {
+      "heading": "There is no audio track, and that is deliberate",
+      "level": 3,
+      "paragraphs": [
+        "The video produced here carries picture and nothing else. A GIF has no sound to carry over, so the only alternative would be inventing a silent track — bytes spent to look conventional, plus a dependency on an audio codec that not every browser can encode.",
+        "Nothing is lost by leaving it out. A file with no audio track plays perfectly well everywhere, and every major platform already produces exactly this when it converts an uploaded GIF on your behalf."
+      ]
+    },
+    {
+      "heading": "Which container you get, and why it might not be MP4",
+      "level": 3,
+      "paragraphs": [
+        "The encoder asks your browser which video formats it can actually produce, at the size you asked for, and takes the best answer. Almost everywhere that is H.264 in an MP4, which plays on essentially anything built this century. Where H.264 encoding is unavailable, it steps down through VP9 and VP8 and hands you a WebM instead.",
+        "In that case the download is named `.webm`, because a WebM in a file called `.mp4` is a file that fails to open on the machine it was sent to, in a way nobody can diagnose. WebM plays in every current browser but not in older Apple software, so if the recipient matters, that is worth knowing before you send it rather than after.",
+        "The dimensions are rounded down to even numbers on both axes for the same class of reason. H.264 stores colour information at half resolution horizontally and vertically, so an odd width has no valid representation, and animations are very often odd-sized. Losing at most one row and one column is invisible; being rejected by the encoder after a wait is not."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "still-a-gif",
+      "question": "Will it still work where GIFs work?",
+      "answer": [
+        "On a web page you control, yes, with the tag above. Chat platforms are a different matter: some accept video and display it as a loop, some accept it and show a player, and a few still want the original format.",
+        "Where the destination is a platform rather than a page you own, check what it accepts before converting. Where it is your own site, video is almost always the right answer."
+      ]
+    },
+    {
+      "id": "sound",
+      "question": "Can I add music to it?",
+      "answer": [
+        "Not here. The output has no audio track at all, and adding one would take a video editor rather than a converter. If you add a soundtrack elsewhere afterwards, remember to remove `muted` from the tag — and expect autoplay to stop working, because that is precisely what `muted` was buying."
+      ]
+    },
+    {
+      "id": "webm",
+      "question": "I got a .webm, not an .mp4. Why?",
+      "answer": [
+        "Your browser reported that it cannot encode H.264 at that size, so the encoder used the best format it could. That is genuinely a browser limitation and not a setting.",
+        "Trying the same file in a different browser on the same machine will often produce an MP4, because the encoding support is provided by the browser rather than by the operating system."
+      ]
+    },
+    {
+      "id": "quality-setting",
+      "question": "Which quality setting should I pick?",
+      "answer": [
+        "Crisp for anything with text, thin lines or flat blocks of colour — a screen recording, a chart, a diagram. Those are where compression damage is visible as fuzz around edges.",
+        "Small for filmed footage, where fine detail is already soft and the eye is far more forgiving. Balanced is a reasonable middle, and it is what you get without choosing."
+      ]
+    },
+    {
+      "id": "transparency",
+      "question": "What happens to transparent areas?",
+      "answer": [
+        "They are flattened. Video has no alpha channel in any format that plays widely, so anything transparent in the animation becomes solid in the result.",
+        "If the transparency is load-bearing — a sticker meant to sit over a background — this conversion is the wrong move and the original format is the one to keep."
+      ]
+    },
+    {
+      "id": "timing",
+      "question": "Does the video play at the same speed?",
+      "answer": [
+        "Yes. Each frame's own delay is carried across, and the frame rate is worked out from the animation's real timing rather than assumed. A file with irregular delays keeps them."
+      ]
+    }
+  ],
+  "related": {
+    "mp4-to-gif": "Need it back the other way? Trim a clip down and loop it.",
+    "gif-compressor": "Have to stay in the original format? Cut the weight without changing it."
+  }
+}

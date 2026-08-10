@@ -104,21 +104,27 @@ test.describe("the homepage", () => {
     await dropOnHomepage(page, MISLABELLED);
 
     // Not "decode-failed", and not silence. The bytes are a video, so the page
-    // says video — and then says plainly that nothing here handles one yet.
+    // says video.
     await expect(hero(page).getByText("Video", { exact: true })).toBeVisible();
-    await expect(
-      hero(page).getByText(/can't work on it yet/i),
-    ).toBeVisible();
-    await expect(hero(page).getByText(/not built yet/i)).toBeVisible();
 
     // And the sentence that explains *why* their GIF is not a GIF. This is the
-    // case the sniffer exists for, and the line used to render only in the
-    // branch where a tool was offered — i.e. never here.
+    // case the sniffer exists for.
     await expect(
       hero(page).getByText(/name ends in \.GIF, but the bytes are Video/i),
     ).toBeVisible();
 
-    // And no tool is offered, because offering one would be the dead end.
+    // The file is offered to the tool that takes video, and to no other.
+    //
+    // This assertion is the inverse of what it was until Phase 7, and the
+    // change is the point rather than a regression: while no video route
+    // existed, the honest answer was "nothing here handles this yet" and the
+    // test asserted that nothing was offered. `mp4-to-gif` now exists, so the
+    // same sniff has a real destination — and the invariant that never moved is
+    // that the destination is chosen from the *bytes*. Routed on its extension,
+    // this file would reach the compressor and die as `decode-failed`.
+    await expect(
+      hero(page).getByRole("link", { name: /MP4 to GIF/i }),
+    ).toBeVisible();
     await expect(
       hero(page).getByRole("link", { name: /GIF compressor/i }),
     ).toHaveCount(0);
@@ -184,13 +190,33 @@ test.describe("the homepage", () => {
       // spill past the bottom edge onto the tool grid — which is exactly what
       // the fixed height exists to prevent, and what the previous form of this
       // assertion could not see.
+      //
+      // The walk stops at any element that clips, and measures *that* element
+      // instead of what is inside it. `getBoundingClientRect()` reports layout
+      // position and knows nothing about clipping, so a scrolling list — which
+      // the tool picker became once seven routes accepted a GIF — reads as a
+      // spill of however far its content runs, while visually nothing crosses
+      // the edge at all. What this test is about is whether anything is painted
+      // over the tool grid, so a clipped subtree is exactly what it should not
+      // descend into.
       const spill = await box.evaluate((element) => {
         const bottom = element.getBoundingClientRect().bottom;
         let worst = 0;
-        for (const child of element.querySelectorAll("*")) {
-          const rect = child.getBoundingClientRect();
-          if (rect.height > 0) worst = Math.max(worst, rect.bottom - bottom);
-        }
+
+        const walk = (node: Element) => {
+          for (const child of node.children) {
+            const rect = child.getBoundingClientRect();
+            if (rect.height === 0) continue;
+            worst = Math.max(worst, rect.bottom - bottom);
+
+            const { overflowY, overflowX } = getComputedStyle(child);
+            const clips =
+              overflowY !== "visible" || overflowX !== "visible";
+            if (!clips) walk(child);
+          }
+        };
+
+        walk(element);
         return Math.round(worst);
       });
       expect(spill, "the picker overflows its reserved box").toBeLessThanOrEqual(0);

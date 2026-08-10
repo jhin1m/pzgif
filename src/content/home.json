@@ -8,9 +8,9 @@
   },
   "picker": {
     "heading": "What would you like to do with it?",
-    "unsupportedTitle": "We know what this is. We can't work on it yet.",
-    "unsupportedBody": "Every tool here takes GIFs today. Yours isn't one, so there is nothing honest to point you at — more formats are being built.",
-    "comingSoon": "Not built yet"
+    "unsupportedTitle": "We know what this is. There's no tool here for it.",
+    "unsupportedBody": "This site works on things that move — animated GIFs, animated WebP, and video clips it can turn into one. A still picture has nothing to animate, so there is nothing honest to point you at.",
+    "comingSoon": "No tool takes this"
   },
   "grid": {
     "heading": "Every tool, in your browser",

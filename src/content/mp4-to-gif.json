@@ -1,0 +1,163 @@
+{
+  "slug": "mp4-to-gif",
+  "title": "MP4 to GIF — turn a clip into a loop, in your browser",
+  "lead": "Pick the seconds you want with the two trim handles, choose a frame rate and a width, and the clip becomes an animated GIF without leaving this tab. The predicted size updates as you move the sliders, so you find out whether the result will be usable before you commit to making it.",
+  "meta": {
+    "title": "MP4 to GIF converter — no upload, runs in your browser",
+    "description": "Convert MP4, WebM or MOV to an animated GIF with a trim, a frame rate and a width you choose. The file never leaves your device, and the size is predicted before you convert."
+  },
+  "dropzone": {
+    "title": "Drop the clip you want to loop",
+    "caption": "or paste with Ctrl+V · .mp4 .webm .mov · audio is dropped, because GIF has no sound"
+  },
+  "actions": {
+    "run": "Make the GIF",
+    "running": "Converting…",
+    "rerun": "Convert again",
+    "download": "Download the GIF",
+    "disabledReason": "Add a clip first."
+  },
+  "controls": {
+    "trim": {
+      "label": "Which seconds to keep",
+      "hint": "Drag either handle, or type the times. The preview jumps to whichever end you moved, so you can see exactly where the loop starts and stops."
+    },
+    "fps": {
+      "label": "Frames per second",
+      "hint": "Every frame is a full picture in a GIF, so this is the setting that moves the size most. Twelve to fifteen reads as motion; below ten it starts to look like a slideshow."
+    },
+    "width": {
+      "label": "Width",
+      "hint": "Height follows the clip's own proportions. Halving the width quarters the pixel count, which is the fastest way to make a long selection fit."
+    },
+    "quality": {
+      "label": "Quality",
+      "hint": "How hard the encoder works to keep colours faithful. Lowering it helps most on filmed footage and barely registers on flat graphics."
+    }
+  },
+  "notes": {
+    "limits": "At {width}×{height} and {fps} fps, the engine plans for about {seconds} seconds at a time. Longer selections are refused before any work starts, with a setting that would fit.",
+    "estimate": "Estimated result: {low} to {high}.",
+    "unavailableTitle": "Video conversion isn't available on this device",
+    "unavailableBody": "A GIF has to be held in memory one uncompressed frame at a time, and iPhones and iPads have far less room for that than a laptop. Measurement showed practically every real clip exceeding what this browser can survive, so the tool says so here rather than accepting your file and failing part-way through.",
+    "unavailableAction": "Tools that do work here",
+    "estimateCaveat": "Any estimate here comes from encoding two short samples of your own clip, so it is a range and not a promise. The real size appears the moment the file does."
+  },
+  "card": {
+    "benefit": "Choose the seconds you want and watch the predicted result update before you convert."
+  },
+  "resultEmpty": {
+    "message": "Your looping GIF will appear here.",
+    "hint": "Move the trim handles first — the selection length matters more than anything else you can change."
+  },
+  "result": {
+    "savedLine": "The GIF came out {saved} lighter than the clip it was made from.",
+    "emptyRows": [
+      "The seconds between your two handles, looping forever",
+      "The real byte count, next to what was predicted for it",
+      "A silent picture — GIF carries no audio track at all"
+    ]
+  },
+  "labels": {
+    "progress": "Conversion progress",
+    "resultAlt": "The GIF made from your clip",
+    "sourceAlt": "A preview of your clip at the current trim position"
+  },
+  "faqHeading": "Converting video to GIF — common questions",
+  "explainer": [
+    {
+      "heading": "Why the length matters more than the file you started with",
+      "level": 2,
+      "paragraphs": [
+        "A GIF stores every frame as a complete picture. Video does the opposite — it stores one full frame and then a long series of descriptions of what changed — which is why a two-minute clip fits in a few megabytes and two minutes of GIF does not fit anywhere at all. The number that decides whether a conversion is possible is not how big your source file is. It is how many frames the result will have, multiplied by how many pixels are in each one.",
+        "That is also why the size of the clip you dropped is nearly useless as a guide. A heavily compressed screen recording and a lightly compressed phone video can be the same number of megabytes and produce results an order of magnitude apart. The three settings that actually decide the outcome are the length of your selection, the frame rate, and the width — in that order.",
+        "So the trim handles are the first thing on the page and the first thing to reach for. Cutting a selection in half halves the frame count, and it does it without touching how the result looks. Every other lever trades away something you can see."
+      ]
+    },
+    {
+      "heading": "What the predicted size is, and what it is not",
+      "level": 3,
+      "paragraphs": [
+        "The figure under the controls comes from encoding a small sample of your own frames at your own settings and reading how many bytes came out. It is not a formula applied to your file's dimensions, which is what makes it worth showing at all — the same settings on filmed footage and on flat vector graphics produce results that differ by more than an order of magnitude, and no formula that ignores the picture can tell those apart.",
+        "It is shown as a range rather than a single figure, deliberately. A sample is a sample: the part of a clip it reads may be busier or calmer than the rest. Handing over one confident-looking number would be a worse answer than an honest span, particularly on the clips people care most about getting right.",
+        "The moment the conversion finishes, the prediction stops mattering and the panel shows the byte count of the file that now exists. That number is read off the actual result, never estimated."
+      ]
+    },
+    {
+      "heading": "Audio, and where it goes",
+      "level": 3,
+      "paragraphs": [
+        "The GIF format has no concept of sound. There is no track to put audio in, no extension that adds one, and nothing this tool could do about it. If your clip has a soundtrack, the conversion silently leaves it behind — and it is worth knowing that before you convert something whose whole point was what was being said.",
+        "If sound is what you need, the honest answer is that you do not want a GIF. Convert the other way instead: a muted, looping MP4 embeds on a web page with four attributes, plays everywhere a GIF plays, and is a fraction of the weight."
+      ]
+    },
+    {
+      "heading": "Portrait clips, phone footage and rotation",
+      "level": 3,
+      "paragraphs": [
+        "Video files record their orientation as a note in the container rather than by storing the pixels the right way up. A phone clip shot vertically is very often stored as a landscape picture plus an instruction to turn it. Tools that read the raw dimensions and ignore that instruction are why so many converted GIFs come out lying on their side.",
+        "This one reads the rotation the container states and applies it before anything else happens, so a portrait clip stays portrait and the width you set is the width of the picture you can see. Files recorded by an iPhone are the common case, and they are also the case most likely to use a codec that not every browser can decode — if that happens you are told which codec it was, rather than watching a progress bar stall."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "how-long",
+      "question": "How long a clip can I convert?",
+      "answer": [
+        "It depends on the device you are on and the width and frame rate you chose, so the caption under the controls works it out for your machine rather than quoting a number that would be wrong on most of them. Narrower and slower means longer.",
+        "If your selection does not fit, you are told before any decoding begins, along with a setting that would make it fit. The job is never started and then abandoned part-way."
+      ]
+    },
+    {
+      "id": "audio",
+      "question": "What happens to the sound?",
+      "answer": [
+        "It is dropped. GIF has no audio track, so there is nowhere for it to go. If the sound is the point of the clip, convert it to a looping muted MP4 instead — that keeps the option of unmuting it later."
+      ]
+    },
+    {
+      "id": "quality-vs-fps",
+      "question": "Should I lower the frame rate or the width?",
+      "answer": [
+        "Width first, in most cases. Halving the width removes three quarters of the pixels and the result still moves smoothly, whereas dropping the frame rate too far makes motion visibly step.",
+        "The exception is a clip that barely moves — a static shot with one thing changing. There, a low frame rate costs almost nothing to look at and saves a great deal."
+      ]
+    },
+    {
+      "id": "iphone-mov",
+      "question": "My iPhone .mov won't convert. Why?",
+      "answer": [
+        "Recent iPhones record in HEVC by default, and most desktop browsers cannot decode it even though they can read the container it sits in. You are told when that is what happened, which is the difference between a fixable problem and a mysterious one.",
+        "The workaround is on the phone: in Settings, under Camera and then Formats, choosing 'Most Compatible' records H.264 instead, which converts everywhere."
+      ]
+    },
+    {
+      "id": "iphone-ipad",
+      "question": "Why is the tool unavailable on my iPhone?",
+      "answer": [
+        "Because holding a GIF's uncompressed frames in memory is what this conversion costs, and mobile Safari has a much smaller allowance for that than a desktop browser does. Testing against realistic clips found the overwhelming majority exceeding it.",
+        "Rather than let you choose a file and then refuse it, the page says so up front. The tools that take a GIF as their input all work normally on the same device."
+      ]
+    },
+    {
+      "id": "loop",
+      "question": "Does the GIF loop?",
+      "answer": [
+        "Yes, forever, which is what almost everyone wants and what every platform assumes. There is no loop-count setting because a GIF that stops after three passes is a support question waiting to happen, and the platforms that matter mostly ignore the count anyway."
+      ]
+    },
+    {
+      "id": "upload",
+      "question": "Is my clip uploaded anywhere?",
+      "answer": [
+        "No. The decoding and the encoding both happen in this tab, using your own processor. Nothing is sent to a server, there is no queue, and closing the tab is all it takes to be rid of the file — which also means the tab has to stay open while the job runs."
+      ]
+    }
+  ],
+  "related": {
+    "gif-compressor": "The GIF came out heavier than you hoped? Take the bytes down here.",
+    "gif-to-mp4": "Going the other way turns a heavy loop back into a light one.",
+    "gif-for-discord": "Need it to clear Discord's ceiling? The preset finds the settings for you."
+  }
+}

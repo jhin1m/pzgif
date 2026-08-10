@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import compressor from "@/content/gif-compressor.json";
+import gifToMp4 from "@/content/gif-to-mp4.json";
+import mp4ToGif from "@/content/mp4-to-gif.json";
+import splitFrames from "@/content/split-gif-to-frames.json";
+import webpToGif from "@/content/webp-to-gif.json";
 import crop from "@/content/crop-gif.json";
 import resize from "@/content/resize-gif.json";
 import reverse from "@/content/reverse-gif.json";
@@ -24,6 +28,10 @@ const PAGES: readonly ToolContent[] = [
   toolContent(crop, "crop-gif"),
   toolContent(speed, "gif-speed-changer"),
   toolContent(reverse, "reverse-gif"),
+  toolContent(mp4ToGif, "mp4-to-gif"),
+  toolContent(gifToMp4, "gif-to-mp4"),
+  toolContent(splitFrames, "split-gif-to-frames"),
+  toolContent(webpToGif, "webp-to-gif"),
 ];
 
 describe("every live tool page", () => {
@@ -67,6 +75,10 @@ describe("every live tool page", () => {
       const prose = [
         ...page.explainer.flatMap((section) => section.paragraphs),
         ...page.faq.flatMap((entry) => entry.answer),
+        // `notes` too. It is prose that a visitor reads, it lives in the same
+        // content file, and it was invisible to this check until Phase 7 added
+        // it — which is exactly how a shared line gets in.
+        ...Object.values(page.notes ?? {}),
       ];
       for (const paragraph of prose) {
         const key = paragraph.trim().toLowerCase();

@@ -40,6 +40,19 @@ import { cn } from "@/lib/utils";
  * truncation that comes back at every ship. Bounding the list and letting it
  * scroll decouples the reservation from the route count permanently, and the
  * partly-visible chip at the cut edge is what says there is more.
+ *
+ * ── [Amended, Phase 8] The bound is now the layout, not a measured number ──
+ * It used to be `max-h-80`, chosen by measuring the seven-route list at 320 and
+ * 375px. Ship 3 shipped the five Discord routes and the list overflowed by 31px
+ * — but at **768px**, where the chips share rows and a fixed 320px ceiling is
+ * far larger than the room the reservation actually leaves, so the bound never
+ * engaged. That is the failure mode of every measured constant here: it is
+ * correct at the widths it was measured at and silently absent everywhere else.
+ *
+ * The list is now a shrinkable flex child (`min-h-0`, which is what overrides a
+ * flex item's automatic minimum) that scrolls inside whatever height is left
+ * over at any width. No breakpoint knows the route count, so the next ship
+ * cannot overflow this box.
  */
 
 export function ToolPicker({
@@ -56,15 +69,15 @@ export function ToolPicker({
   className?: string;
 }) {
   return (
-    <div className={className}>
+    <div className={cn("flex min-h-0 flex-col", className)}>
       <h2 className="text-label font-semibold text-fg-secondary">{heading}</h2>
-      {/* `max-h-80` is 320px, measured: at 320 and 375 the seven GIF-accepting
-          routes want 368px and the reservation has 325px of room for them, so
-          the bound leaves a few pixels of slack and cuts mid-chip rather than
-          on a row boundary. From `sm` up the chips share rows and the list is
-          98-152px, so this never engages there. `overscroll-contain` stops a
-          flick inside the list from scrolling the page behind it. */}
-      <ul className="mt-2.5 flex max-h-80 flex-wrap gap-2.5 overflow-y-auto overscroll-contain">
+      {/* `min-h-0 flex-1` is the whole mechanism: it lets this list be given
+          less room than its content wants, at which point it scrolls instead of
+          painting over the tool grid below. Without `min-h-0` a flex item
+          refuses to shrink past its content and the overflow goes to the page.
+          `overscroll-contain` stops a flick inside the list from scrolling the
+          page behind it. */}
+      <ul className="mt-2.5 flex min-h-0 flex-1 flex-wrap gap-2.5 overflow-y-auto overscroll-contain">
         {routes.map((route) => {
           const Icon = toolIcon(route.slug);
           return (

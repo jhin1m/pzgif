@@ -102,6 +102,12 @@ export function ResultPanel({
   if (empty) {
     return (
       <div
+        // A stable hook for the reservation spec. It used to find this box by
+        // matching `min-h-1\d\d` against the class string, which broke the
+        // moment a page needed a reservation outside that range — the Discord
+        // panel is taller than any tool's and its bands start at `min-h-193`.
+        // A class-name regex is a coupling to a value the CSS is free to change.
+        data-result-panel=""
         className={cn(
           // `bg-checker` is the motif's whole point on this surface: a
           // checkerboard means "an image belongs here" to anyone who has opened
@@ -153,6 +159,7 @@ export function ResultPanel({
 
   return (
     <div
+      data-result-panel=""
       className={cn(
         "rounded-card border border-line bg-surface-1 p-5 shadow-sm md:p-6",
         RESERVED_HEIGHT,

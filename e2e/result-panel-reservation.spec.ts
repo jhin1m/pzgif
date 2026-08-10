@@ -47,6 +47,17 @@ const TOOLS = [
   { slug: "crop-gif", run: /^crop gif$/i, fixture: "loop-small.gif" },
   { slug: "reverse-gif", run: /^reverse gif$/i, fixture: "loop-small.gif" },
   { slug: "mp4-to-gif", run: /^make the gif$/i, fixture: "screen-720p-10s.mp4" },
+  // The Discord done state is the tallest on the site and the only one whose
+  // shape differs structurally: a size-budget meter and an in-message preview
+  // sit above the summary every other tool ends with. The reservation bands
+  // were measured before either existed, so this route is the one most likely
+  // to overshoot them — which is CLS arriving when the encoder finishes,
+  // seconds after the click, and therefore not excused as prompted.
+  {
+    slug: "discord-emoji-gif",
+    run: /^make it fit 256 KB$/i,
+    fixture: "loop-small.gif",
+  },
 ] as const;
 
 /**
@@ -65,9 +76,12 @@ async function measurePanel(page: Page) {
   return page.evaluate(() => {
     const stage = document.querySelector("[data-tool-stage]");
     if (!stage) throw new Error("no tool stage on this page");
-    const panel = [...stage.querySelectorAll("div")].find((element) =>
-      /(^|\s)min-h-1\d\d(\s|$)/.test(element.className),
-    );
+    // `[data-result-panel]`, not a class-name regex. The previous form matched
+    // `min-h-1\d\d` against the class string, which silently found nothing once
+    // a page reserved a box outside that range — a test that cannot locate its
+    // subject reports an infrastructure error rather than the drift it exists
+    // to catch.
+    const panel = stage.querySelector("[data-result-panel]");
     if (!panel) throw new Error("no reserved result panel on this page");
 
     const style = getComputedStyle(panel);

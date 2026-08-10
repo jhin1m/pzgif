@@ -278,6 +278,11 @@ export function HomeHero({ content }: { content: HomeContent }) {
                 heading={content.picker.heading}
                 routes={state.routes}
                 onPick={stash}
+                // `min-h-0` is what lets this shrink when the preview above has
+                // already reached its own floor. Without it the picker keeps its
+                // content height and the deficit is paid by the tool grid, which
+                // it is painted over.
+                className="min-h-0"
               />
             ) : (
               <div className="flex flex-col gap-2">

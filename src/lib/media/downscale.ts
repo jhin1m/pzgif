@@ -107,7 +107,15 @@ export function drawDownscaled(
     if (nextWidth === currentWidth && nextHeight === currentHeight) break;
 
     const step = scratch(slot, nextWidth, nextHeight);
-    context2d(step).drawImage(
+    const stepCtx = context2d(step);
+    // Both the scratch canvases and the caller's destination are reused across
+    // frames, and `drawImage` composites source-over — so a pixel that is
+    // transparent in this frame keeps whatever the *previous* frame left there.
+    // On opaque content that is invisible, which is why it survived; on anything
+    // with transparency it burns the old frame in permanently. Clearing first
+    // makes each draw a replacement rather than an accumulation.
+    stepCtx.clearRect(0, 0, nextWidth, nextHeight);
+    stepCtx.drawImage(
       current,
       0,
       0,
@@ -125,7 +133,9 @@ export function drawDownscaled(
     slot = slot === 0 ? 1 : 0;
   }
 
-  context2d(destination).drawImage(
+  const destinationCtx = context2d(destination);
+  destinationCtx.clearRect(0, 0, targetWidth, targetHeight);
+  destinationCtx.drawImage(
     current,
     0,
     0,

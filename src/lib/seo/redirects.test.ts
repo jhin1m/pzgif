@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ALL_ROUTES, liveRoutes } from "@/lib/tools/registry";
+import { liveRoutes } from "@/lib/tools/registry";
 import { TOOL_RENAMES, toolRedirects } from "./redirects";
 
 /**
@@ -20,7 +20,6 @@ import { TOOL_RENAMES, toolRedirects } from "./redirects";
  */
 describe("tool redirects", () => {
   const liveSlugs = new Set(liveRoutes().map((route) => route.slug));
-  const knownSlugs = new Set(ALL_ROUTES.map((route) => route.slug));
 
   it("never redirects away from a slug a live route still uses", () => {
     for (const { from } of TOOL_RENAMES) {
@@ -46,16 +45,12 @@ describe("tool redirects", () => {
     }
   });
 
-  it("names a retired slug, not one the registry never knew", () => {
-    // A `from` that was never a real route is dead config: harmless, but it means
-    // the rename it claims to record never happened, so flag it.
-    for (const { from } of TOOL_RENAMES) {
-      expect(
-        knownSlugs.has(from),
-        `redirect source /${from} was never a registered route`,
-      ).toBe(true);
-    }
-  });
+  // Note: a retired `from` is deliberately NOT required to be in `ALL_ROUTES`.
+  // The documented rename workflow moves the registry entry to the new slug, so
+  // the old slug leaves the registry entirely — that is the point, since
+  // `routesInGroup()` renders `ALL_ROUTES` into the header and footer and a
+  // lingering entry would keep advertising the dead URL instead of only
+  // redirecting from it. `from` must be absent from live routes, nothing more.
 
   it("expands each rename into a permanent (308) redirect", () => {
     const redirects = toolRedirects();

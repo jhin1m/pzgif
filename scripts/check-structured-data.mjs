@@ -70,6 +70,18 @@ const RULES = [
       "No ratings exist. Self-serving `aggregateRating` markup is a structured-data manual action risk. Do not add one to earn a star.",
   },
   {
+    // The other half of the same fabricated-rating path: a `review` node carries
+    // a `reviewRating`, and embedded reviews earn the identical star with no
+    // `aggregateRating` in sight — which the rule above would miss. Matched by the
+    // JSON-LD shapes (a `review`/`reviewRating` key, or a `review` assigned an
+    // array/object) so backticked prose like the `review` in the header comment
+    // does not trip it.
+    pattern:
+      /["']reviewRating["']|\breviewRating\s*:|["']review["']\s*:|\breview\s*:\s*[[{]/,
+    reason:
+      "No reviews exist. `review` / `reviewRating` markup earns the same self-serving star rating as `aggregateRating` — the manual-action risk this guard exists to block.",
+  },
+  {
     pattern: /["']FAQPage["']/,
     reason:
       "FAQ rich results were removed from Google Search on 2026-05-07. Keep the FAQ UI; do not emit FAQPage JSON-LD.",

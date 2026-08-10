@@ -10,7 +10,14 @@
  * `MessageChannel` rather than through the page.
  */
 
-import { runEstimate, runJob, type EncodeOutcome, type EncodeRequest, type PipelineHost } from "../pipeline";
+import {
+  runAutofit,
+  runEstimate,
+  runJob,
+  type EncodeOutcome,
+  type EncodeRequest,
+  type PipelineHost,
+} from "../pipeline";
 import { configureTier } from "../capability";
 import { probeInput } from "../decode";
 import { toMediaError } from "../errors";
@@ -62,6 +69,24 @@ scope.addEventListener("message", (event) => {
         message.jobId,
         message.file,
         message.spec,
+        hostFor(message.jobId),
+        state.controller.signal,
+      ).finally(() => jobs.delete(message.jobId));
+      return;
+    }
+
+    case "autofit": {
+      const state: JobState = {
+        controller: new AbortController(),
+        awaitEncoder: null,
+        failEncoder: null,
+      };
+      jobs.set(message.jobId, state);
+      void runAutofit(
+        message.jobId,
+        message.file,
+        message.spec,
+        message.budgetBytes,
         hostFor(message.jobId),
         state.controller.signal,
       ).finally(() => jobs.delete(message.jobId));

@@ -189,6 +189,30 @@ export class JobController {
   }
 
   /**
+   * Runs the Discord auto-fit search: repeated real encodes until one lands
+   * under `budgetBytes`.
+   *
+   * Shares `run`'s lifecycle exactly — one handler, one telemetry record, one
+   * cancel — because from the page's point of view it is one job that happens to
+   * encode more than once. The repeated spawn-and-terminate of encode workers is
+   * already what `spawnEncoder` does per `need-encoder`, so nothing here changes:
+   * gifski's WASM heap is reclaimed between attempts rather than accumulating
+   * toward the ceiling across them.
+   */
+  autofit(
+    file: File,
+    spec: JobSpec,
+    budgetBytes: number,
+    onEvent: JobEventHandler,
+  ): JobHandle {
+    return this.start(
+      (jobId) => ({ type: "autofit", jobId, spec, file, budgetBytes }),
+      spec,
+      onEvent,
+    );
+  }
+
+  /**
    * Identifies a file without decoding it.
    *
    * The tool page needs this the moment a file is dropped — to say "this is

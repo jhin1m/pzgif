@@ -18,6 +18,8 @@ import { JobController } from "@/lib/media/job-controller";
 import { detectCapabilities } from "@/lib/media/capability";
 import { readGifMetadata } from "@/lib/media/decode/gif";
 import { probeVideo } from "@/lib/media/decode/video";
+import { probeWebp, webpFrameSource } from "@/lib/media/decode/webp";
+import { FrameGeometry } from "@/lib/media/ops/geometry";
 import type {
   AcceptedPlan,
   InputProbe,
@@ -54,6 +56,32 @@ export interface EngineApi {
   estimate(spec: Partial<JobSpec>): Promise<SizeEstimate | MediaError>;
   /** Starts a job and cancels it after `afterMs`. Resolves with the delay. */
   runAndCancel(spec: Partial<JobSpec>, afterMs: number): Promise<{ cancelMs: number; status: string }>;
+  /**
+   * Reads composited RGBA out of the animated-WebP decoder, at source scale.
+   *
+   * Deliberately *not* a round trip through a produced GIF. The obvious way to
+   * check compositing is to encode one and read it back, but `e2e/lib/pixel-
+   * probe.ts` goes through `createImageBitmap`, which returns frame one of an
+   * animation and nothing else — and offset and disposal defects are invisible
+   * on frame one by construction. This returns the decoder's own output, frame
+   * by frame, so the assertion lands on the code under test instead of on an
+   * encoder and a probe that cannot see the frames that matter.
+   *
+   * Samples named points rather than whole frames: the interesting pixels are a
+   * handful of coordinates either side of a rectangle edge, and serialising
+   * megabytes of RGBA across the CDP boundary to read six of them is waste.
+   */
+  sampleWebpFrames(points: readonly (readonly [number, number])[]): Promise<WebpFrameSample>;
+}
+
+export interface WebpFrameSample {
+  width: number;
+  height: number;
+  frames: {
+    durationMs: number;
+    /** One `[r, g, b, a]` per requested point, in the order requested. */
+    pixels: [number, number, number, number][];
+  }[];
 }
 
 declare global {
@@ -204,6 +232,36 @@ export function EngineConsole() {
             if (event.type === "refused" || event.type === "error") resolve(event.error);
           });
         }),
+
+      sampleWebpFrames: async (points) => {
+        const current = fileRef.current;
+        if (!current) throw new Error("No file selected");
+        const probe = await probeWebp(current, "webp");
+        // Source scale, so a requested coordinate means the same pixel the
+        // fixture was authored around. Any resize here would resample the very
+        // rectangle edges the assertions are about.
+        const geometry = new FrameGeometry(probe.width, probe.height, {
+          targetWidth: probe.width,
+        });
+        const source = await webpFrameSource(current, geometry);
+
+        const frames: WebpFrameSample["frames"] = [];
+        for await (const frame of source.frames()) {
+          frames.push({
+            durationMs: frame.durationMs,
+            pixels: points.map(([x, y]) => {
+              const at = (y * geometry.outputWidth + x) * 4;
+              return [
+                frame.rgba[at],
+                frame.rgba[at + 1],
+                frame.rgba[at + 2],
+                frame.rgba[at + 3],
+              ];
+            }),
+          });
+        }
+        return { width: geometry.outputWidth, height: geometry.outputHeight, frames };
+      },
 
       runAndCancel: (partial, afterMs) =>
         new Promise((resolve) => {

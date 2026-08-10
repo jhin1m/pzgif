@@ -105,13 +105,10 @@
           <span>Sticker</span><span class="chip-dim">320×320 · ≤512 KB</span>
         </button>
         <button class="chip" type="button" aria-pressed="false">
-          <span>Server icon</span><span class="chip-dim">512×512 · ≤10 MB</span>
+          <span>Server banner</span><span class="chip-dim">960×540 · no published limit</span>
         </button>
         <button class="chip" type="button" aria-pressed="false">
-          <span>Profile banner</span><span class="chip-dim">680×240 · ≤10 MB</span>
-        </button>
-        <button class="chip" type="button" aria-pressed="false">
-          <span>Custom target</span><span class="chip-dim">set your own KB</span>
+          <span>Avatar</span><span class="chip-dim">128×128 · no published limit</span>
         </button>
       </div>
       <p class="hint" style="margin-top:10px">
@@ -398,11 +395,11 @@
 
       <h3>Reference sizes</h3>
       <p>
-        <b>Emoji</b> — 128×128, under 256&nbsp;KB, animated allowed.<br>
-        <b>Sticker</b> — 320×320, under 512&nbsp;KB.<br>
-        <b>Server icon</b> — 512×512, animated icons need a boosted server.<br>
-        <b>Profile banner</b> — 680×240, animated banners need Nitro.<br>
-        Discord changes these occasionally; the presets on this page are updated when they do.
+        <b>Emoji</b> — 128×128, under 256&nbsp;KB.<br>
+        <b>Sticker</b> — exactly 320×320, under 512&nbsp;KB, at most 5 seconds and 60 frames per second.<br>
+        <b>Server banner</b> — 960×540, 16:9. Discord publishes no maximum file size.<br>
+        <b>Avatar</b> — 128×128 recommended. Discord publishes no maximum file size.<br>
+        Verified 2026-08-04.
       </p>
       <h3>Why does my emoji look blurry after upload?</h3>
       <p>
@@ -437,13 +434,13 @@
         </div>
         <div class="acc-item">
           <button class="acc-head" type="button" aria-expanded="false">
-            Do I need Nitro to use an animated emoji?
+            What are the sticker rules I keep hitting?
             <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
           <div class="acc-panel"><div><p>
-            To upload one to a server you need Manage Expressions permission, and animated emoji slots depend on the
-            server's boost level. To use a server's animated emoji outside that server you need Nitro. Making the file
-            is free either way — that part is this page's job.
+            Three at once, and the last two are the ones nobody mentions: exactly 320×320, at most 512&nbsp;KB, at
+            most 5 seconds long, and at most 60 frames per second. A file that satisfies the first two and runs for
+            six seconds is still refused. The Sticker preset applies all four.
           </p></div></div>
         </div>
         <div class="acc-item">
@@ -452,7 +449,7 @@
             <svg class="acc-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
           <div class="acc-panel"><div><p>
-            Not for emoji — Discord expects GIF, PNG or JPEG there. You can drop an MP4 on this page though: we
+            Not for emoji — Discord expects GIF, PNG, JPEG or WebP there. You can drop an MP4 on this page though: we
             convert it to GIF first, then fit it to the limit in the same pass.
           </p></div></div>
         </div>
@@ -472,7 +469,7 @@
     <section style="margin-top:40px">
       <h2 style="margin-bottom:16px">Other presets</h2>
       <div class="tool-grid">
-        <a class="tool-card" href="#"><span class="tc-name">GIF for Slack</span><span class="tc-desc">128×128 emoji under 128 KB, fitted automatically.</span></a>
+        <a class="tool-card" href="#"><span class="tc-name">Crop GIF</span><span class="tc-desc">Choose the square yourself instead of taking the middle.</span></a>
         <a class="tool-card" href="tool-compressor.html"><span class="tc-name">GIF compressor</span><span class="tc-desc">No fixed target — just make it smaller.</span></a>
         <a class="tool-card" href="tool-mp4-to-gif.html"><span class="tc-name">MP4 to GIF</span><span class="tc-desc">Start from a clip instead of a GIF.</span></a>
       </div>
@@ -490,7 +487,7 @@
       </div>
       <div><h4>Edit</h4><ul class="footer-links"><li><a href="tool-compressor.html">GIF compressor</a></li><li><a href="#">Resize GIF</a></li><li><a href="#">Crop GIF</a></li></ul></div>
       <div><h4>Convert</h4><ul class="footer-links"><li><a href="tool-mp4-to-gif.html">MP4 to GIF</a></li><li><a href="#">GIF to MP4</a></li><li><a href="#">WebP to GIF</a></li></ul></div>
-      <div><h4>Presets &amp; info</h4><ul class="footer-links"><li><a href="discord-preset.html">GIF for Discord</a></li><li><a href="#">GIF for Slack</a></li><li><a href="#">Privacy policy</a></li></ul></div>
+      <div><h4>Presets &amp; info</h4><ul class="footer-links"><li><a href="discord-preset.html">GIF for Discord</a></li><li><a href="#">Discord emoji GIF</a></li><li><a href="#">Privacy policy</a></li></ul></div>
     </div>
     <p class="footer-legal">© 2026 PZGIF · pzgif.com · Terms · Privacy · Cookies · Acceptable use</p>
   </div>

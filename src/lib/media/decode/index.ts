@@ -62,8 +62,11 @@ export async function probeInput(file: File): Promise<InputProbe> {
       try {
         return await probeWebp(file, sniffed.declaredExtension);
       } catch {
-        // No `ImageDecoder` — Safari at every version, Firefox below 133. The
-        // container is understood; this engine just cannot read it.
+        // The sniffer saw an ANIM or ANMF fourcc but the container does not walk
+        // — a truncated download, or bytes concatenated by something that did
+        // not understand RIFF padding. Not an engine limitation any more: since
+        // Phase 7 the splitter reads animated WebP everywhere, so reaching here
+        // means the file itself is malformed.
         return {
           format: "webp",
           declaredExtension: sniffed.declaredExtension,

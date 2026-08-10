@@ -82,22 +82,44 @@ export const TIER_BUDGETS: Record<DeviceTier, TierBudget> = {
 /**
  * Classifies the current device.
  *
- * iOS is detected by touch capability rather than by `deviceMemory`, because
- * Safari does not implement `deviceMemory` at all — so an iPad, which reports
- * itself as a Mac, would otherwise be classified desktop and handed a budget
- * seventeen times what it can survive.
+ * iOS is not detected by `deviceMemory`, because Safari does not implement it at
+ * all. Two signals are used instead, and they are deliberately complementary
+ * rather than redundant — each covers the case the other misses:
+ *
+ *  - **The user-agent string.** A real iPhone says `iPhone` in it, as do the
+ *    WebKit shells that Chrome and Firefox are on iOS, and all of them share the
+ *    same memory ceiling. What it does *not* catch is an iPad, which reports
+ *    itself as a Macintosh.
+ *  - **Touch capability.** Which is what catches the iPad, and also catches an
+ *    iPhone with "Request Desktop Website" turned on, where the user-agent
+ *    becomes a Mac's.
+ *
+ * Either one on an Apple platform is enough. Getting this wrong in the safe
+ * direction costs a desktop-class machine a smaller budget than it needed;
+ * getting it wrong the other way hands an iPhone seventeen times what it can
+ * survive, and the failure mode there is a killed tab with no message.
+ *
+ * The user-agent half also makes the classification reachable from a test:
+ * emulated mobile contexts report `maxTouchPoints: 0`, so touch alone left the
+ * one state `plan.md` makes a hard obligation — the iOS refusal on `mp4-to-gif`
+ * — with no way to exercise it outside real hardware.
  */
 export function detectTier(): DeviceTier {
   if (typeof navigator === "undefined") return "desktop";
 
+  const userAgent = navigator.userAgent ?? "";
   const isApple = /Mac|iPhone|iPad|iPod/.test(navigator.platform ?? "");
   const touchPoints = navigator.maxTouchPoints ?? 0;
-  if (isApple && touchPoints > 0) return "ios";
+  if (isApple && (touchPoints > 0 || /iPhone|iPad|iPod/.test(userAgent))) {
+    return "ios";
+  }
 
   const deviceMemory = (navigator as Navigator & { deviceMemory?: number })
     .deviceMemory;
 
-  const isMobile = touchPoints > 0 && /Android|Mobile/.test(navigator.userAgent);
+  const isMobile =
+    (touchPoints > 0 || /Mobile/.test(userAgent)) &&
+    /Android|Mobile/.test(userAgent);
   if (isMobile) return "android-mobile";
 
   if (typeof deviceMemory === "number" && deviceMemory <= 4) {
@@ -113,6 +135,31 @@ export function frameBufferBytes(
   height: number,
 ): number {
   return 2 * frames * width * height * 4;
+}
+
+/**
+ * How many frames of this size a tier will actually admit.
+ *
+ * The ceiling is whichever of the two bounds bites first — the byte budget or
+ * `hardMaxFrames` — and which one that is depends entirely on the frame size. On
+ * the desktop tier a 480x270 job runs out of *bytes* at 505 frames, well before
+ * the 900-frame cap, while a small one hits the cap first. A caption that quoted
+ * `hardMaxFrames` alone would promise 900 and then watch admission control
+ * refuse at 506, which is the specific failure that makes a limit caption worse
+ * than none.
+ *
+ * Exported so every surface that states a limit derives it from the same place
+ * `admit()` will. Two independent calculations of the same ceiling drift, and
+ * the drift is invisible until a user is refused something the page promised.
+ */
+export function affordableFrames(
+  budget: TierBudget,
+  width: number,
+  height: number,
+): number {
+  if (width <= 0 || height <= 0) return 0;
+  const perFrame = frameBufferBytes(1, width, height);
+  return Math.max(0, Math.min(Math.floor(budget.budgetBytes / perFrame), budget.hardMaxFrames));
 }
 
 export interface EncodePlan {

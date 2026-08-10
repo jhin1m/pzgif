@@ -1,106 +1,66 @@
 /**
- * Animated WebP decoding, via `ImageDecoder`.
+ * Animated WebP decoding: RIFF splitter plus the browser's own still-image
+ * decoder, on every engine.
  *
- * ── Why there is no fallback here yet ───────────────────────────────────────
- * `ImageDecoder` is absent from Safari at every version and arrived in Firefox
- * only at 133, so `webp-to-gif` has no decode path on Safari. The alternative is
- * a hand-rolled RIFF/ANMF splitter feeding a WebP still-image decoder per frame
- * — roughly 150 lines plus its own correctness surface — and that call belongs
- * to Phase 7, where the tool actually ships. Until then this decoder reports the
- * truth through `capability.imageDecoder`, and `plan.ts` refuses with
- * `browser-unsupported` rather than letting a Safari user pick a file and watch
- * it fail.
+ * ── Why `ImageDecoder` is gone ──────────────────────────────────────────────
+ * It was the only API that decodes animated WebP directly, and Safari has never
+ * shipped it at any version — Firefox only from 133. `plan.md` ratified the same
+ * shape for GIF and for the same reason: **one decode path, no per-engine
+ * special case.** Keeping `ImageDecoder` on Chromium and a splitter everywhere
+ * else would ship the least-exercised code to the engine that is hardest to
+ * debug, which is precisely backwards.
  *
- * Animated WebP is also the lowest-volume input in the MVP, which is why the
- * cost is deferred rather than paid speculatively.
+ * `webp-riff.ts` turns each ANMF frame back into a standalone still WebP;
+ * `createImageBitmap()` decodes it, natively, everywhere. No new dependency and
+ * no second `.wasm` to boot through the CSP.
+ *
+ * ── Compositing is this file's real job ─────────────────────────────────────
+ * An animated WebP is not a sequence of complete pictures. Each frame carries a
+ * rectangle, an offset, a blend rule and a disposal rule, and the animation is
+ * what you get by applying them in order to a persistent canvas. A decoder that
+ * yields the raw frames — which is what "just decode each ANMF" would do — emits
+ * fragments on empty backgrounds. The canvas below is the animation; each yielded
+ * frame is a snapshot of it.
  */
 
 import { FrameGeometry } from "../ops/geometry";
 import { selectsFrame } from "../ops/frame-select";
+import { parseAnimatedWebp, type AnimatedWebp } from "./webp-riff";
 import type { DecodedFrame, FrameSource, InputProbe, TimingSpec } from "../types";
 
-/**
- * The slice of `ImageDecoder` this file uses.
- *
- * Declared locally rather than pulled from a DOM lib: the API is not in
- * TypeScript's `lib.dom` yet, and adding `@types/dom-webcodecs` repo-wide to
- * name four members would put a second, competing definition of `VideoFrame` in
- * scope for every file that touches the engine.
- */
-interface ImageDecoderTrack {
-  frameCount: number;
-  repetitionCount: number;
-  animated: boolean;
-}
-
-interface ImageDecoderLike {
-  tracks: {
-    ready: Promise<void>;
-    selectedTrack: ImageDecoderTrack | null;
-  };
-  decode(options: { frameIndex: number }): Promise<{
-    image: CanvasImageSource & {
-      displayWidth: number;
-      displayHeight: number;
-      /** Microseconds. Null for a still image. */
-      duration: number | null;
-      close(): void;
-    };
-  }>;
-  close(): void;
-}
-
-type ImageDecoderConstructor = new (init: {
-  data: ArrayBuffer | Uint8Array;
-  type: string;
-}) => ImageDecoderLike;
-
-function imageDecoderConstructor(): ImageDecoderConstructor {
-  const ctor = (globalThis as { ImageDecoder?: ImageDecoderConstructor }).ImageDecoder;
-  if (!ctor) throw new Error("ImageDecoder is unavailable in this browser");
-  return ctor;
-}
-
-/** Matches the GIF clamp, so a WebP→GIF round trip keeps its apparent speed. */
-const DEFAULT_DELAY_MS = 100;
-const MIN_DELAY_MS = 20;
-
-function toDelayMs(durationMicroseconds: number | null): number {
-  if (durationMicroseconds === null || !Number.isFinite(durationMicroseconds)) {
-    return DEFAULT_DELAY_MS;
-  }
-  const ms = Math.round(durationMicroseconds / 1000);
-  return ms < MIN_DELAY_MS ? DEFAULT_DELAY_MS : ms;
+async function readAnimated(
+  file: Blob,
+  options?: { rebuild: boolean },
+): Promise<AnimatedWebp> {
+  const parsed = parseAnimatedWebp(new Uint8Array(await file.arrayBuffer()), options);
+  if (!parsed) throw new Error("Not an animated WebP");
+  return parsed;
 }
 
 export async function probeWebp(
   file: Blob,
   declaredExtension: string | null,
 ): Promise<InputProbe> {
-  const Ctor = imageDecoderConstructor();
-  const decoder = new Ctor({ data: await file.arrayBuffer(), type: "image/webp" });
-  try {
-    await decoder.tracks.ready;
-    const track = decoder.tracks.selectedTrack;
-    const { image } = await decoder.decode({ frameIndex: 0 });
-    const width = image.displayWidth;
-    const height = image.displayHeight;
-    image.close();
+  // Headers only, and no decode at all. The canvas size is in VP8X and the frame
+  // count is the number of ANMF chunks. The old `ImageDecoder` probe decoded
+  // frame zero purely to learn the dimensions, which spent a full frame's memory
+  // before admission control — whose entire job is deciding whether this device
+  // can afford that memory — had run. `rebuild: false` keeps the same discipline
+  // for the splitter: rebuilding every frame would allocate the animation's
+  // compressed size a second time to answer a question the headers contain.
+  const animation = await readAnimated(file, { rebuild: false });
 
-    return {
-      format: "webp",
-      declaredExtension,
-      width,
-      height,
-      durationSec: null,
-      frameCount: track?.frameCount ?? 1,
-      codec: "webp",
-      decodable: true,
-      rotationDegrees: 0,
-    };
-  } finally {
-    decoder.close();
-  }
+  return {
+    format: "webp",
+    declaredExtension,
+    width: animation.width,
+    height: animation.height,
+    durationSec: animation.durationMs / 1000,
+    frameCount: animation.frameCount,
+    codec: "webp",
+    decodable: true,
+    rotationDegrees: 0,
+  };
 }
 
 export interface WebpSourceOptions {
@@ -113,11 +73,8 @@ export async function webpFrameSource(
   geometry: FrameGeometry,
   { timing = {}, maxFrames }: WebpSourceOptions = {},
 ): Promise<FrameSource> {
-  const Ctor = imageDecoderConstructor();
-  const data = await file.arrayBuffer();
-  const decoder = new Ctor({ data, type: "image/webp" });
-  await decoder.tracks.ready;
-  const frameCount = decoder.tracks.selectedTrack?.frameCount ?? 1;
+  const animation = await readAnimated(file);
+  const frameCount = animation.frames.length;
 
   let selected = 0;
   for (let index = 0; index < frameCount; index += 1) {
@@ -130,56 +87,86 @@ export async function webpFrameSource(
     height: geometry.outputHeight,
     frameCount: total,
     async *frames(signal?: AbortSignal): AsyncGenerator<DecodedFrame> {
+      // The composited animation, at *source* size. Geometry is applied when a
+      // frame is emitted, not here: the canvas has to stay at canvas size or the
+      // per-frame offsets no longer mean anything.
+      const canvas = new OffscreenCanvas(animation.width, animation.height);
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) throw new Error("OffscreenCanvas 2D context unavailable");
+
       const out = geometry.createOutputCanvas();
       const outCtx = out.getContext("2d", { willReadFrequently: true });
       if (!outCtx) throw new Error("OffscreenCanvas 2D context unavailable");
 
       let emitted = 0;
       // Time owed by frames the stride skipped, paid to the next kept frame —
-      // see the same carry in `decode/gif.ts`.
+      // the same carry as `decode/gif.ts`.
       let carriedDelayMs = 0;
 
-      try {
-        for (let index = 0; index < frameCount; index += 1) {
-          if (signal?.aborted) return;
-          if (emitted >= total) return;
-          if (!selectsFrame(index, timing)) {
-            // A skipped frame still has to be decoded to learn its duration —
-            // `ImageDecoder` exposes timing only on the decoded frame — but it is
-            // closed immediately and never drawn. Paying that decode is what
-            // keeps a strided animation the same length as its source.
-            const skipped = await decoder.decode({ frameIndex: index });
-            carriedDelayMs += toDelayMs(skipped.image.duration);
-            skipped.image.close();
-            continue;
+      for (const [index, frame] of animation.frames.entries()) {
+        if (signal?.aborted) return;
+        if (emitted >= total) return;
+
+        // Every frame is composited even when it is skipped. Skipping the
+        // *compositing* would be wrong rather than merely fast: a later kept
+        // frame may be a small rectangle that only makes sense on top of the
+        // ones before it, so the canvas has to have seen them.
+        const bitmap = await createImageBitmap(
+          new Blob([toStandaloneBuffer(frame.bytes)], { type: "image/webp" }),
+        );
+        try {
+          // "Do not blend" means overwrite, including the alpha — so the
+          // rectangle is cleared first rather than drawn over.
+          if (frame.blend === "replace") {
+            ctx.clearRect(frame.x, frame.y, frame.width, frame.height);
           }
-
-          // Each frame is decoded and closed immediately. `VideoFrame` holds a
-          // platform buffer that garbage collection does not reclaim promptly,
-          // and a hundred unclosed frames is the fastest way to hit the ceiling
-          // this engine spends its effort staying under.
-          const { image } = await decoder.decode({ frameIndex: index });
-          try {
-            geometry.apply(image, image.displayWidth, image.displayHeight, out);
-            emitted += 1;
-
-            const durationMs = toDelayMs(image.duration) + carriedDelayMs;
-            carriedDelayMs = 0;
-
-            yield {
-              rgba: new Uint8Array(
-                outCtx.getImageData(0, 0, geometry.outputWidth, geometry.outputHeight).data
-                  .buffer,
-              ),
-              durationMs,
-            };
-          } finally {
-            image.close();
-          }
+          ctx.drawImage(bitmap, frame.x, frame.y);
+        } finally {
+          // `ImageBitmap` holds a platform buffer that garbage collection is
+          // slow to reclaim. A hundred unclosed ones is the fastest route to the
+          // ceiling this engine spends its effort staying under.
+          bitmap.close();
         }
-      } finally {
-        decoder.close();
+
+        if (!selectsFrame(index, timing)) {
+          carriedDelayMs += frame.durationMs;
+        } else {
+          geometry.apply(canvas, animation.width, animation.height, out);
+          emitted += 1;
+
+          const durationMs = frame.durationMs + carriedDelayMs;
+          carriedDelayMs = 0;
+
+          yield {
+            rgba: new Uint8Array(
+              outCtx.getImageData(0, 0, geometry.outputWidth, geometry.outputHeight)
+                .data.buffer,
+            ),
+            durationMs,
+          };
+        }
+
+        // Disposal happens after the frame has been shown, not before the next
+        // one is drawn — the distinction matters when the next frame's rectangle
+        // does not cover this one's.
+        if (frame.dispose === "background") {
+          ctx.clearRect(frame.x, frame.y, frame.width, frame.height);
+        }
       }
     },
   };
+}
+
+/**
+ * Copies into a standalone ArrayBuffer.
+ *
+ * The rebuilt frame is a fresh allocation, but `Blob` is given whatever buffer
+ * backs the view — and a future change that made `rebuildFrame` return a
+ * subarray of the source file would silently hand the whole WebP to every
+ * `createImageBitmap` call. One copy of a compressed frame is cheap insurance.
+ */
+function toStandaloneBuffer(bytes: Uint8Array): ArrayBuffer {
+  const buffer = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(buffer).set(bytes);
+  return buffer;
 }

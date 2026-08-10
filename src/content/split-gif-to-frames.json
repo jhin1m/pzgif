@@ -1,0 +1,133 @@
+{
+  "slug": "split-gif-to-frames",
+  "title": "Split GIF to frames — every picture, numbered, in one archive",
+  "lead": "Pull an animation apart into individual PNG files, in order, zipped and ready to download. Pick the whole thing or a stretch of it. The archive is assembled in this tab, so nothing about your file reaches a server.",
+  "meta": {
+    "title": "Split GIF into frames — download every frame as PNG",
+    "description": "Extract the frames of an animated GIF as numbered PNG files in a single ZIP. Choose a range, keep the transparency, and do it all without uploading anything."
+  },
+  "dropzone": {
+    "title": "Drop the animation you want taken apart",
+    "caption": "or paste with Ctrl+V · .gif · frames come out as PNG, so transparency survives"
+  },
+  "actions": {
+    "run": "Extract the frames",
+    "running": "Extracting…",
+    "rerun": "Extract again",
+    "download": "Download the archive",
+    "disabledReason": "Add a GIF first."
+  },
+  "controls": {
+    "range": {
+      "label": "Which frames to extract",
+      "hint": "Counted from one, and both ends are included — frame 4 to frame 9 gives you six files. Leave it alone to take everything."
+    }
+  },
+  "notes": {
+    "cap": "The engine plans for about {cap} frames at a time here, at up to {width} px across. Your selection of {selected} is within that.",
+    "overCap": "Your selection of {selected} frames is above the {cap} the engine plans for here. Narrow the range, or run it and take the alternative you are offered.",
+    "archive": "{count} PNG files",
+    "archiveMeta": "{width}×{height} px each · {size} in total"
+  },
+  "card": {
+    "benefit": "Take an animation apart into numbered stills you can edit one at a time."
+  },
+  "resultEmpty": {
+    "message": "Your archive of stills will appear here.",
+    "hint": "Files are numbered in playback order, padded so they sort correctly everywhere."
+  },
+  "result": {
+    "savedLine": "Unpacked into stills, which is why the archive holds {saved} more than the animation did.",
+    "emptyRows": [
+      "One lossless PNG for every frame you selected",
+      "Names numbered in playback order and zero-padded to sort",
+      "The pixel dimensions each still came out at"
+    ]
+  },
+  "labels": {
+    "progress": "Extraction progress",
+    "resultAlt": "A summary of the archive that was produced",
+    "sourceAlt": "The animation you are taking apart"
+  },
+  "faqHeading": "Extracting frames — common questions",
+  "explainer": [
+    {
+      "heading": "What comes out, and how it is named",
+      "level": 2,
+      "paragraphs": [
+        "You get one PNG per frame, inside a single ZIP. Each name is the original filename plus a number, zero-padded to the width of the largest index — so a hundred-frame animation numbers from `001` rather than from `1`. That padding is not decoration. Without it, every file manager and every scripting language sorts frame 10 immediately after frame 1, and an animation reassembled from that order is scrambled in a way that takes a while to notice and longer to explain.",
+        "PNG rather than JPEG, and that is not a preference either. A GIF frame is a palette of flat colours with hard edges, which is the exact content JPEG handles worst — it puts a halo of noise around every boundary. PNG is lossless, so a frame that goes in as a block of one colour comes out as a block of that colour. It also carries transparency, which a GIF frame may well have and which JPEG cannot represent at all.",
+        "Frames are written after compositing, not as the raw data stored in the file. A GIF frequently stores only the rectangle that changed since the previous frame, sometimes with instructions about what to erase first. Written out raw, most of your files would be small fragments on empty backgrounds. What you get instead is what the animation actually shows at that moment."
+      ]
+    },
+    {
+      "heading": "Why the archive is bigger than the animation was",
+      "level": 3,
+      "paragraphs": [
+        "It always will be, often by a great deal, and that is not a fault. The GIF was a single stream where each frame could be described as a change from the last one; the archive is a set of independent pictures, each complete in itself, with no shared history to lean on.",
+        "The ZIP itself deliberately does not compress. PNG is already compressed, and running a second general-purpose compressor over compressed data reliably makes it very slightly larger while spending a noticeable amount of processor time doing so. The archive is a container here, nothing more."
+      ]
+    },
+    {
+      "heading": "The limit is memory, not file size",
+      "level": 3,
+      "paragraphs": [
+        "Every frame has to exist uncompressed while it is being written, and the number of frames a device can hold at once is what decides whether this job can run. That figure comes from the pixel dimensions multiplied by the frame count — not from how many megabytes the file you dropped happens to be. A small, long, wide animation is far harder on a phone than a large, short, narrow one.",
+        "The caption under the range picker works out the number for whatever you are reading this on. If a selection is beyond it, you are told before any decoding starts, together with a range that would work. Nothing is begun and then abandoned, and no tab is asked to do something it cannot survive.",
+        "That is also what the range picker is for. Rather than being refused a two-thousand-frame animation, take it in stretches: the first few hundred, then the next few hundred. Each run is a separate archive, and the numbering within each one still follows playback order."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "file-format",
+      "question": "Can I get JPEGs instead?",
+      "answer": [
+        "No, and it would be the wrong output. GIF frames are flat colour with sharp boundaries, which is the content JPEG damages most visibly, and JPEG cannot store the transparency many frames rely on.",
+        "If you need JPEGs at the end of whatever you are doing, convert the PNGs afterwards in a tool that is meant for it — after any editing, not before."
+      ]
+    },
+    {
+      "id": "one-frame",
+      "question": "I only want one frame. Do I have to take them all?",
+      "answer": [
+        "Set both ends of the range to the same number and you get an archive containing that single file. If you are not sure which index you want, play the animation in the preview and count, or extract a short stretch around it and pick from that."
+      ]
+    },
+    {
+      "id": "transparency",
+      "question": "Does transparency survive?",
+      "answer": [
+        "Yes. PNG carries an alpha channel and the frames are written with it intact, so a sticker with a transparent background stays cut out rather than arriving on a white square.",
+        "What you see in each file is the composited frame — what the animation displays at that point — rather than the partial rectangle the format may have stored internally."
+      ]
+    },
+    {
+      "id": "reassemble",
+      "question": "Can I put them back together afterwards?",
+      "answer": [
+        "Not on this site — there is no frames-to-GIF tool here. The numbering is chosen so that any tool which does that will read them in the right order without being told.",
+        "Be aware that per-frame timing is not carried in the filenames. If the original had irregular delays, reassembling at a constant frame rate will not reproduce its rhythm."
+      ]
+    },
+    {
+      "id": "how-many",
+      "question": "How many frames can I extract at once?",
+      "answer": [
+        "It depends on the device and on how large each frame is, so the caption works it out rather than quoting a figure that would be wrong on half the machines that read it. A desktop manages a great many more than a phone.",
+        "When a selection is too large you are told up front, with a range that fits, rather than partway through."
+      ]
+    },
+    {
+      "id": "privacy",
+      "question": "Is the animation uploaded to build the archive?",
+      "answer": [
+        "No. Decoding, PNG writing and the archive itself are all assembled in this tab by your own browser. There is no server involved at any point, which also means the tab has to stay open until the download appears."
+      ]
+    }
+  ],
+  "related": {
+    "reverse-gif": "Wanted the order flipped rather than the frames out? Do it in one pass.",
+    "gif-speed-changer": "If the timing was the problem, retime it instead of taking it apart."
+  }
+}

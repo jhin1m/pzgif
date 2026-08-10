@@ -1,6 +1,6 @@
 # Tech Stack — PZGIF
 
-Status: **approved** (2026-08-04), **amended 2026-08-05** — see the changelog at the foot of this file.
+Status: **approved** (2026-08-04), **amended 2026-08-05 and 2026-08-10** — see the changelog at the foot of this file.
 Decided in `/ak:bootstrap --full` Step 3. Backed by research reports in `plans/reports/`.
 
 > Six statements in the 2026-08-04 version were proved factually wrong by research. They are corrected inline below and each correction is marked **[Amended 2026-08-05]**. Everything not marked stands unchanged.
@@ -55,8 +55,9 @@ This is why the pipeline below uses **WebCodecs (native) + gifski-wasm (single-t
 File input
   ├─ video → WebCodecs VideoDecoder  (native, hardware-accelerated)
   │            ↑ demuxed by mediabunny (MP4/MOV/WebM)
-  ├─ animated GIF → modern-gif (every browser — Safari has no ImageDecoder)
-  └─ still images → @jsquash/* codecs
+  ├─ animated GIF  → modern-gif (every browser — Safari has no ImageDecoder)
+  ├─ animated WebP → RIFF/ANMF splitter + createImageBitmap (every browser)
+  └─ still images  → createImageBitmap
 
         ↓ frames (VideoFrame / ImageBitmap)
 
@@ -66,7 +67,6 @@ File input
         ↓ RGBA frames
 
   gifski-wasm  → optimized GIF  (pngquant palette + temporal dithering)
-  @jsquash/webp → animated WebP
   WebCodecs VideoEncoder + muxer → MP4 / WebM
 ```
 
@@ -80,7 +80,7 @@ File input
 | GIF encode | **`gifski-wasm`** (AGPL-3.0-or-later, vendored fork) | Best-in-class quality/size. This is differentiator #1 — most WASM competitors use `gif.js`/`gifenc` and look visibly worse. **[Amended 2026-08-05]** Its licence is why the PZGIF client bundle is published under the AGPL; see "Licensing" below. The fork adds progress and cancellation and is deferred past launch |
 | Quick preview encode | `gifenc` | Tiny, fast, low-quality — for live preview only, never final export |
 | Still-image decode | **`createImageBitmap`** **[Amended 2026-08-05, Phase 4]** | `@jsquash/*` is not adopted. No MVP tool takes a still image as *input*; the engine only needs to identify one so the refusal can name it, and every supported browser decodes PNG/JPEG/WebP natively inside a worker. A WASM codec would be a megabyte of download to learn an image's size |
-| Animated WebP decode | **`ImageDecoder`**, where present **[Added 2026-08-05, Phase 4]** | Absent in Safari at every version and Firefox below 133, so `webp-to-gif` reports `browser-unsupported` there rather than failing mid-job. The hand-rolled RIFF/ANMF splitter is Phase 7's decision |
+| Animated WebP decode | **Hand-written RIFF/ANMF splitter + `createImageBitmap`**, on every browser (`src/lib/media/decode/webp-riff.ts`) **[Amended 2026-08-10, Phase 7]** | Was `ImageDecoder` where present, which meant nowhere on Safari. An animated WebP is a container holding one compressed *still* image per frame, and every engine decodes a still WebP natively — so each frame is rebuilt into a minimal standalone container and handed to `createImageBitmap`. No dependency, no second `.wasm` through the CSP, and no `browser-unsupported` state left to report. The `@jsquash/webp` option `phase-07` costed was not needed |
 | Exotic format fallback | `@ffmpeg/core` **single-thread**, runtime-loaded from `public/ffmpeg/` **[Amended 2026-08-05, Phase 4]** | Only when WebCodecs cannot handle the container. Single-thread = no SAB = no COEP. Not an npm dependency: `ffmpeg-fallback.ts` imports it from a URL assembled at call time so no bundler can follow it, and `pnpm check:heavy` fails the build if it ever reaches a client chunk. The binaries are **not vendored yet**, so `isFfmpegAvailable()` is false and the recovery is not offered |
 | Heavy multi-step image pipelines (later) | `wasm-vips` | Only if static-image tools get added; not MVP |
 
@@ -204,6 +204,26 @@ Deferred until the server tier ships: DMCA Policy + registered DMCA agent ($6 / 
 ---
 
 ## Changelog
+
+### 2026-08-10 — animated WebP needs no library at all (Phase 7)
+
+Source: `plans/260805-0001-pzgif-mvp-9-browser-native-gif-tools-discord-presets/phase-07-cross-format-tools.md`.
+
+| # | Section | Was | Now |
+|---|---|---|---|
+| 1 | §4 | Animated WebP decode via `ImageDecoder`, with `webp-to-gif` reporting `browser-unsupported` on Safari | **A ~250-line RIFF/ANMF splitter feeding `createImageBitmap`, on every browser.** The format is a container of compressed still images, and a still WebP decodes natively everywhere — so the animated case never needed an animated decoder. `browser-unsupported`'s `no-image-decoder` reason is deleted along with it |
+| 2 | §4 | (implied) `@jsquash/webp` would be needed for the splitter | **No dependency added.** `phase-07` costed the splitter as needing a WASM still-decoder; the browser already is one |
+
+Two consequences worth recording. The engine now has **no** per-browser decode
+branch for any input format — GIF, video and WebP each take one path everywhere,
+which is what makes the Playwright WebKit run meaningful rather than decorative.
+And `capability.imageDecoder` is now a reported probe result that nothing gates
+on; it is kept only so a future `ImageDecoder`-only format has the check ready.
+
+Also settled in Phase 7: a video trim is expressed in **seconds** (`TimingSpec.trimSec`)
+and honoured by seeking rather than by discarding decoded frames, so a short cut
+out of a long clip costs the length of the cut. Admission control sizes the job
+against the trimmed span.
 
 ### 2026-08-05 — three library corrections from building the engine (Phase 4)
 

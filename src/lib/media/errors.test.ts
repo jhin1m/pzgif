@@ -50,7 +50,6 @@ const SAMPLES: MediaError[] = [
   browserUnsupportedError({ reason: "ios-video-budget" }),
   browserUnsupportedError({ reason: "no-video-decoder" }),
   browserUnsupportedError({ reason: "no-video-encoder" }),
-  browserUnsupportedError({ reason: "no-image-decoder" }),
 ];
 
 describe("error message catalogue", () => {

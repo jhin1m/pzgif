@@ -213,13 +213,18 @@ export const cancelledError = (): MediaError => ({
 /**
  * The device cannot do this at all, and no setting change will help.
  *
- * `reason` distinguishes the two real cases, because they deserve different
- * copy: Firefox for Android has no `VideoDecoder` whatsoever, while iOS has the
- * codecs and not the memory. Telling an iOS user to switch browsers would send
- * them to another WebKit shell with the same ceiling.
+ * `reason` distinguishes the real cases, because they deserve different copy:
+ * Firefox for Android has no `VideoDecoder` whatsoever, while iOS has the codecs
+ * and not the memory. Telling an iOS user to switch browsers would send them to
+ * another WebKit shell with the same ceiling.
+ *
+ * `no-image-decoder` was a fourth reason until Phase 7. It said "this browser
+ * cannot read animated WebP", which stopped being true of any browser once
+ * `decode/webp-riff.ts` replaced `ImageDecoder` — so it was removed rather than
+ * left as a message nothing can emit.
  */
 export function browserUnsupportedError(options: {
-  reason: "no-video-decoder" | "no-video-encoder" | "ios-video-budget" | "no-image-decoder";
+  reason: "no-video-decoder" | "no-video-encoder" | "ios-video-budget";
   detail?: string;
 }): MediaError {
   const actions: RecoveryAction[] =

@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  detectTier,
   frameBufferBytes,
   planEncode,
   TIER_BUDGETS,
@@ -163,5 +164,98 @@ describe("planEncode", () => {
     for (const tier of Object.keys(TIER_BUDGETS)) {
       expect(report[tier]).toBeDefined();
     }
+  });
+});
+
+/**
+ * Tier detection decides the memory budget, and the budget decides whether a job
+ * runs at all. The costly direction is one-sided: classifying a desktop as iOS
+ * hands it a smaller budget than it needed, while classifying an iPhone as a
+ * desktop hands it seventeen times what it can survive — and the failure there
+ * is a killed tab with no message.
+ */
+describe("detectTier", () => {
+  const original = globalThis.navigator;
+
+  function withNavigator(
+    fields: { platform?: string; maxTouchPoints?: number; userAgent?: string; deviceMemory?: number },
+    assert: () => void,
+  ) {
+    Object.defineProperty(globalThis, "navigator", {
+      value: { platform: "", maxTouchPoints: 0, userAgent: "", ...fields },
+      configurable: true,
+    });
+    try {
+      assert();
+    } finally {
+      Object.defineProperty(globalThis, "navigator", {
+        value: original,
+        configurable: true,
+      });
+    }
+  }
+
+  it("classifies an iPhone from its user-agent when touch reports zero", () => {
+    // Emulated mobile contexts report `maxTouchPoints: 0`, and so does an iPhone
+    // in some privacy configurations. The user-agent still says iPhone.
+    withNavigator(
+      {
+        platform: "MacIntel",
+        maxTouchPoints: 0,
+        userAgent:
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+      },
+      () => expect(detectTier()).toBe("ios"),
+    );
+  });
+
+  it("classifies an iPad from touch, which is all it gives away", () => {
+    // iPadOS reports itself as a Macintosh outright — no `iPad` anywhere in the
+    // string — so touch is the only signal left.
+    withNavigator(
+      {
+        platform: "MacIntel",
+        maxTouchPoints: 5,
+        userAgent:
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/17.0 Safari/605.1.15",
+      },
+      () => expect(detectTier()).toBe("ios"),
+    );
+  });
+
+  it("leaves a desktop Mac alone", () => {
+    withNavigator(
+      {
+        platform: "MacIntel",
+        maxTouchPoints: 0,
+        userAgent:
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/17.0 Safari/605.1.15",
+      },
+      () => expect(detectTier()).toBe("desktop"),
+    );
+  });
+
+  it("classifies an Android phone", () => {
+    withNavigator(
+      {
+        platform: "Linux armv8l",
+        maxTouchPoints: 5,
+        userAgent:
+          "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36",
+      },
+      () => expect(detectTier()).toBe("android-mobile"),
+    );
+  });
+
+  it("drops a low-memory desktop to its own tier", () => {
+    withNavigator(
+      {
+        platform: "Win32",
+        maxTouchPoints: 0,
+        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0",
+        deviceMemory: 4,
+      },
+      () => expect(detectTier()).toBe("desktop-low-ram"),
+    );
   });
 });

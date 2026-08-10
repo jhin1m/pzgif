@@ -1,0 +1,168 @@
+{
+  "slug": "discord-avatar-gif",
+  "title": "Discord avatar GIF — small, round, and read at a glance",
+  "lead": "The picture beside your name is drawn at about the size of a fingernail and masked into a circle. Whatever survives that is your avatar. This page builds one at the canvas Discord recommends and shows you the result at the scale it will be seen, which is the only test that matters.",
+  "meta": {
+    "title": "Discord avatar GIF maker — animated profile picture, 128×128",
+    "description": "Turn an animation or clip into an animated Discord avatar. Built in your browser at the recommended canvas, previewed at the size it is actually drawn."
+  },
+  "dropzone": {
+    "title": "Drop the animation for your avatar",
+    "caption": "or paste with Ctrl+V · .gif .webp .mp4 .mov .webm"
+  },
+  "actions": {
+    "run": "Encode with these settings",
+    "running": "Making the avatar…",
+    "rerun": "Make it again",
+    "download": "Download the avatar",
+    "disabledReason": "Add an animation to turn into an avatar."
+  },
+  "controls": {
+    "quality": {
+      "label": "Quality",
+      "hint": "There is very little canvas for this to work on. Pushing it high rarely produces a difference you can see at the size an avatar is drawn."
+    },
+    "colours": {
+      "label": "Colours",
+      "hint": "A generous palette is wasted on something this small. Reducing it here is one of the safest savings on the site.",
+      "options": [
+        { "value": "256", "label": "256 — the full palette" },
+        { "value": "128", "label": "128 — no visible difference" },
+        { "value": "64", "label": "64 — still hard to tell apart" },
+        { "value": "32", "label": "32 — bold shapes hold up" }
+      ]
+    },
+    "keepEveryNth": {
+      "label": "Keep every Nth frame",
+      "hint": "An avatar is glanced at rather than watched. Fewer frames is almost never the thing anybody notices about it."
+    }
+  },
+  "preset": {
+    "autofit": "Make the avatar",
+    "autofitRunning": "Making it…",
+    "budgetHeading": "Avatar weight",
+    "states": {
+      "over": "Heavier than the target by {over}.",
+      "close": "About {size}, near the target used here.",
+      "fits": "Well inside the target, {spare} under it.",
+      "unknown": "This weighs {size}. Discord publishes no maximum file size for an avatar, so nothing here is a rule — the figure being aimed at is one chosen on this page, not by Discord."
+    },
+    "meterLabel": "Avatar weight, {size}",
+    "unfitted": "This device could not get it below {size}. Nothing published says that is too much, but an avatar this heavy is a lot of data for something drawn very small.",
+    "previewCaption": "The sizes an avatar is actually drawn at",
+    "previewMessage": "posted a message",
+    "previewSamples": [
+      { "px": 40, "label": "beside a message" },
+      { "px": 32, "label": "in the member list" },
+      { "px": 80, "label": "on the profile card" }
+    ],
+    "nextStep": "Next: User Settings → Profile, then set the avatar. Whether an animated one can be applied depends on your own account, and your client is the place that answers it.",
+    "cropNote": "Non-square sources have their middle taken, and then the corners are hidden by a circular mask. Keep the subject centred and away from the edges.",
+    "verified": "The 128 by 128 canvas is Discord's recommendation, read on {date}."
+  },
+  "card": {
+    "benefit": "Turn a clip into the little round picture beside your name."
+  },
+  "resultEmpty": {
+    "message": "Your avatar will appear here.",
+    "hint": "Judge it at the smallest preview. That is the size nearly every viewer sees."
+  },
+  "result": {
+    "savedLine": "Reduced by {saved} on the way down to avatar scale.",
+    "emptyRows": [
+      "A small square file at the canvas Discord recommends",
+      "The same picture drawn at message and member-list scale",
+      "A measured weight, with no invented maximum beside it"
+    ]
+  },
+  "labels": {
+    "progress": "Avatar fitting progress",
+    "resultAlt": "The finished avatar",
+    "sourceAlt": "The animation you are turning into an avatar"
+  },
+  "faqHeading": "Discord avatars — common questions",
+  "explainer": [
+    {
+      "heading": "Everything is decided by how small it ends up",
+      "level": 2,
+      "paragraphs": [
+        "An avatar is drawn at roughly forty pixels beside a message and smaller still in the member list. That is a few dozen pixels across for the entire picture. Almost every decision people agonise over — palette depth, encoder quality, frame count — is invisible at that scale, and one decision that people rarely think about is the whole game: what is in the frame.",
+        "A face filling the circle is legible. The same face standing in a room becomes three smudges. A logo with fine lettering becomes a grey blob. Anything that relies on detail relies on pixels that will not exist by the time anybody looks at it.",
+        "This is why the preview here shows the result at message scale and member-list scale rather than large and flattering. Judging an avatar at full size is the most common way to end up with one that does not work, because you are inspecting a version of it that nobody else will ever see."
+      ]
+    },
+    {
+      "heading": "The circle is not a border, it is a crop",
+      "level": 3,
+      "paragraphs": [
+        "Discord masks avatars into a circle. The corners are not framed or faded — they are simply gone. On a square image that removes roughly a fifth of the picture, all of it around the outside, and it takes the corners of any subject that reaches into them.",
+        "So the useful area is smaller than the file suggests, and content needs to sit centred with room to breathe. A composition that fills its square edge to edge will be trimmed on all four sides; one that sits comfortably in the middle survives intact.",
+        "There is a second bite out of it too. A status indicator sits over one corner of the circle, covering a small area near the bottom right. It is not much, but if that is where the interesting part of your picture lives, it will spend its life behind a coloured dot."
+      ]
+    },
+    {
+      "heading": "There is no published weight limit, and that cuts both ways",
+      "level": 3,
+      "paragraphs": [
+        "Discord states no maximum file size for an avatar anywhere in its documentation. Advice elsewhere often quotes the emoji ceiling as though it applied here, which is a figure lifted from a different surface with different rules and no basis for being repeated.",
+        "Rather than pick one and present it as a rule, this page shows what the file weighs and says plainly that the number it is aiming at was chosen here. You are free to encode by hand and go past it.",
+        "That said, restraint costs nothing at this size. An avatar is fetched constantly — every message you post, every member list, every mention — and there is very little to be gained by spending weight on detail that the circle and the scaling will remove anyway. A small file and a good avatar are almost always the same file."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "avatar-size",
+      "question": "What size should a Discord avatar be?",
+      "answer": [
+        "128 by 128 is the canvas Discord recommends, and it is what this page produces.",
+        "Larger square sources are scaled down rather than refused. Since the picture is drawn far smaller than that anyway, the extra pixels are spent for nothing."
+      ]
+    },
+    {
+      "id": "avatar-limit",
+      "question": "How big can the file be?",
+      "answer": [
+        "Discord publishes no maximum, so this page refuses to state one. The meter reports the weight and leaves the ceiling blank.",
+        "Figures you may have seen quoted for this are generally the emoji allowance borrowed from another part of the product. There is no reason to believe it applies."
+      ]
+    },
+    {
+      "id": "animated-avatar",
+      "question": "Can I actually apply an animated avatar to my account?",
+      "answer": [
+        "That depends on your account, and the only reliable answer is the one your own client gives you when you open the profile settings and try.",
+        "Deliberately no rule is quoted here. What Discord makes available to whom on this front is described inconsistently across its own pages and has been revised more than once, so anything written down on a site like this would be wrong for somebody. The file itself costs nothing to make either way, and it is a perfectly ordinary animation."
+      ]
+    },
+    {
+      "id": "circle-crop",
+      "question": "Why are the corners of my picture missing?",
+      "answer": [
+        "Avatars are masked into a circle, so the corners of the square are never drawn. This is not something the file can avoid — it happens when Discord renders it.",
+        "Keep the subject centred and leave a margin around it. Anything that reaches the edges of the square will lose its corners."
+      ]
+    },
+    {
+      "id": "avatar-blurry",
+      "question": "Why does my avatar look fuzzy?",
+      "answer": [
+        "Usually because the subject is too far away in the source. Detail that reads fine on a screen at full size does not survive being reduced to a few dozen pixels.",
+        "Crop in much closer than feels natural before you come here. The most common fix is not a technical setting at all."
+      ]
+    },
+    {
+      "id": "server-icon",
+      "question": "Can I use this for a server icon instead?",
+      "answer": [
+        "The output is square and small, so it will work, but a server icon is generally shown a little larger than a personal avatar and is worth building at a bigger canvas if you want it sharp.",
+        "The resize tool will take a square animation to whatever dimensions you want if you would rather choose the size yourself."
+      ]
+    }
+  ],
+  "related": {
+    "gif-for-discord": "The hub, if you are not certain which surface you are making this for.",
+    "discord-banner-gif": "The wide strip above a channel list, which has the opposite problem.",
+    "crop-gif": "Pick the square yourself when the middle is not where the subject is."
+  }
+}

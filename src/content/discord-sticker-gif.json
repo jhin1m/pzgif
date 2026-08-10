@@ -1,0 +1,167 @@
+{
+  "slug": "discord-sticker-gif",
+  "title": "Discord sticker GIF — exactly 320 by 320, and the two rules nobody mentions",
+  "lead": "A sticker must be precisely 320 pixels square and no heavier than 512 KB. It must also run no longer than five seconds and no faster than sixty frames per second — two conditions that appear in almost no guide, and that quietly account for a great many refused uploads.",
+  "meta": {
+    "title": "Discord sticker GIF maker — 320×320, 512 KB, 5 seconds, 60 FPS",
+    "description": "Build a Discord sticker that passes all four of its rules: exact dimensions, weight, length and frame rate. Runs in your browser, nothing uploaded."
+  },
+  "dropzone": {
+    "title": "Drop the animation you want as a sticker",
+    "caption": "or paste with Ctrl+V · .gif .webp .mp4 .mov .webm"
+  },
+  "actions": {
+    "run": "Encode with these settings",
+    "running": "Building the sticker…",
+    "rerun": "Build it again",
+    "download": "Download the sticker",
+    "disabledReason": "Add an animation to turn into a sticker."
+  },
+  "controls": {
+    "quality": {
+      "label": "Quality",
+      "hint": "A sticker has six times the area of an emoji, so this control has considerably more to act on here than it does there."
+    },
+    "colours": {
+      "label": "Colours",
+      "hint": "Stickers are drawn large enough that banding in a gradient becomes visible. Drop this only when the artwork is genuinely flat.",
+      "options": [
+        { "value": "256", "label": "256 — keep every shade" },
+        { "value": "128", "label": "128 — usually indistinguishable" },
+        { "value": "64", "label": "64 — expect visible banding" },
+        { "value": "32", "label": "32 — flat vector art only" }
+      ]
+    },
+    "keepEveryNth": {
+      "label": "Keep every Nth frame",
+      "hint": "Useful, but less free than it is on a small emoji: a sticker is large enough that choppy motion registers."
+    }
+  },
+  "preset": {
+    "autofit": "Fit the sticker rules",
+    "autofitRunning": "Applying all four rules…",
+    "budgetHeading": "Against the 512 KB sticker allowance",
+    "states": {
+      "over": "About {over} too heavy for a sticker. The length cap has already been applied, so quality is what is left.",
+      "close": "Somewhere in {size} — the upper part of that would be refused on weight.",
+      "fits": "All four rules satisfied, with {spare} of the allowance unspent.",
+      "unknown": "The finished sticker comes to {size}."
+    },
+    "meterLabel": "{size} against the 512 KB sticker allowance",
+    "unfitted": "Even at its smallest this stays {over} above the allowance. A sticker this detailed may need a shorter loop or simpler artwork.",
+    "previewCaption": "At the size a sticker is drawn in a channel",
+    "previewMessage": "sent as a sticker",
+    "previewSamples": [
+      { "px": 160, "label": "in the conversation" },
+      { "px": 80, "label": "in the picker tray" }
+    ],
+    "nextStep": "Next: Server Settings → Stickers → Upload Sticker, then give it the related emoji and a name of at least two characters.",
+    "cropNote": "The square is compulsory here, so anything wide or tall loses its edges. Crop the region you want first if the middle is not it.",
+    "verified": "The dimensions, the allowance, the five-second cap and the frame-rate ceiling are all Discord's, read on {date}."
+  },
+  "card": {
+    "benefit": "Clear all four sticker conditions, including the ones nobody warns you about."
+  },
+  "resultEmpty": {
+    "message": "Your sticker will appear here.",
+    "hint": "The length and frame-rate caps are applied before compression, so the weight you see already accounts for them."
+  },
+  "result": {
+    "savedLine": "Trimmed and compressed, {saved} lighter than what you brought in.",
+    "emptyRows": [
+      "A file at precisely the dimensions the sticker upload demands",
+      "A loop kept inside the five-second maximum",
+      "The measured weight against the 512 KB allowance"
+    ]
+  },
+  "labels": {
+    "progress": "Sticker fitting progress",
+    "resultAlt": "The finished sticker",
+    "sourceAlt": "The animation you are turning into a sticker"
+  },
+  "faqHeading": "Discord stickers — common questions",
+  "explainer": [
+    {
+      "heading": "Four conditions, and two of them are invisible",
+      "level": 2,
+      "paragraphs": [
+        "Dimensions and weight are the two everybody knows about, because they are the two that get written down. A sticker has to be 320 pixels on each side — not merely close to it, not merely square — and it has to weigh 512 KB or less.",
+        "The other two are where the frustration comes from. A sticker may not run longer than five seconds, and it may not play faster than sixty frames per second. Neither is visible in a file browser. Neither is something you would think to check. And both are absolute: an animation that is the right shape, comfortably under the weight, and six seconds long is refused with the same unhelpful message as one that is four times too heavy.",
+        "That is the specific reason this page exists as its own thing rather than as a size preset. Getting the first two right is arithmetic. Getting all four right means the length has to be cut before anything is compressed, because trimming changes how many frames exist, which changes the weight, which changes every compression decision downstream. Doing it in the other order produces a carefully optimised file that fails anyway."
+      ]
+    },
+    {
+      "heading": "Why the dimensions are exact rather than a maximum",
+      "level": 3,
+      "paragraphs": [
+        "Most places that accept an image treat a size as a recommendation and rescale whatever they are given. The sticker pipeline does not. It wants that square and refuses the rest, which produces the confusing situation where a smaller file is rejected for being small.",
+        "This is also the one place on this site where a picture is enlarged. Everywhere else, scaling something up is treated as inventing detail that was never captured, and the engine refuses to do it. Here the destination leaves no alternative: a 200 pixel drawing kept honestly at 200 pixels is a file Discord will not take. So it is scaled up, and it will look softer than the original did. That is a real cost and it is worth knowing about before you wonder why the result seems less crisp than the artwork you drew.",
+        "If you have any say over the source, drawing or exporting at the target square in the first place avoids the whole problem. It is the only way to get a sticker that is genuinely sharp."
+      ]
+    },
+    {
+      "heading": "Five seconds is a design constraint, not just a limit",
+      "level": 3,
+      "paragraphs": [
+        "Once you accept it, the five-second ceiling changes how a sticker should be built. It is not enough time for a scene, and it is plenty for a gesture — a reaction, a gag, a single movement that reads at a glance and loops cleanly back to where it started.",
+        "Long clips cut to the cap keep their first five seconds, which is rarely the good part. A better approach is to decide which moment you actually want and take that out of the source before you get here, rather than letting an arbitrary cut choose for you.",
+        "The frame-rate ceiling almost never bites in practice, because very few animations are authored above sixty frames per second and most players clamp very short delays anyway. It is enforced regardless, by keeping a fraction of the frames, because the alternative is another silent refusal at the point of upload with nothing on screen to explain it."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "sticker-size",
+      "question": "What exactly does a Discord sticker have to be?",
+      "answer": [
+        "320 pixels wide by 320 pixels high, 512 KB or less, no longer than five seconds, and no more than sixty frames per second.",
+        "All four apply at once. Satisfying three of them is not a partial pass — the upload is refused just the same."
+      ]
+    },
+    {
+      "id": "gif-stickers",
+      "question": "Can a sticker be animated at all?",
+      "answer": [
+        "Discord's own developer documentation and its announcements describe animated stickers as supported, while one help article is more restrictive about the format. The sources do not entirely agree.",
+        "Given that, treat this as worth testing on your own server before you rely on it. The file this page produces meets every published requirement, so if an upload is refused it will be a client's format preference rather than a rule you missed."
+      ]
+    },
+    {
+      "id": "too-long",
+      "question": "My animation is longer than five seconds. What gets kept?",
+      "answer": [
+        "The opening. The clip is cut at the cap and everything after that point is discarded before any compression happens.",
+        "That is rarely the section you wanted, so it is usually better to select the moment yourself beforehand. Whatever you bring here is treated as the whole animation."
+      ]
+    },
+    {
+      "id": "upscaled",
+      "question": "Why does my sticker look softer than the original artwork?",
+      "answer": [
+        "Because the source was smaller than the required square and had to be enlarged. Enlarging cannot recover detail that was never there, so edges look slightly soft.",
+        "Exporting the artwork at the target square before you come here is the only real fix, and it makes a very noticeable difference on line art."
+      ]
+    },
+    {
+      "id": "sticker-vs-emoji",
+      "question": "Should I make this a sticker or an emoji?",
+      "answer": [
+        "Stickers are sent on their own and drawn several times larger, so detail and motion actually register. Emoji sit inline beside text at a fraction of that size and work best as a single bold shape.",
+        "The allowances differ accordingly: a sticker gets double the weight of an emoji, and it needs it, because it has around six times the area to fill."
+      ]
+    },
+    {
+      "id": "no-upload",
+      "question": "Is the file sent anywhere to be processed?",
+      "answer": [
+        "No. Decoding, trimming, resizing and every compression attempt happen inside this tab on your own hardware.",
+        "The trade is time and memory. A large source on a phone may be turned away before work starts, which is deliberate — being told up front beats a tab that runs out of memory partway through and loses everything."
+      ]
+    }
+  ],
+  "related": {
+    "gif-for-discord": "Not sure a sticker is the right surface? Compare all four on the hub.",
+    "discord-emoji-gif": "The small inline version, with a tighter allowance and different priorities.",
+    "gif-compressor": "Already the right shape and just need the weight down? Go straight to compression."
+  }
+}

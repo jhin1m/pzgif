@@ -130,8 +130,8 @@ pre-committed reversal in `phase-01` stands if judging later fails.
 | 4 | [Media Engine Core](./phase-04-media-engine-core.md) | Code complete 2026-08-05 · browser suite unrun | 1 |
 | 5 | [Tool Framework and GIF Compressor](./phase-05-tool-framework-and-gif-compressor.md) | Complete 2026-08-05 · output decoded and verified in-browser | 3, 4 |
 | 6 | [GIF-to-GIF Tools](./phase-06-gif-to-gif-tools.md) | Complete 2026-08-05 · 26/26 E2E on Chromium and WebKit, outputs decoded | 5 |
-| 7 | [Cross-Format Tools](./phase-07-cross-format-tools.md) | Pending | 5 |
-| 8 | [Discord Preset Pages](./phase-08-discord-preset-pages.md) | Pending | 5 |
+| 7 | [Cross-Format Tools](./phase-07-cross-format-tools.md) | Complete 2026-08-10 · 22/22 E2E on Chromium and WebKit, outputs decoded | 5 |
+| 8 | [Discord Preset Pages](./phase-08-discord-preset-pages.md) | Complete 2026-08-10 · 15/15 E2E on Chromium and WebKit, outputs decoded · one manual step outstanding | 5 |
 | 9 | [Content SEO and Legal](./phase-09-content-seo-and-legal.md) | Pending | 3 |
 | 10 | [Ads Consent and Analytics](./phase-10-ads-consent-and-analytics.md) | Pending | 3, 9 |
 | 11 | [QA Perf A11y and Launch](./phase-11-qa-perf-a11y-and-launch.md) | Pending | 6, 7, 8, 9, 10 |
@@ -241,9 +241,9 @@ Research proved several statements in the approved documents factually wrong. Th
 
 | Doc | Says | Reality | Fixed in |
 |---|---|---|---|
-| `design-guidelines.md` §10 | Preset "Banner 680×240" | **Matches no Discord surface.** Server banner is 960×540; profile banner ~600×240 (community, undocumented) | Phase 8 |
-| `design-guidelines.md` §10 | All presets target "under 256 KB" | 256 KB is **emoji only**. Sticker is 512 KB; Slack emoji 128 KB; banners/avatars have no published limit | Phase 8 |
-| `design-guidelines.md` §10 | (omits) | Sticker also caps at **5 s** and **60 FPS**; both are hard rejection criteria | Phase 8 |
+| `design-guidelines.md` §10 | Preset "Banner 680×240" | **Matches no Discord surface.** Server banner is 960×540; profile banner ~600×240 (community, undocumented) | ✅ Phase 8, 2026-08-10 |
+| `design-guidelines.md` §10 | All presets target "under 256 KB" | 256 KB is **emoji only**. Sticker is 512 KB; Slack emoji 128 KB; banners/avatars have no published limit | ✅ Phase 8, 2026-08-10 |
+| `design-guidelines.md` §10 | (omits) | Sticker also caps at **5 s** and **60 FPS**; both are hard rejection criteria | ✅ Phase 8, 2026-08-10 |
 | `design-guidelines.md` §10 | "FAQ accordion (schema.org `FAQPage`)" | FAQ rich results were **removed from Search on 2026-05-07**, docs deleted 2026-06-15. Keep the FAQ UI, drop the JSON-LD | Phase 9 |
 | `tech-stack.md` §6 | "Ezoic accepts new/small tool sites" | Ezoic has required **250,000+ MAU since 2026-02-19**. The launch monetisation premise is void | Phase 10 |
 | `tech-stack.md` §4 | `mp4box.js` + WebM demuxer + muxer; `ImageDecoder` for GIF; 150 MB/50 MB limits | Replaced by `mediabunny`; `modern-gif` everywhere; frame-buffer budgets | Phase 2 |
@@ -256,7 +256,7 @@ Tracked live at the end of each phase file. Blocking ones at plan time:
 1. **Does the gifski single-thread path deadlock?** Unverified — upstream issue #5 concerns "channels and/or threads", and gifski uses `crossbeam-channel` even without rayon. **Blocks Phase 4.** Gate G1 answers it
 2. **Is gifski visibly better than `gifenc` at matched bytes?** The entire positioning and the AGPL obligation rest on yes. **Blocks Phase 4.** Gate G6 answers it
 3. **How fast is `modern-gif`?** Unbenchmarked; it was chosen for maintenance, not measured speed. Phase 1 answers it
-4. **Animated WebP on Safari** has no maintained library and no `ImageDecoder`. Phase 7 resolves it by building a ~150-line RIFF/ANMF splitter so the page works everywhere. **A knowingly-broken ranking page is not an option** — if the splitter is not built, the page and its sitemap entry are cut instead (it is in Ship 4, the last and most cuttable)
+4. ~~**Animated WebP on Safari** has no maintained library and no `ImageDecoder`.~~ **Closed 2026-08-10.** The splitter was built and the page ships whole on every engine — and it needed no library at all, which the question assumed it would. An animated WebP is a RIFF container holding one compressed *still* image per frame, and every browser including Safari decodes a still WebP natively, so `decode/webp-riff.ts` rebuilds each frame into a minimal standalone container and hands it to `createImageBitmap()`. The `ImageDecoder` path was removed rather than kept as a fast path, on the same reasoning that made `modern-gif` universal: two paths would ship the untested one to the engine that is hardest to debug. `browser-unsupported`'s `no-image-decoder` reason is deleted — there is no longer a browser it describes
 5. **The gifski Rust fork is deferred past launch** (ratified 2026-08-05). MVP ships the unforked encoder with honest progress — determinate through decode, a clearly labelled encode stage with an elapsed timer, no invented percentage. Revisit after launch with real data, or immediately if gate G1 exposes a deadlock, in which case it gets its own budget rather than being absorbed into Phase 4
 6. **If G6 fails, does the project continue?** The pre-registered decision tree in Phase 1 says reposition on presets, privacy and the size-budget UX. **Still open** — the judging pack is generated and pre-registered but unscored, so Phase 4 proceeds on the assumption gifski wins while already paying the AGPL cost for it
 7. Who is the named operator on the About page? Required before any ad-network application, the Contact page, GDPR controller identification, and a DMCA agent if one is ever needed
@@ -266,6 +266,60 @@ Tracked live at the end of each phase file. Blocking ones at plan time:
 
     **The fifth is closed.** The compressor's **CLS 0.015** was diagnosed and fixed in the homepage soul pass: the result panel grew 320 → 505 px when a job finished, seconds after the click that started it, so `hadRecentInput` never excluded it. The panel now reserves the done state's *measured* height in four breakpoint bands, `e2e/result-panel-reservation.spec.ts` asserts the reservation still covers its contents, and the compressor's CLS test measures 0.
 
+11. ~~**Animated WebP compositing is the one Phase 7 output that fails
+    silently.**~~ **Closed 2026-08-10 — and it was not a false alarm.**
+    `webp-offset-dispose.webp` is now generated by `scripts/make-fixtures.mjs`:
+    three `webpmux`-authored frames, each isolating one rule — a full-canvas
+    base, a 16x16 no-blend patch at (32,16) that disposes to background, and a
+    third patch deliberately placed *somewhere else*. That placement is the
+    fixture's whole design. A full-canvas third frame would paint over the
+    disposed rectangle and the disposal would be unobservable, so the suite
+    would pass whether or not disposal ran at all — which is how a fixture can
+    look thorough and test nothing.
+
+    `e2e/bench/webp-compositing.spec.ts` reads composited RGBA frame by frame
+    through a new `sampleWebpFrames` on the `/__bench` engine API, on all three
+    engines. Not through a produced GIF: `e2e/lib/pixel-probe.ts` decodes with
+    `createImageBitmap`, which returns frame one and nothing else, and every
+    defect this question was about is invisible on frame one by construction.
+
+    **It found a real one on the first run, and not the one being looked for.**
+    Offsets and no-blend were already correct; disposal was correct too. What
+    was wrong sat one layer down in `downscale.ts`, which both formats share:
+    the output canvas and the halving scratch canvases are reused across frames
+    and `drawImage` composites source-over, so a pixel that is transparent in
+    this frame kept whatever the previous frame left there. Opaque content hides
+    it completely, which is why every existing fixture passed — `anim.webp` and
+    all five GIFs are fully opaque. On anything with transparency it burns the
+    previous frame in permanently. Fixed by clearing before each draw.
+
+    A second finding, recorded because it silently threatens the G6 scores:
+    **`make-fixtures.mjs` is not byte-reproducible.** A blanket rerun moved
+    `photo-grain.gif` 6.5 → 8.3 MB and changed `clip-vp9-5s.webm` at identical
+    size — `noise=alls=42` sets strength, not a seed, and libvpx's threading is
+    not deterministic. Adding one fixture the obvious way would therefore have
+    replaced the corpus G6's judging pack was scored against without touching a
+    line of code. The script now takes fixture names as arguments and measures
+    the rest where they sit.
+
     A sixth defect was found while verifying that work and is **not** fixed: at 375 px with a 32 px root font, `site-header.tsx` overflows by 22 px on **every** route — the wordmark grows with the text and pushes the theme toggle and menu button past the edge. WCAG 1.4.4, shared chrome, out of the soul pass's scope.
+
+12. **A real Discord upload has never been tested, and cannot be from this
+    machine.** Phase 8 shipped all five preset routes with every dimension and
+    byte count asserted by decoding the produced GIF, but the last link in the
+    chain — Discord accepting the file — is unverified. Custom stickers need a
+    Boost-level-1 server and the 960×540 banner needs level 2, so this costs
+    roughly one month of Nitro/Boost and about five dollars. **Arrange it well
+    before launch week**, not during it: it is the only way to close phase 8's
+    open question 3 (the API and Discord's blog say animated stickers work, one
+    help article disagrees), and if the restrictive source turns out to be right
+    the sticker page needs a copy change rather than a code one.
+
+13. **Two shipped surfaces are bounded by numbers nobody measured on the
+    hardware they describe.** `ATTEMPT_CAP.ios` is 2 real encodes, chosen
+    against the 30 MB iOS frame budget — which still carries `measured: false`,
+    because gate G3 has never run for want of an iPhone. Auto-fit is the most
+    memory-hungry flow in the product and iOS is the tier least able to afford
+    it, so this is the same gap as open question 8 with more riding on it.
 
 <!-- slug: pzgif-mvp-9-browser-native-gif-tools-discord-presets -->

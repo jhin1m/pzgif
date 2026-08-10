@@ -94,6 +94,13 @@
     "directionDowngraded": "To hold that many frames this device will run the job at {width} px.",
     "directionWontFit": "{frames} frames will not fit this device at once. Try a straight reverse, or crop the frame down first."
   },
+  "preset": {
+    "manual": "Manual override",
+    "optional": "Optional",
+    "attempt": "Try {index} of up to {max}",
+    "attemptPending": "Up to {max} attempts",
+    "settled": "Settled after {attempts, plural, one {# attempt} other {# attempts}} · {width}×{height} · {frames} frames"
+  },
   "crop": {
     "moveLabel": "Crop area — arrow keys move it, Shift for 10 px",
     "readout": "{width}×{height} at {x}, {y}",
@@ -114,6 +121,23 @@
       "sw": "Resize from the bottom-left corner",
       "w": "Resize from the left edge"
     }
+  },
+  "trim": {
+    "start": "Start",
+    "end": "End",
+    "startHandle": "Trim start, in seconds",
+    "endHandle": "Trim end, in seconds",
+    "selected": "{seconds}s selected"
+  },
+  "frameRange": {
+    "first": "First frame",
+    "last": "Last frame",
+    "selected": "{count, plural, one {# frame} other {# frames}}",
+    "selectAll": "Select every frame"
+  },
+  "embed": {
+    "copy": "Copy",
+    "copied": "Copied"
   },
   "engine": {
     "stage": {
@@ -144,8 +168,7 @@
       "browserUnsupported": {
         "noVideoDecoder": "This browser cannot decode video at all, so video input is unavailable here.",
         "noVideoEncoder": "This browser cannot create MP4 files.",
-        "iosVideoBudget": "iPhones and iPads do not have enough memory to convert video in the browser. GIF files work normally here.",
-        "noImageDecoder": "This browser cannot read animated WebP."
+        "iosVideoBudget": "iPhones and iPads do not have enough memory to convert video in the browser. GIF files work normally here."
       }
     },
     "actions": {

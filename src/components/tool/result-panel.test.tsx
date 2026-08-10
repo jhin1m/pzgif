@@ -25,11 +25,20 @@ const EMPTY_ROWS = [
   "Which encoder ran, and how many colours it was allowed",
 ] as const;
 
-/** Every `min-h-*` class on the outermost element, in source order. */
+/**
+ * Every `min-h-*` class on the outermost element, in source order.
+ *
+ * The class attribute is located by name rather than by position. Anchoring on
+ * `^<div class="` looked equivalent and was not: React emits attributes in JSX
+ * order, so adding `data-result-panel` ahead of `className` made this return an
+ * empty list — and an empty list compares equal to an empty list, so the
+ * assertion below would have passed while measuring nothing. The `length` check
+ * in that test exists for the same reason.
+ */
 function reservedHeights(markup: string): string[] {
-  const openingTag = /^<div class="([^"]*)"/.exec(markup);
-  if (!openingTag) return [];
-  return openingTag[1].split(/\s+/).filter((token) => /(^|:)min-h-/.test(token));
+  const openingTag = /^<div\s[^>]*>/.exec(markup)?.[0] ?? "";
+  const classes = /\sclass="([^"]*)"/.exec(openingTag)?.[1] ?? "";
+  return classes.split(/\s+/).filter((token) => /(^|:)min-h-/.test(token));
 }
 
 describe("ResultPanel", () => {
@@ -48,6 +57,24 @@ describe("ResultPanel", () => {
 
     expect(reservedHeights(empty).length).toBeGreaterThan(0);
     expect(reservedHeights(empty)).toEqual(reservedHeights(filled));
+  });
+
+  it("carries the hook the reservation spec locates it by", () => {
+    // `result-panel-reservation.spec.ts` measures this box across four
+    // breakpoint bands and used to find it by matching `min-h-1\d\d` against
+    // the class string. That silently found nothing the moment a page reserved
+    // a box outside that range, and a test that cannot find its subject
+    // measures nothing while looking healthy.
+    for (const markup of [
+      renderToStaticMarkup(<ResultPanel empty emptyMessage="…" />),
+      renderToStaticMarkup(
+        <ResultPanel>
+          <p>done</p>
+        </ResultPanel>,
+      ),
+    ]) {
+      expect(markup).toContain("data-result-panel");
+    }
   });
 
   it("marks the empty surface as the place an image goes", () => {

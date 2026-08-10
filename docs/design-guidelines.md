@@ -712,7 +712,22 @@ Hard rules: no horizontal scroll at 320px · touch targets ≥44px below `md` ·
 
 **Tool page** — h1 (exact-match keyword) · trust line 🔒 immediately under it · dropzone · settings + preview · progress · result panel · **ad** · SEO explainer (≥400 words, H2/H3 structure) · **inline ad** after ~150 words · FAQ accordion (schema.org `FAQPage`) · related tools · footer.
 
-**Preset page (Discord/Slack)** — same skeleton, but the settings panel is replaced by a **constraint UI**: preset chips (Emoji 128×128 / Sticker 320×320 / Banner 680×240 / Avatar 128×128), a live "target size" readout that must land under 256 KB, and an auto-tuning quality search rather than manual sliders. The success criterion is explicit and binary: "Fits Discord's 256 KB limit ✓".
+**Preset page (Discord)** — same skeleton, but the settings panel is replaced by a **constraint UI**: preset chips, a live "target size" readout, and an auto-tuning quality search rather than manual sliders alone. The success criterion is explicit and binary, and it is **parameterised by the active preset** — "Fits Discord's sticker limit: 320×320, 480 KB of 512 KB ✓" — never a single sentence with one number in it.
+
+> **[Amended 2026-08-10, Phase 8] The preset figures previously given here were wrong, and one of them was dangerous.**
+>
+> This section used to read "Emoji 128×128 / Sticker 320×320 / Banner 680×240 / Avatar 128×128 … must land under 256 KB … Fits Discord's 256 KB limit ✓". Four corrections, verified against Discord's Help Center on 2026-08-04:
+>
+> | Was | Is |
+> |---|---|
+> | Banner **680×240** | **Matches no Discord surface.** The server banner is **960×540** (16:9); the ~600×240 profile banner is a community figure Discord documents nowhere. 680×240 is most likely a corruption of the latter. A preset emitting it produces a file Discord letterboxes or crops on every upload — while the page claims it fits |
+> | All presets "under 256 KB" | 256 KB is **emoji only**. The sticker budget is **512 KB**. Discord publishes **no** byte limit for banners, avatars or server icons |
+> | (omitted) | The sticker also caps at **5 seconds** and **60 FPS**. Both are hard rejection criteria at upload |
+> | One success sentence | The sentence is per preset, because the numbers in it are |
+>
+> The figures now live in `src/lib/presets/discord.ts`, one record per surface, each carrying its source URL and the date it was read. **There is no shared byte constant and there must not be one** — `discord.test.ts` asserts every ceiling is derived from its own preset's record. Where Discord publishes nothing, the config stores `null` and the UI says "well under Discord's limit" rather than printing a figure nobody measured.
+>
+> Two further copy rules follow from the research and are enforced in the same test: **no Nitro or Boost gating rule is stated anywhere**, including the FAQ (two Discord articles updated within a fortnight of each other contradict each other on animated-emoji gating), and the maintenance promise — "the presets on this page are updated when they change" — is replaced by the verification date, because those four articles changed twice in two weeks.
 
 ---
 

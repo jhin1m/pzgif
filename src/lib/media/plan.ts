@@ -34,17 +34,24 @@ import {
   type TierBudget,
 } from "./limits";
 import { FrameGeometry } from "./ops/geometry";
-import { directionFrameCount, selectedFrameCount } from "./ops/frame-select";
+import { directionFrameCount, selectedFrameCount, trimmedSpan } from "./ops/frame-select";
 import type { AcceptedPlan, InputProbe, JobSpec, MediaError } from "./types";
 
 export type Admission =
   | { ok: true; plan: AcceptedPlan }
   | { ok: false; error: MediaError };
 
-/** Frames a decode would produce at `fps`, before any timing op. */
-function decodedFrameCount(probe: InputProbe, fps: number): number {
+/**
+ * Frames a decode would produce at `fps`, before any timing op.
+ *
+ * Sized against the *trimmed* span for video, because the trim is a seek: the
+ * decoder never reads the discarded seconds, so budgeting for them would refuse
+ * a three-second cut out of a long clip that comfortably fits.
+ */
+function decodedFrameCount(probe: InputProbe, spec: JobSpec, fps: number): number {
   if (probe.frameCount !== null) return probe.frameCount;
-  if (probe.durationSec !== null) return Math.max(1, Math.ceil(probe.durationSec * fps));
+  const span = trimmedSpan(probe.durationSec, spec.timing);
+  if (span !== null) return Math.max(1, Math.ceil(span.durationSec * fps));
   // Neither stated — some WebM carries no duration in its header. The count is
   // unknowable here, so the plan is capped at the tier ceiling and the decoder
   // stops there. Guessing a smaller number would let a job start that cannot
@@ -78,7 +85,7 @@ function frameCountsFor(
   fps: number,
   outputCeiling = spec.maxFrames ?? Number.POSITIVE_INFINITY,
 ): FrameCounts {
-  const decoded = decodedFrameCount(probe, fps);
+  const decoded = decodedFrameCount(probe, spec, fps);
   const selected = selectedFrameCount(decoded, spec.timing);
 
   const maxDecode =
@@ -92,6 +99,19 @@ function frameCountsFor(
     frames: directionFrameCount(decodeFrames, spec.timing.direction),
     truncated: decodeFrames < selected,
   };
+}
+
+/**
+ * The widest output this job may be planned at.
+ *
+ * `defaultMaxWidth` is a default, not the memory constraint — the constraint is
+ * `budgetBytes`, and it is enforced separately below whatever this returns. A
+ * job that states a `widthCeiling` is one whose *destination* fixes the size, so
+ * the tier's default would silently produce the wrong shape rather than a
+ * smaller version of the right one. See `JobSpec.widthCeiling`.
+ */
+function widthCapFor(spec: JobSpec, budget: TierBudget): number {
+  return Math.max(budget.defaultMaxWidth, spec.widthCeiling ?? 0);
 }
 
 function buildPlan(
@@ -108,7 +128,7 @@ function buildPlan(
   const geometry = new FrameGeometry(probe.width, probe.height, {
     ...spec.geometry,
     targetWidth: width,
-  }, { even: spec.output.kind === "video", maxWidth: budget.defaultMaxWidth });
+  }, { even: spec.output.kind === "video", maxWidth: widthCapFor(spec, budget) });
 
   return {
     fps,
@@ -165,10 +185,22 @@ function capabilityRefusal(
     return browserUnsupportedError({ reason: "no-video-encoder" });
   }
 
-  if (probe.format === "webp" && !capabilities.imageDecoder) {
-    // Safari has no `ImageDecoder` at any version, so animated WebP has no
-    // decode path here until Phase 7 decides on a hand-rolled RIFF splitter.
-    return browserUnsupportedError({ reason: "no-image-decoder" });
+  // Animated WebP used to be refused on any engine without `ImageDecoder`, which
+  // was every version of Safari. Phase 7 replaced that decoder with a RIFF
+  // splitter feeding `createImageBitmap()`, so there is no longer an engine on
+  // which the format cannot be read — `capabilities.imageDecoder` survives as a
+  // probe result and nothing gates on it.
+  //
+  // What is left is the file itself. `probeInput` reports `decodable: false`
+  // when the container did not walk, which now means malformed rather than
+  // unsupported: a truncated download, or bytes joined by something that did not
+  // understand RIFF padding. Saying so before decode keeps it out of the generic
+  // bucket the taxonomy exists to keep files out of.
+  if (probe.format === "webp" && !probe.decodable) {
+    return decodeFailedError({
+      canOfferFallback: false,
+      detail: "animated WebP container did not parse",
+    });
   }
 
   return null;
@@ -184,13 +216,12 @@ export function admit(
   if (refusal) return { ok: false, error: refusal };
 
   const wantedFps = spec.timing.fps ?? FPS_LADDER[0];
-  const wantedWidth = Math.min(spec.geometry.targetWidth, budget.defaultMaxWidth);
+  const wantedWidth = Math.min(spec.geometry.targetWidth, widthCapFor(spec, budget));
 
   const fpsOptions = [wantedFps, ...FPS_LADDER.filter((value) => value < wantedFps)];
-  const widthOptions = [
-    wantedWidth,
-    ...WIDTH_LADDER.filter((value) => value < wantedWidth),
-  ];
+  const widthOptions = spec.geometry.pinWidth
+    ? [wantedWidth]
+    : [wantedWidth, ...WIDTH_LADDER.filter((value) => value < wantedWidth)];
 
   for (const fps of fpsOptions) {
     for (const width of widthOptions) {
@@ -244,7 +275,7 @@ export function admit(
  */
 /** What the user actually asked for, uncapped. Infinite when unknowable. */
 function requestedOutputFrames(probe: InputProbe, spec: JobSpec, fps: number): number {
-  const decoded = decodedFrameCount(probe, fps);
+  const decoded = decodedFrameCount(probe, spec, fps);
   if (!Number.isFinite(decoded)) return Number.POSITIVE_INFINITY;
   return directionFrameCount(
     selectedFrameCount(decoded, spec.timing),
@@ -259,13 +290,18 @@ export function truncatedPlan(
   budget: TierBudget = TIER_BUDGETS[capabilities.tier],
 ): AcceptedPlan | null {
   const fps = FPS_LADDER[FPS_LADDER.length - 1];
-  const width = Math.min(WIDTH_LADDER[WIDTH_LADDER.length - 1], budget.defaultMaxWidth);
+  // A pinned job keeps its size and gives up length instead — offering a
+  // narrower run would offer a file its destination rejects, which is not an
+  // offer at all.
+  const width = spec.geometry.pinWidth
+    ? Math.min(spec.geometry.targetWidth, widthCapFor(spec, budget))
+    : Math.min(WIDTH_LADDER[WIDTH_LADDER.length - 1], budget.defaultMaxWidth);
 
   const geometry = new FrameGeometry(
     probe.width,
     probe.height,
     { ...spec.geometry, targetWidth: width },
-    { even: spec.output.kind === "video", maxWidth: budget.defaultMaxWidth },
+    { even: spec.output.kind === "video", maxWidth: widthCapFor(spec, budget) },
   );
 
   const bytesPerFrame = 2 * geometry.outputWidth * geometry.outputHeight * 4;

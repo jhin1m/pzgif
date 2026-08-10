@@ -1,0 +1,183 @@
+{
+  "slug": "gif-for-discord",
+  "title": "GIF for Discord — pick the surface, and the file is fitted to it",
+  "lead": "Discord has four places an animation can go and four different sets of rules for them. Choose which one you are uploading to, drop the file, and the size and compression are worked out against that surface's own limits rather than a single number borrowed from somewhere else.",
+  "meta": {
+    "title": "GIF for Discord — emoji, sticker, banner and avatar sizes, fitted automatically",
+    "description": "Fit a GIF to Discord's emoji, sticker, banner or avatar rules without uploading it. Real encodes, real byte counts, and the limits Discord actually publishes."
+  },
+  "dropzone": {
+    "title": "Drop the GIF or clip you want on Discord",
+    "caption": "or paste with Ctrl+V · .gif .webp .mp4 .mov .webm"
+  },
+  "actions": {
+    "run": "Encode with these settings",
+    "running": "Fitting…",
+    "rerun": "Fit it again",
+    "download": "Download for Discord",
+    "disabledReason": "Choose a surface and add a file."
+  },
+  "controls": {
+    "quality": {
+      "label": "Quality",
+      "hint": "Only used when you encode by hand. Auto-fit chooses this itself and keeps the best value that stayed under the target."
+    },
+    "colours": {
+      "label": "Colours",
+      "hint": "The size of the palette each frame indexes into. Fewer colours is a smaller file and flatter shading.",
+      "options": [
+        { "value": "256", "label": "256 — the full palette" },
+        { "value": "128", "label": "128 — a good balance" },
+        { "value": "64", "label": "64 — noticeably smaller" },
+        { "value": "32", "label": "32 — flat artwork only" }
+      ]
+    },
+    "keepEveryNth": {
+      "label": "Keep every Nth frame",
+      "hint": "Two keeps half the frames and the loop still runs for the same length of time. The most effective lever on a long animation."
+    }
+  },
+  "preset": {
+    "legend": "Where is this going?",
+    "chips": {
+      "emoji": "Emoji",
+      "sticker": "Sticker",
+      "banner": "Server banner",
+      "avatar": "Avatar"
+    },
+    "autofit": "Fit it to Discord",
+    "autofitRunning": "Fitting…",
+    "budgetHeading": "Size against this surface's rules",
+    "states": {
+      "over": "Discord will refuse this. It needs to lose about {over}.",
+      "close": "This lands near the ceiling — the estimate spans {size}, and the upper half of that would be refused.",
+      "fits": "Ready to upload, with {spare} to spare.",
+      "unknown": "Discord publishes no maximum file size for this surface, so there is no ceiling to show. The size is {size}."
+    },
+    "meterLabel": "{size} against a limit of {limit}",
+    "unfitted": "This is the smallest version this device could reach, and it is still {over} over. The file is yours to keep, but Discord will refuse it.",
+    "previewCaption": "At the size Discord will actually draw it",
+    "previewMessage": "shipped it",
+    "previewSamples": [
+      { "px": 32, "label": "beside text" },
+      { "px": 48, "label": "on its own" },
+      { "px": 96, "label": "the preset's own canvas" }
+    ],
+    "nextStep": "Next: open Server Settings in Discord, find the section for the surface you chose, and upload the file you just downloaded.",
+    "cropNote": "A file that is not the right shape has its middle taken. If the part that matters is off to one side, crop it yourself first and come back.",
+    "verified": "Every figure on this page is Discord's own, read from its help articles on {date}."
+  },
+  "card": {
+    "benefit": "One page for every place an animation can live in a chat server."
+  },
+  "resultEmpty": {
+    "message": "Your fitted file will appear here.",
+    "hint": "Nothing is called a fit until a real file exists to measure."
+  },
+  "result": {
+    "savedLine": "That took {saved} off the original on the way to the target.",
+    "emptyRows": [
+      "A file at the dimensions the chosen surface expects",
+      "The measured byte count, set against that surface's own ceiling",
+      "A look at the result at the size a reader will see it"
+    ]
+  },
+  "labels": {
+    "progress": "Fitting progress",
+    "resultAlt": "The fitted file, ready to upload",
+    "sourceAlt": "The file you are fitting"
+  },
+  "faqHeading": "Discord sizes — common questions",
+  "explainer": [
+    {
+      "heading": "Four surfaces, four sets of rules, one very confusing error message",
+      "level": 2,
+      "paragraphs": [
+        "Discord tells you an upload failed. It does not tell you by how much, which rule you broke, or what to change. That is workable if you only ever make one kind of file, and maddening the first time you discover that the settings which worked for an emoji are refused for a sticker.",
+        "The reason is that these are genuinely different pipelines with genuinely different requirements. An animated emoji has a published ceiling of 256 KB and a recommended canvas of 128 by 128. A sticker is stricter on every axis: it wants exactly 320 by 320, no more than 512 KB, no longer than five seconds, and no faster than sixty frames per second. A server banner is a wide 960 by 540 image with no published weight limit at all. An avatar is small, square, masked to a circle, and also carries no documented maximum.",
+        "Nothing about those four sets follows from each other. Half the advice on the internet applies one surface's number to another, which is how you end up with a carefully compressed 256 KB sticker that Discord refuses because it is the wrong shape. Choosing the surface first is the entire point of the picker above."
+      ]
+    },
+    {
+      "heading": "Where a figure comes from, and what happens when there is not one",
+      "level": 3,
+      "paragraphs": [
+        "Two of these four surfaces have a maximum file size that Discord states in writing. Two do not. That distinction is preserved rather than smoothed over: where a number is published, this page shows it as a ceiling and measures against it; where none is, the meter simply reports what the file weighs and says so.",
+        "This matters more than it sounds. The tidy version of this page would print a limit for all four, and the two invented ones would be wrong in a way nobody could check. Dimensions get the same treatment — every size offered here is one Discord itself recommends, not a figure passed around until it acquired the appearance of a rule.",
+        "The articles behind these numbers are not stable, either. Several of them changed within a fortnight of each other while this page was being built. Rather than promising to keep up, the panel carries the date they were last read, so you can judge for yourself how much to trust them."
+      ]
+    },
+    {
+      "heading": "Nothing is called a fit until something has actually been encoded",
+      "level": 3,
+      "paragraphs": [
+        "Before anything is compressed, the size shown is an estimate — and it is shown as a span rather than a single number, because a span is the truth. Two files with identical settings can differ by more than twentyfold in weight depending entirely on what is in them; flat cartoon artwork compresses to almost nothing while camera footage does not. An estimate that quoted one confident figure would be badly wrong on exactly the files people care most about.",
+        "So the meter reads \"probably fits\" or \"cutting it close\" until a real file exists, and only then does it claim a fit. Auto-fit produces that real file: each attempt is a genuine encode of your frames on your own machine, measured afterwards. When the counter says it is on the third attempt, three files really were made.",
+        "The search stops the moment one lands under the target, which is usually the first or second try — it starts from a measurement of your specific file rather than working down a list from the top. If it runs out of attempts without getting there, it says so and hands you the smallest version it reached instead of pretending."
+      ]
+    },
+    {
+      "heading": "Your file does not go anywhere",
+      "level": 3,
+      "paragraphs": [
+        "Every attempt in the search runs inside this tab, using your own processor. Nothing is uploaded, nothing is stored, and there is no account. That is also why the work takes a moment and why the tab has to stay open — it is doing the encoding, not waiting for a server to finish.",
+        "The practical benefit is not only privacy. A tool that uploads has to cap what it will accept and how often you may use it, because someone is paying for the machines. This one has no such incentive, so the only real limit is what the device in front of you can hold in memory at once."
+      ]
+    }
+  ],
+  "faq": [
+    {
+      "id": "which-preset",
+      "question": "I don't know which surface I'm uploading to. How do I tell?",
+      "answer": [
+        "Emoji are the small images that appear inline with a message and in the reaction row. Stickers are the larger ones sent on their own from the sticker tray. A server banner is the wide image across the top of a server's channel list, and an avatar is the round picture next to your name.",
+        "If you pick the wrong one the file will simply be the wrong shape or weight for the place you try to use it. Nothing is lost — switch the chip and fit it again."
+      ]
+    },
+    {
+      "id": "video-input",
+      "question": "Can I start from a video clip?",
+      "answer": [
+        "Yes, on a desktop or an Android device. Drop an MP4, MOV or WebM and it is converted to an animation first, then fitted to the surface you chose, in one pass.",
+        "On an iPhone or iPad the video path is not offered. Converting video in a browser needs far more memory than those devices allow a page to use, and being told so up front is better than watching it fail after the work has started. Animations from a GIF or WebP file work normally there."
+      ]
+    },
+    {
+      "id": "why-different-sizes",
+      "question": "Why can't I just use one file everywhere?",
+      "answer": [
+        "Because each surface is drawn at a different size and rebuilt by Discord to suit it. Something authored for a wide banner has most of its picture thrown away when it is squeezed into a small square, and something authored small looks soft when it is stretched wide.",
+        "There is also the weight. A file comfortably inside a sticker's allowance is double what an emoji is allowed, so the same upload succeeds in one place and fails in another with no explanation of why."
+      ]
+    },
+    {
+      "id": "quality-drop",
+      "question": "The result looks rougher than the original. Can I get some of that back?",
+      "answer": [
+        "Sometimes. The auto-fit search keeps the highest quality that stayed under the target, so if the result looks rough it is generally because the target is tight for that particular animation rather than because the search gave up early.",
+        "The lever with the best return is usually length rather than quality. A loop with half the frames has roughly half the weight, and that spare weight goes straight back into how each frame looks. The manual panel has a control for it."
+      ]
+    },
+    {
+      "id": "shape",
+      "question": "Part of my animation got cut off.",
+      "answer": [
+        "Each surface has a shape, and a file that does not match it has the middle taken so the proportions come out right. For most content the middle is where the subject is, which is why it is the default.",
+        "When it is not — a caption along the bottom, a character over to one side — crop the region yourself first with the crop tool and then bring the result back here."
+      ]
+    },
+    {
+      "id": "webp-accepted",
+      "question": "Does Discord take WebP files?",
+      "answer": [
+        "The emoji upload does accept a WebP as well as an animation, a still image or a photograph. It is not the only format that surface allows, despite how often it is described that way.",
+        "This page produces an animation regardless, because that is the format every one of these surfaces accepts and the one least likely to be refused by whichever client somebody is reading on."
+      ]
+    }
+  ],
+  "related": {
+    "discord-emoji-gif": "Making an emoji specifically? That page goes further into what actually drives the weight.",
+    "discord-sticker-gif": "Stickers carry two rules almost nobody mentions until an upload is refused.",
+    "gif-compressor": "No fixed target in mind — just want the file smaller? Start here instead."
+  }
+}

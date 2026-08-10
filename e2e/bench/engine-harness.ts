@@ -4,6 +4,7 @@ import { FIXTURES } from "./harness";
 import type {
   EngineApi,
   EngineRunOutcome,
+  WebpFrameSample,
 } from "../../src/app/%5F%5Fbench/engine-console";
 import type { JobSpec } from "../../src/lib/media/types";
 
@@ -12,7 +13,7 @@ import type { JobSpec } from "../../src/lib/media/types";
  * redeclared here. Two structural copies of the same contract drift, and the
  * drift shows up as a test asserting a shape the product stopped producing.
  */
-export type { EngineApi, EngineRunOutcome };
+export type { EngineApi, EngineRunOutcome, WebpFrameSample };
 export type EngineSpec = Partial<JobSpec>;
 
 /** Opens the harness and waits for the engine API to be installed. */
@@ -43,4 +44,14 @@ export async function selectEngineFixture(page: Page, name: string): Promise<voi
 
 export function runEngine(page: Page, spec: EngineSpec): Promise<EngineRunOutcome> {
   return page.evaluate((argument) => window.__engine!.run(argument), spec);
+}
+
+export function sampleWebpFrames(
+  page: Page,
+  points: readonly (readonly [number, number])[],
+): Promise<WebpFrameSample> {
+  return page.evaluate(
+    (argument) => window.__engine!.sampleWebpFrames(argument),
+    points,
+  );
 }

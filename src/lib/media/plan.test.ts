@@ -220,15 +220,31 @@ describe("admit", () => {
     expect(result.error.code).toBe("decode-failed");
   });
 
-  it("refuses animated WebP where ImageDecoder is absent", () => {
+  it("admits animated WebP where ImageDecoder is absent", () => {
+    // This used to be a refusal, and the refusal was the whole reason
+    // `webp-to-gif` was at risk of being cut: `ImageDecoder` is the only browser
+    // API that reads animated WebP and Safari has never shipped it at any
+    // version. Phase 7 replaced that decoder with the RIFF splitter in
+    // `decode/webp-riff.ts`, which feeds `createImageBitmap()` — present
+    // everywhere — so there is no longer an engine on which the format cannot be
+    // read, and no capability left to refuse on.
+    //
+    // Asserted on iOS specifically, which is the tier with `imageDecoder: false`
+    // *and* the tightest budget: a small enough job has to be admitted there, or
+    // the page is broken on the traffic it was cut for in the first place.
     const result = admit(
-      gifProbe({ format: "webp", declaredExtension: "webp" }),
-      spec({ toolSlug: "webp-to-gif" }),
+      gifProbe({
+        format: "webp",
+        declaredExtension: "webp",
+        width: 240,
+        height: 135,
+        frameCount: 24,
+        durationSec: 1.2,
+      }),
+      spec({ toolSlug: "webp-to-gif", geometry: { targetWidth: 240 } }),
       IOS,
     );
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.error.params?.reason).toBe("no-image-decoder");
+    expect(result.ok).toBe(true);
   });
 
   it("rounds video output to even dimensions", () => {
@@ -277,5 +293,94 @@ describe("truncatedPlan", () => {
     expect(plan).not.toBeNull();
     expect(plan!.frameBufferBytes).toBeLessThanOrEqual(TIER_BUDGETS.ios.budgetBytes);
     expect(plan!.frames).toBeLessThanOrEqual(TIER_BUDGETS.ios.hardMaxFrames);
+  });
+});
+
+/**
+ * The three flags the Discord presets added to the spec.
+ *
+ * Each one exists because a preset's output size is decided by its destination
+ * rather than by the visitor, which inverts an assumption admission control was
+ * built on: that a smaller version of the requested file is always an acceptable
+ * substitute for it. For a 320×320 Discord sticker it is not — a 240×240 sticker
+ * is a rejected upload, not a smaller one.
+ */
+describe("a job whose destination fixes its size", () => {
+  it("may exceed the tier's default width when it states a ceiling", () => {
+    // Discord publishes 960×540 for the server banner, which is above every
+    // tier's `defaultMaxWidth`. Without the ceiling the preset would silently
+    // emit 640×360 and claim it fits a shape it does not.
+    const result = admit(
+      gifProbe({ width: 1920, height: 1080, frameCount: 20, durationSec: 2 }),
+      spec({ geometry: { targetWidth: 960 }, widthCeiling: 960 }),
+      DESKTOP,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.plan.width).toBe(960);
+    expect(result.plan.height).toBe(540);
+  });
+
+  it("still refuses a ceiling the byte budget cannot hold", () => {
+    // The ceiling raises what may be *considered*, never what may be admitted.
+    // The memory constraint is unchanged and still has the last word.
+    const result = admit(
+      gifProbe({ width: 1920, height: 1080, frameCount: 5000, durationSec: 200 }),
+      spec({ geometry: { targetWidth: 960, pinWidth: true }, widthCeiling: 960 }),
+      IOS,
+      TIER_BUDGETS.ios,
+    );
+    expect(result.ok).toBe(false);
+  });
+
+  it("sheds frame rate rather than width when the width is pinned", () => {
+    const pinned = admit(
+      videoProbe({ width: 1920, height: 1080, durationSec: 5, frameCount: null }),
+      spec({
+        geometry: { targetWidth: 320, pinWidth: true },
+        timing: { fps: 20 },
+      }),
+      DESKTOP,
+      { ...TIER_BUDGETS.desktop, budgetBytes: 30 * 1024 * 1024 },
+    );
+    expect(pinned.ok).toBe(true);
+    if (!pinned.ok) return;
+    expect(pinned.plan.width).toBe(320);
+    expect(pinned.plan.fps).toBeLessThan(20);
+  });
+
+  it("keeps the pinned width in the offer attached to a refusal", () => {
+    // A refusal's whole value is the concrete alternative it carries. Offering
+    // a narrower run offers a file the destination rejects, which is no offer.
+    const plan = truncatedPlan(
+      gifProbe({ width: 1000, height: 1000, frameCount: 5000, durationSec: 300 }),
+      spec({ geometry: { targetWidth: 320, pinWidth: true } }),
+      IOS,
+      TIER_BUDGETS.ios,
+    );
+    expect(plan).not.toBeNull();
+    expect(plan!.width).toBe(320);
+    expect(plan!.truncated).toBe(true);
+  });
+
+  it("scales a small source up only when the spec asks for it", () => {
+    const small = gifProbe({ width: 200, height: 200, frameCount: 10, durationSec: 1 });
+
+    const honest = admit(small, spec({ geometry: { targetWidth: 320 } }), DESKTOP);
+    expect(honest.ok).toBe(true);
+    if (honest.ok) expect(honest.plan.width).toBe(200);
+
+    // Discord refuses anything but exactly 320×320, so an honest 200×200
+    // sticker is a file the destination will not take.
+    const upscaled = admit(
+      small,
+      spec({ geometry: { targetWidth: 320, upscale: true, pinWidth: true }, widthCeiling: 320 }),
+      DESKTOP,
+    );
+    expect(upscaled.ok).toBe(true);
+    if (upscaled.ok) {
+      expect(upscaled.plan.width).toBe(320);
+      expect(upscaled.plan.height).toBe(320);
+    }
   });
 });

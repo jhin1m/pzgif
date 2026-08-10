@@ -47,6 +47,13 @@ import { cn } from "@/lib/utils";
  *     320 → 731    360 → 695    400 → 674    440 → 635
  *     480 → 581    560 → 553    767 → 553    768 → 617    1440 → 617
  *
+ * Re-measured when Phase 7 shipped, and one band moved. `mp4-to-gif` is now the
+ * tallest done state at 400px — 695px against the 680px that band reserved,
+ * which is a 15px shift arriving when the encoder finishes and therefore real,
+ * un-prompted CLS. The band is 704px. Every other band already covered it, and
+ * `e2e/result-panel-reservation.spec.ts` now runs that tool too, so the next
+ * tool to overshoot fails the suite rather than quietly costing the score.
+ *
  * A single reservation would have to be 736px everywhere, which would put 180px
  * of blank under a panel that needs 553 on the widest phone — on the surface
  * where vertical space is scarcest. So the bands follow the measurement.
@@ -63,7 +70,7 @@ import { cn } from "@/lib/utils";
  * surface that is already most of a phone screen.
  */
 const RESERVED_HEIGHT =
-  "min-h-184 min-[400px]:min-h-170 min-[480px]:min-h-147 md:min-h-156";
+  "min-h-184 min-[400px]:min-h-176 min-[480px]:min-h-147 md:min-h-156";
 
 export interface ResultPanelProps {
   /** The pre-run state that reserves the space. */
@@ -95,6 +102,12 @@ export function ResultPanel({
   if (empty) {
     return (
       <div
+        // A stable hook for the reservation spec. It used to find this box by
+        // matching `min-h-1\d\d` against the class string, which broke the
+        // moment a page needed a reservation outside that range — the Discord
+        // panel is taller than any tool's and its bands start at `min-h-193`.
+        // A class-name regex is a coupling to a value the CSS is free to change.
+        data-result-panel=""
         className={cn(
           // `bg-checker` is the motif's whole point on this surface: a
           // checkerboard means "an image belongs here" to anyone who has opened
@@ -146,6 +159,7 @@ export function ResultPanel({
 
   return (
     <div
+      data-result-panel=""
       className={cn(
         "rounded-card border border-line bg-surface-1 p-5 shadow-sm md:p-6",
         RESERVED_HEIGHT,

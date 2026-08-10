@@ -51,6 +51,61 @@ export interface ControlCopy {
   options?: readonly { value: string; label: string }[];
 }
 
+/**
+ * One rendered sample of the output at a size Discord actually displays it.
+ *
+ * The pixel figure lives in content rather than in `discord.ts` because it is
+ * not a rule Discord publishes — it is an observation about how a surface looks
+ * in the client, and the label beside it is a sentence. Anything Discord *does*
+ * publish belongs in the preset config, with its source and its date.
+ */
+export interface PreviewSampleCopy {
+  px: number;
+  label: string;
+}
+
+export interface PresetCopy {
+  /** The picker's `<legend>`. Hub only — a dedicated page has no picker. */
+  legend?: string;
+  /** Chip label per preset id. Hub only. */
+  chips?: Readonly<Record<string, string>>;
+  /** The auto-fit primary, e.g. "Fit it to Discord". */
+  autofit: string;
+  autofitRunning: string;
+  /** Heading above the meter, e.g. "Size budget — Discord emoji". */
+  budgetHeading: string;
+  /**
+   * One sentence per budget state. `{size}`, `{limit}` and `{over}` are filled
+   * from real byte counts.
+   *
+   * `unknown` is the state for a surface Discord publishes no limit for, and it
+   * is a distinct sentence rather than a blank: "Discord does not publish a
+   * maximum for this one" is information, and hiding the meter would leave the
+   * visitor guessing what the silence meant.
+   */
+  states: {
+    over: string;
+    close: string;
+    fits: string;
+    unknown: string;
+  };
+  /** Accessible name for the meter. Same tokens as `states`. */
+  meterLabel: string;
+  /** Shown when the search ran out of attempts without reaching the budget. */
+  unfitted: string;
+  /** Heading over the in-message mock. */
+  previewCaption: string;
+  /** The line of chat text the sample sits in. */
+  previewMessage: string;
+  previewSamples: readonly PreviewSampleCopy[];
+  /** What to do in Discord once the file is downloaded. */
+  nextStep: string;
+  /** Says the middle was taken, and where to go to choose the region instead. */
+  cropNote: string;
+  /** Says the figures are Discord's and when they were last read. */
+  verified: string;
+}
+
 export interface ToolContent {
   /** Must match a `registry.ts` slug. Asserted at build time by the page. */
   slug: string;
@@ -119,6 +174,39 @@ export interface ToolContent {
     /** Alt text for the loaded source preview. */
     sourceAlt?: string;
   };
+  /**
+   * Hand-written lines the page renders with runtime figures substituted.
+   *
+   * The sentence is written once, by hand, for this tool; the numbers inside it
+   * are `{token}`s the component fills from what it actually measured. That
+   * split is the point. `phase-07` forbids a static limits caption — "up to
+   * 150 MB · up to 60 seconds" is the wireframe's, and it is wrong on every
+   * device, because the binding constraint is decoded RGBA and not file size —
+   * while the *prose* around the figure still has to be this tool's own.
+   *
+   * Not a general-purpose escape hatch: anything with no runtime figure in it
+   * belongs in `explainer`, `controls` or `result`, where the copy tests can see
+   * it.
+   */
+  notes?: Readonly<Record<string, string>>;
+  /**
+   * The Discord preset cluster's own copy. Absent on the nine tool pages.
+   *
+   * ── Why the sentences are here and not in the components ──────────────────
+   * The budget bar's three states are the product: "Discord will reject this",
+   * "fits, but with almost no margin", "ready to upload". They are also the
+   * lines most tempting to write once in `SizeBudgetBar` and share across five
+   * routes — which is exactly the shape that makes five near-identical pages
+   * read as generated. The component takes them as props for that reason alone.
+   *
+   * ── Why the figures are tokens ────────────────────────────────────────────
+   * `{size}`, `{limit}` and `{over}` are filled from a real byte count at render
+   * time — the estimator's band before an encode, the blob's own size after one.
+   * A preset page that hard-coded "256 KB" in its success line would be the
+   * `design-guidelines.md` §10 defect written into content instead of code, and
+   * it would be wrong on four of the five routes.
+   */
+  preset?: PresetCopy;
   explainer: readonly ExplainerSection[];
   faqHeading: string;
   faq: readonly FaqEntry[];
@@ -149,4 +237,26 @@ export function toolContent(data: unknown, expectedSlug: string): ToolContent {
     );
   }
   return content;
+}
+
+/**
+ * Fills `{token}`s in a `notes` line from a record of runtime values.
+ *
+ * Deliberately not next-intl's formatter: these strings live under
+ * `LICENSE-CONTENT` in `src/content/`, and routing them through the message
+ * catalogue would move prose into `messages/`, which is the boundary the whole
+ * two-licence file layout exists to keep visible. Same reasoning as
+ * `ResultSummary`'s `{saved}`.
+ *
+ * An unknown token is left standing rather than blanked. A caption that reads
+ * "about {seconds}s" is an obvious bug in review; one that reads "about s" looks
+ * like a copy decision and ships.
+ */
+export function fillNote(
+  line: string,
+  values: Readonly<Record<string, string | number>>,
+): string {
+  return line.replace(/\{(\w+)\}/g, (whole, token: string) =>
+    token in values ? String(values[token]) : whole,
+  );
 }

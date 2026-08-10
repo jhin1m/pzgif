@@ -44,6 +44,24 @@ export interface GeometryOptions {
   maxWidth?: number;
 }
 
+/**
+ * The output width, given everything that can bound it.
+ *
+ * Shared with `plan.ts` so admission control and the frame pipeline cannot
+ * disagree about the size of the thing being budgeted. The source width is a
+ * bound unless `spec.upscale` lifts it — see `GeometrySpec.upscale` for the one
+ * caller that does.
+ */
+function boundedWidth(
+  spec: GeometrySpec,
+  rotatedWidth: number,
+  options: GeometryOptions,
+): number {
+  const bounds = [spec.targetWidth, options.maxWidth ?? spec.targetWidth];
+  if (!spec.upscale) bounds.push(rotatedWidth);
+  return Math.min(...bounds);
+}
+
 export class FrameGeometry {
   readonly crop: CropRect;
   readonly rotate: Rotation;
@@ -79,11 +97,7 @@ export class FrameGeometry {
     const rotatedWidth = quarterTurn ? this.crop.height : this.crop.width;
     const rotatedHeight = quarterTurn ? this.crop.width : this.crop.height;
 
-    const wanted = Math.min(
-      spec.targetWidth,
-      options.maxWidth ?? spec.targetWidth,
-      rotatedWidth,
-    );
+    const wanted = boundedWidth(spec, rotatedWidth, options);
     let width = Math.max(1, Math.round(wanted));
     let height = Math.max(1, Math.round((width * rotatedHeight) / rotatedWidth));
     if (options.even) {

@@ -25,6 +25,34 @@ import { cn } from "@/lib/utils";
  * file over — see `onPick` — but the navigation is the browser's, so a failure
  * anywhere in the handoff leaves the visitor on the tool page with their own
  * dropzone rather than nowhere.
+ *
+ * ── Why the list scrolls instead of being capped ───────────────────────────
+ * The hero reserves a fixed box so that a drop moves nothing below it, and below
+ * 640px every chip wraps onto its own 44px row — so the height this list wants
+ * grows linearly with the number of live routes. That went from five to seven
+ * when Phase 7 shipped and overflowed the reservation by exactly one row; Ship 3
+ * adds the five Discord routes, all of which accept GIF, and would overflow it
+ * by five more.
+ *
+ * A cap was the obvious alternative and is the wrong one. Every route in this
+ * list is a genuine thing to do with the file that was just dropped, and hiding
+ * some of them behind a number tuned to today's inventory is a silent
+ * truncation that comes back at every ship. Bounding the list and letting it
+ * scroll decouples the reservation from the route count permanently, and the
+ * partly-visible chip at the cut edge is what says there is more.
+ *
+ * ── [Amended, Phase 8] The bound is now the layout, not a measured number ──
+ * It used to be `max-h-80`, chosen by measuring the seven-route list at 320 and
+ * 375px. Ship 3 shipped the five Discord routes and the list overflowed by 31px
+ * — but at **768px**, where the chips share rows and a fixed 320px ceiling is
+ * far larger than the room the reservation actually leaves, so the bound never
+ * engaged. That is the failure mode of every measured constant here: it is
+ * correct at the widths it was measured at and silently absent everywhere else.
+ *
+ * The list is now a shrinkable flex child (`min-h-0`, which is what overrides a
+ * flex item's automatic minimum) that scrolls inside whatever height is left
+ * over at any width. No breakpoint knows the route count, so the next ship
+ * cannot overflow this box.
  */
 
 export function ToolPicker({
@@ -41,9 +69,15 @@ export function ToolPicker({
   className?: string;
 }) {
   return (
-    <div className={className}>
+    <div className={cn("flex min-h-0 flex-col", className)}>
       <h2 className="text-label font-semibold text-fg-secondary">{heading}</h2>
-      <ul className="mt-2.5 flex flex-wrap gap-2.5">
+      {/* `min-h-0 flex-1` is the whole mechanism: it lets this list be given
+          less room than its content wants, at which point it scrolls instead of
+          painting over the tool grid below. Without `min-h-0` a flex item
+          refuses to shrink past its content and the overflow goes to the page.
+          `overscroll-contain` stops a flick inside the list from scrolling the
+          page behind it. */}
+      <ul className="mt-2.5 flex min-h-0 flex-1 flex-wrap gap-2.5 overflow-y-auto overscroll-contain">
         {routes.map((route) => {
           const Icon = toolIcon(route.slug);
           return (

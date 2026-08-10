@@ -20,7 +20,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { JobController, type JobTelemetry } from "@/lib/media/job-controller";
 import type {
   AcceptedPlan,
+  AutofitAttempt,
   InputProbe,
+  JobEvent,
   JobSpec,
   JobStats,
   MediaError,
@@ -40,6 +42,14 @@ export interface JobState {
   error: MediaError | null;
   estimate: SizeEstimate | null;
   previewUrl: string | null;
+  /**
+   * The auto-fit attempt currently encoding, or null.
+   *
+   * Ordinary React state rather than the progress store: it changes once per
+   * attempt, not ten times a second, and the badge that renders it sits beside
+   * the panel title rather than inside the bar.
+   */
+  attempt: AutofitAttempt | null;
 }
 
 const IDLE: JobState = {
@@ -51,6 +61,7 @@ const IDLE: JobState = {
   error: null,
   estimate: null,
   previewUrl: null,
+  attempt: null,
 };
 
 const NO_PROGRESS: ProgressEvent = {
@@ -148,18 +159,26 @@ export function useMediaJob({ onTelemetry }: UseMediaJobOptions = {}) {
     setState(IDLE);
   }, [progress, revokeAll]);
 
-  const run = useCallback(
-    (file: File, spec: JobSpec) => {
-      reset();
-      setState({ ...IDLE, status: "planning" });
-
-      handleRef.current = controller().run(file, spec, (event) => {
+  /**
+   * The event handler shared by `run` and `autofit`.
+   *
+   * One function rather than two because from the page's side the two jobs have
+   * the same life: they plan, they report progress, they end in a blob or an
+   * error. Auto-fit adds one event — which attempt is encoding — and duplicating
+   * two hundred lines of state machine to carry it is how the cancelled-job
+   * handling in one copy stops matching the other.
+   */
+  const jobEvents = useCallback(
+    (event: JobEvent) => {
         switch (event.type) {
           case "accepted":
             setState((previous) => ({ ...previous, status: "running", plan: event.plan }));
             return;
           case "progress":
             progress.set(event.progress);
+            return;
+          case "attempt":
+            setState((previous) => ({ ...previous, attempt: event.attempt }));
             return;
           case "preview": {
             // Painted once into a canvas-backed blob so the bitmap can be closed;
@@ -196,6 +215,10 @@ export function useMediaJob({ onTelemetry }: UseMediaJobOptions = {}) {
             setState((previous) => ({
               ...previous,
               status: "done",
+              // The badge describes work in flight. Leaving it set would label a
+              // finished result with the attempt that produced it, which reads
+              // as though the search were still running.
+              attempt: null,
               resultBlob: event.blob,
               resultUrl: trackUrl(event.blob),
               stats: event.stats,
@@ -204,9 +227,32 @@ export function useMediaJob({ onTelemetry }: UseMediaJobOptions = {}) {
           default:
             return;
         }
-      });
     },
-    [controller, progress, reset, trackUrl],
+    [progress, trackUrl],
+  );
+
+  const run = useCallback(
+    (file: File, spec: JobSpec) => {
+      reset();
+      setState({ ...IDLE, status: "planning" });
+      handleRef.current = controller().run(file, spec, jobEvents);
+    },
+    [controller, jobEvents, reset],
+  );
+
+  /**
+   * The Discord auto-fit search. Same lifecycle as `run`, several real encodes.
+   *
+   * `budgetBytes` is the preset's own ceiling and is never a shared constant —
+   * see `lib/presets/discord.ts` for why there cannot be one.
+   */
+  const autofit = useCallback(
+    (file: File, spec: JobSpec, budgetBytes: number) => {
+      reset();
+      setState({ ...IDLE, status: "planning" });
+      handleRef.current = controller().autofit(file, spec, budgetBytes, jobEvents);
+    },
+    [controller, jobEvents, reset],
   );
 
   const estimate = useCallback(
@@ -218,11 +264,24 @@ export function useMediaJob({ onTelemetry }: UseMediaJobOptions = {}) {
       estimateRef.current?.cancel();
       const handle = controller().estimate(file, spec, (event) => {
         if (event.type === "estimate") {
-          setState((previous) => ({ ...previous, estimate: event.estimate }));
+          // The error is cleared alongside the new figure, and that is not
+          // tidiness. A refusal here is a statement about the *settings* — "this
+          // will not fit" — and settings move. Without this, dragging a width
+          // slider past the budget and back left the refusal on screen for the
+          // rest of the session, describing a job the page is no longer offering
+          // to run.
+          setState((previous) => ({
+            ...previous,
+            estimate: event.estimate,
+            error: null,
+          }));
         }
         if (event.type === "refused" || event.type === "error") {
           if (event.error.code === "cancelled") return;
-          setState((previous) => ({ ...previous, error: event.error }));
+          // The stale estimate goes with it: showing last-known bytes beside a
+          // refusal is two halves of the panel disagreeing about what happens
+          // if the button is pressed.
+          setState((previous) => ({ ...previous, estimate: null, error: event.error }));
         }
       });
       estimateRef.current = handle;
@@ -273,5 +332,5 @@ export function useMediaJob({ onTelemetry }: UseMediaJobOptions = {}) {
     setState((previous) => ({ ...IDLE, previewUrl: previous.previewUrl }));
   }, [progress]);
 
-  return { state, progress, run, estimate, probe, cancel, reset };
+  return { state, progress, run, autofit, estimate, probe, cancel, reset };
 }

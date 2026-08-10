@@ -83,7 +83,12 @@ describe("the homepage copy", () => {
       /up to 80\s*%/i,
       /a tenth of the size/i,
       /150\s*MB/i,
-      /\bwebp\b/i,
+      // The cut tool, not the format. This was `/\bwebp\b/i` while no route
+      // touched WebP at all, and that was the right net then — but `webp-to-gif`
+      // ships in Phase 7, so naming WebP as an *input* is now accurate copy and
+      // the blanket ban would forbid describing a tool the site has. What stays
+      // banned is the direction that was cut: `GIF → WebP`.
+      /gif\s*(→|->|to)\s*webp/i,
       /\bslack\b/i,
     ];
     for (const line of PROSE) {

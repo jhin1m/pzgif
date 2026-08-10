@@ -1,9 +1,18 @@
 import { describe, expect, it } from "vitest";
 import compressor from "@/content/gif-compressor.json";
+import gifToMp4 from "@/content/gif-to-mp4.json";
+import mp4ToGif from "@/content/mp4-to-gif.json";
+import splitFrames from "@/content/split-gif-to-frames.json";
+import webpToGif from "@/content/webp-to-gif.json";
 import crop from "@/content/crop-gif.json";
 import resize from "@/content/resize-gif.json";
 import reverse from "@/content/reverse-gif.json";
 import speed from "@/content/gif-speed-changer.json";
+import discordHub from "@/content/gif-for-discord.json";
+import discordEmoji from "@/content/discord-emoji-gif.json";
+import discordSticker from "@/content/discord-sticker-gif.json";
+import discordBanner from "@/content/discord-banner-gif.json";
+import discordAvatar from "@/content/discord-avatar-gif.json";
 import { wordCount } from "@/components/content/inline-copy";
 import { toolContent, type ToolContent } from "./content";
 import { getRoute, liveRoutes } from "./registry";
@@ -24,7 +33,19 @@ const PAGES: readonly ToolContent[] = [
   toolContent(crop, "crop-gif"),
   toolContent(speed, "gif-speed-changer"),
   toolContent(reverse, "reverse-gif"),
+  toolContent(mp4ToGif, "mp4-to-gif"),
+  toolContent(gifToMp4, "gif-to-mp4"),
+  toolContent(splitFrames, "split-gif-to-frames"),
+  toolContent(webpToGif, "webp-to-gif"),
+  toolContent(discordHub, "gif-for-discord"),
+  toolContent(discordEmoji, "discord-emoji-gif"),
+  toolContent(discordSticker, "discord-sticker-gif"),
+  toolContent(discordBanner, "discord-banner-gif"),
+  toolContent(discordAvatar, "discord-avatar-gif"),
 ];
+
+/** The five preset routes, which carry rules the nine tool pages do not. */
+const PRESET_PAGES = PAGES.filter((page) => page.preset !== undefined);
 
 describe("every live tool page", () => {
   it("has a content file", () => {
@@ -67,6 +88,10 @@ describe("every live tool page", () => {
       const prose = [
         ...page.explainer.flatMap((section) => section.paragraphs),
         ...page.faq.flatMap((entry) => entry.answer),
+        // `notes` too. It is prose that a visitor reads, it lives in the same
+        // content file, and it was invisible to this check until Phase 7 added
+        // it — which is exactly how a shared line gets in.
+        ...Object.values(page.notes ?? {}),
       ];
       for (const paragraph of prose) {
         const key = paragraph.trim().toLowerCase();
@@ -198,6 +223,122 @@ describe("every live tool page", () => {
       expect(prose, page.slug).not.toMatch(
         /\b(instant|instantly|in seconds|under \w+ seconds)\b/i,
       );
+    }
+  });
+});
+
+/**
+ * The Discord cluster's own copy rules.
+ *
+ * Five pages about one product, sharing a vocabulary, written in one sitting:
+ * this is the single most likely place on the site for near-identical prose to
+ * appear, and the scaled-content penalty it would earn is site-wide rather than
+ * per-page. The generic checks above already forbid a shared paragraph; these
+ * add the constraints that are specific to what these pages are *about*.
+ */
+describe("every Discord preset page", () => {
+  it("exists — five routes, five sets of copy", () => {
+    expect(PRESET_PAGES).toHaveLength(5);
+  });
+
+  it("states no Nitro or Boost gating rule, FAQ included", () => {
+    // Two Discord articles updated within a fortnight of each other contradict
+    // each other on this, so the honest position is to say nothing and point
+    // the reader at their own client. Asserted over the whole file, because the
+    // FAQ is exactly where such a sentence comes back.
+    for (const page of PRESET_PAGES) {
+      const prose = JSON.stringify(page);
+      expect(prose, page.slug).not.toMatch(/\bnitro\b/i);
+      expect(prose, page.slug).not.toMatch(/\bboost(ed|s|ing)?\b/i);
+    }
+  });
+
+  it("promises a verification date instead of promising to keep up", () => {
+    // "The presets on this page are updated when they change" is unkeepable for
+    // a solo operator on figures that moved twice in two weeks.
+    for (const page of PRESET_PAGES) {
+      expect(page.preset!.verified, page.slug).toContain("{date}");
+    }
+  });
+
+  it("mentions no cut tool, and no surface this site does not build", () => {
+    for (const page of PRESET_PAGES) {
+      expect(JSON.stringify(page), page.slug).not.toMatch(/\bslack\b/i);
+    }
+  });
+
+  it("never writes 680×240, which matches no Discord surface", () => {
+    for (const page of PRESET_PAGES) {
+      expect(JSON.stringify(page), page.slug).not.toMatch(/680\s*[×x]\s*240/);
+    }
+  });
+
+  it("only prints a byte ceiling on the two surfaces that publish one", () => {
+    // The wireframe's "≤10 MB" for banners and icons is a figure nobody
+    // measured. A page for a surface Discord documents no maximum for must not
+    // render one, and its `unknown` state is where it says so.
+    const published = new Set(["discord-emoji-gif", "discord-sticker-gif"]);
+    for (const page of PRESET_PAGES) {
+      if (published.has(page.slug) || page.slug === "gif-for-discord") continue;
+      const states = page.preset!.states;
+      expect(states.unknown, page.slug).toMatch(/publishes no maximum/i);
+      // `{limit}` renders Discord's figure. A page with no such figure must not
+      // reach for the token at all.
+      for (const [name, sentence] of Object.entries(states)) {
+        expect(sentence, `${page.slug}.${name}`).not.toContain("{limit}");
+      }
+    }
+  });
+
+  it("gives every budget state an interpolated figure rather than a written one", () => {
+    // A hard-coded "256 KB" in a success line is `design-guidelines.md` §10's
+    // defect moved into content, and it would be wrong on four of five routes.
+    for (const page of PRESET_PAGES) {
+      for (const [name, sentence] of Object.entries(page.preset!.states)) {
+        expect(sentence, `${page.slug}.${name}`).toMatch(/\{(size|limit|over|spare)\}/);
+      }
+    }
+  });
+
+  it("shares no budget-state sentence between two pages", () => {
+    const seen = new Map<string, string>();
+    for (const page of PRESET_PAGES) {
+      for (const sentence of Object.values(page.preset!.states)) {
+        const key = sentence.trim().toLowerCase();
+        expect(seen.has(key), `"${sentence}" also appears in ${seen.get(key)}`).toBe(false);
+        seen.set(key, page.slug);
+      }
+    }
+  });
+
+  it("shows the result at a size the surface is really drawn at", () => {
+    for (const page of PRESET_PAGES) {
+      const samples = page.preset!.previewSamples;
+      expect(samples.length, page.slug).toBeGreaterThan(0);
+      for (const sample of samples) {
+        expect(sample.px, page.slug).toBeGreaterThan(0);
+        expect(sample.label.length, page.slug).toBeGreaterThan(3);
+      }
+    }
+  });
+
+  it("tells the reader what to do in Discord once the file exists", () => {
+    for (const page of PRESET_PAGES) {
+      expect(page.preset!.nextStep.length, page.slug).toBeGreaterThan(40);
+    }
+  });
+
+  it("says the middle was taken, on every page that takes it", () => {
+    for (const page of PRESET_PAGES) {
+      expect(page.preset!.cropNote.length, page.slug).toBeGreaterThan(40);
+    }
+  });
+
+  it("gives the hub a picker and the dedicated pages none", () => {
+    for (const page of PRESET_PAGES) {
+      const hub = page.slug === "gif-for-discord";
+      expect(Boolean(page.preset!.legend), page.slug).toBe(hub);
+      expect(Boolean(page.preset!.chips), page.slug).toBe(hub);
     }
   });
 });

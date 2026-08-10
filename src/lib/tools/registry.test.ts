@@ -86,12 +86,22 @@ describe("tool registry", () => {
     }
   });
 
-  it("filters unbuilt tools out of the related block", () => {
-    const related = relatedRoutes("gif-compressor").map((route) => route.slug);
-    const live = relatedLiveRoutes("gif-compressor").map((route) => route.slug);
-    expect(related.length).toBeGreaterThan(live.length);
-    for (const slug of live) {
-      expect(isLive(getRoute(slug)!), slug).toBe(true);
+  it("never offers an unbuilt tool in the related block", () => {
+    // This used to assert that the filter actually removed something, using
+    // `gif-compressor`'s link to the then-unbuilt Discord hub as the specimen.
+    // Phase 8 shipped that hub, so every route in the registry is now live and
+    // the filter legitimately removes nothing — an inequality there would fail
+    // for the best possible reason, which is not a useful test.
+    //
+    // What still has to hold is the property itself, asserted across every
+    // route rather than one. The next `planned` route added to this file is
+    // covered by it without anyone remembering to come back here.
+    for (const route of ALL_ROUTES) {
+      const live = relatedLiveRoutes(route.slug);
+      expect(live.length).toBeLessThanOrEqual(relatedRoutes(route.slug).length);
+      for (const related of live) {
+        expect(isLive(related), `${route.slug} → ${related.slug}`).toBe(true);
+      }
     }
   });
 

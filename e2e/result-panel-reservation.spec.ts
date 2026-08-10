@@ -26,21 +26,38 @@ import { expect, test, type Page } from "@playwright/test";
  * only that a number was not zero.
  */
 
-const FIXTURE = join(process.cwd(), "e2e", "fixtures", "loop-small.gif");
-
 /** Encoding a 48-frame GIF is seconds on V8 and slower under WebKit. */
 const JOB_TIMEOUT_MS = 180_000;
 
 /**
- * The two tools with the tallest done state.
+ * The tools with the tallest done state.
  *
- * Both carry the full summary and a two-chip next row; the compressor is
- * covered by its own CLS test at 1440. Running all five here would triple the
- * suite's wall clock to re-measure a layout that does not differ between them.
+ * Each carries the full summary and a two-chip next row; the compressor is
+ * covered by its own CLS test at 1440. Running every tool here would multiply
+ * the suite's wall clock to re-measure a layout that does not differ between
+ * most of them.
+ *
+ * `mp4-to-gif` earned its place by failing: when Phase 7 shipped it needed 695px
+ * at 400px against a band that reserved 680, which is a shift arriving when the
+ * encoder finishes. It also takes a video, so it is the one entry here that
+ * costs a real decode — which is why the fixture is per tool rather than one
+ * constant.
  */
 const TOOLS = [
-  { slug: "crop-gif", run: /^crop gif$/i },
-  { slug: "reverse-gif", run: /^reverse gif$/i },
+  { slug: "crop-gif", run: /^crop gif$/i, fixture: "loop-small.gif" },
+  { slug: "reverse-gif", run: /^reverse gif$/i, fixture: "loop-small.gif" },
+  { slug: "mp4-to-gif", run: /^make the gif$/i, fixture: "screen-720p-10s.mp4" },
+  // The Discord done state is the tallest on the site and the only one whose
+  // shape differs structurally: a size-budget meter and an in-message preview
+  // sit above the summary every other tool ends with. The reservation bands
+  // were measured before either existed, so this route is the one most likely
+  // to overshoot them — which is CLS arriving when the encoder finishes,
+  // seconds after the click, and therefore not excused as prompted.
+  {
+    slug: "discord-emoji-gif",
+    run: /^make it fit 256 KB$/i,
+    fixture: "loop-small.gif",
+  },
 ] as const;
 
 /**
@@ -59,9 +76,12 @@ async function measurePanel(page: Page) {
   return page.evaluate(() => {
     const stage = document.querySelector("[data-tool-stage]");
     if (!stage) throw new Error("no tool stage on this page");
-    const panel = [...stage.querySelectorAll("div")].find((element) =>
-      /(^|\s)min-h-1\d\d(\s|$)/.test(element.className),
-    );
+    // `[data-result-panel]`, not a class-name regex. The previous form matched
+    // `min-h-1\d\d` against the class string, which silently found nothing once
+    // a page reserved a box outside that range — a test that cannot locate its
+    // subject reports an infrastructure error rather than the drift it exists
+    // to catch.
+    const panel = stage.querySelector("[data-result-panel]");
     if (!panel) throw new Error("no reserved result panel on this page");
 
     const style = getComputedStyle(panel);
@@ -91,7 +111,7 @@ async function measurePanel(page: Page) {
 }
 
 test.describe("the result panel's reservation", () => {
-  for (const { slug, run } of TOOLS) {
+  for (const { slug, run, fixture } of TOOLS) {
     for (const { width, band } of BANDS) {
       test(`covers ${slug}'s done state at ${width}px (${band})`, async ({
         page,
@@ -108,7 +128,7 @@ test.describe("the result panel's reservation", () => {
 
         const empty = await measurePanel(page);
 
-        await page.locator('input[type="file"]').setInputFiles(FIXTURE);
+        await page.locator('input[type="file"]').setInputFiles(join(process.cwd(), "e2e", "fixtures", fixture));
         await page.getByRole("button", { name: run }).first().click();
         await expect(page.locator("a[download]:visible")).toBeVisible({
           timeout: JOB_TIMEOUT_MS,

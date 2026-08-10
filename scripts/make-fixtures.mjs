@@ -16,7 +16,8 @@
  * 499x281, the rotation metadata and the grain are the point of those entries.
  *
  * Requires: ffmpeg (any recent build with libx264, libx265, libvpx-vp9) and
- * gif2webp from the `webp` package. Run: `node scripts/make-fixtures.mjs`
+ * gif2webp, cwebp and webpmux from the `webp` package.
+ * Run: `node scripts/make-fixtures.mjs`
  *
  * `drawtext` is deliberately unused — Homebrew's default ffmpeg ships without
  * freetype, so a text overlay would make this script fail on the most common
@@ -34,7 +35,7 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const OUT = join(process.cwd(), "e2e", "fixtures");
@@ -64,6 +65,26 @@ function gif(inputArgs, filters, name, { colours = 256, dither = "sierra2_4a" } 
     out(name),
   ]);
   run("rm", ["-f", palette]);
+}
+
+/**
+ * One flat-colour still WebP, lossless — a building block for a hand-authored
+ * animation, not a fixture in its own right, so it is written to a dotted name
+ * and deleted by its caller.
+ *
+ * `format=rgb24` is not decoration: without it the colour source may negotiate
+ * a YUV format with the PNG encoder, and a round trip through limited-range
+ * chroma moves a pure primary by a few counts. The test that reads this asserts
+ * exact channel values, so it has to stay in RGB the whole way — which is also
+ * why the encode is `-lossless` rather than the default.
+ */
+function solidWebp(hex, size, name) {
+  const png = out(`.${name}.png`);
+  const webp = out(`.${name}.webp`);
+  ff(["-f", "lavfi", "-i", `color=c=0x${hex}:s=${size}`, "-vf", "format=rgb24", "-frames:v", "1", png]);
+  run("cwebp", ["-quiet", "-lossless", png, "-o", webp]);
+  run("rm", ["-f", png]);
+  return webp;
 }
 
 const steps = [
@@ -187,13 +208,60 @@ const steps = [
     () =>
       run("gif2webp", ["-lossy", "-q", "75", "-m", "4", out("loop-small.gif"), "-o", out("anim.webp")]),
   ],
+  [
+    "webp-offset-dispose.webp",
+    "The compositing fixture. `anim.webp`'s frames are all full-canvas, at offset 0,0, blending, never disposing — so it exercises none of the three rules that make an animated WebP a sequence of patches rather than pictures, and a decoder that ignored all three would still pass on it. This one is authored frame by frame with webpmux so each rule is isolated: frame 2 is a 16x16 patch at (32,16) with no-blend and dispose-to-background, and frame 3 is a 16x16 patch somewhere else entirely — deliberately NOT covering frame 2's rectangle, which is what makes the disposal observable at all. Three flat primaries and lossless encoding, because the test reads exact channel values.",
+    () => {
+      const base = solidWebp("FF0000", "64x64", "wod-base");
+      const dot = solidWebp("0000FF", "16x16", "wod-dot");
+      const mark = solidWebp("00FF00", "16x16", "wod-mark");
+      // `+di+xi+yi+mi[bi]` — mi is dispose (0 none, 1 background) and bi is
+      // `+b` blend or `-b` no-blend. The blend flag has no `+` separator of its
+      // own; `+n` is not the spelling and webpmux rejects it.
+      run("webpmux", [
+        "-frame", base, "+100+0+0+0+b",
+        "-frame", dot, "+100+32+16+1-b",
+        "-frame", mark, "+100+0+32+0+b",
+        "-loop", "0",
+        "-bgcolor", "255,255,255,255",
+        "-o", out("webp-offset-dispose.webp"),
+      ]);
+      run("rm", ["-f", base, dot, mark]);
+    },
+  ],
 ];
+
+/**
+ * Named arguments regenerate only those fixtures; everything else is measured
+ * where it already sits, so the manifest still describes the whole corpus.
+ *
+ * This is not a convenience. **ffmpeg is not byte-reproducible here** — measured
+ * on one machine across two consecutive runs, `photo-grain.gif` moved 6.5 → 8.3
+ * MB and `clip-vp9-5s.webm` changed content at identical size. `noise=alls=42`
+ * sets strength, not a seed, and libvpx's threading is not deterministic. A
+ * blanket rerun to add one fixture therefore silently replaces the corpus that
+ * G6's judging pack was scored against, which would invalidate the scores
+ * without touching a single line of code.
+ *
+ * So: `node scripts/make-fixtures.mjs webp-offset-dispose.webp` to add one, and
+ * a bare run only when replacing the corpus is the actual intent.
+ */
+const only = new Set(process.argv.slice(2));
+const regenerate = (name) => only.size === 0 || only.has(name);
 
 let total = 0;
 const manifest = [];
 
 for (const [name, why, make] of steps) {
   process.stdout.write(`  ${name} … `);
+  const exists = existsSync(out(name));
+  if (!regenerate(name) && exists) {
+    const bytes = statSync(out(name)).size;
+    total += bytes;
+    manifest.push({ name, bytes, why });
+    console.log(`${(bytes / 1024).toFixed(0)} KB (kept)`);
+    continue;
+  }
   try {
     make();
   } catch (error) {

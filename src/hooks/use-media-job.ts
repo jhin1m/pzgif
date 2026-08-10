@@ -218,11 +218,24 @@ export function useMediaJob({ onTelemetry }: UseMediaJobOptions = {}) {
       estimateRef.current?.cancel();
       const handle = controller().estimate(file, spec, (event) => {
         if (event.type === "estimate") {
-          setState((previous) => ({ ...previous, estimate: event.estimate }));
+          // The error is cleared alongside the new figure, and that is not
+          // tidiness. A refusal here is a statement about the *settings* — "this
+          // will not fit" — and settings move. Without this, dragging a width
+          // slider past the budget and back left the refusal on screen for the
+          // rest of the session, describing a job the page is no longer offering
+          // to run.
+          setState((previous) => ({
+            ...previous,
+            estimate: event.estimate,
+            error: null,
+          }));
         }
         if (event.type === "refused" || event.type === "error") {
           if (event.error.code === "cancelled") return;
-          setState((previous) => ({ ...previous, error: event.error }));
+          // The stale estimate goes with it: showing last-known bytes beside a
+          // refusal is two halves of the panel disagreeing about what happens
+          // if the button is pressed.
+          setState((previous) => ({ ...previous, estimate: null, error: event.error }));
         }
       });
       estimateRef.current = handle;

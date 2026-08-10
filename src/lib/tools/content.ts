@@ -119,6 +119,21 @@ export interface ToolContent {
     /** Alt text for the loaded source preview. */
     sourceAlt?: string;
   };
+  /**
+   * Hand-written lines the page renders with runtime figures substituted.
+   *
+   * The sentence is written once, by hand, for this tool; the numbers inside it
+   * are `{token}`s the component fills from what it actually measured. That
+   * split is the point. `phase-07` forbids a static limits caption — "up to
+   * 150 MB · up to 60 seconds" is the wireframe's, and it is wrong on every
+   * device, because the binding constraint is decoded RGBA and not file size —
+   * while the *prose* around the figure still has to be this tool's own.
+   *
+   * Not a general-purpose escape hatch: anything with no runtime figure in it
+   * belongs in `explainer`, `controls` or `result`, where the copy tests can see
+   * it.
+   */
+  notes?: Readonly<Record<string, string>>;
   explainer: readonly ExplainerSection[];
   faqHeading: string;
   faq: readonly FaqEntry[];
@@ -149,4 +164,26 @@ export function toolContent(data: unknown, expectedSlug: string): ToolContent {
     );
   }
   return content;
+}
+
+/**
+ * Fills `{token}`s in a `notes` line from a record of runtime values.
+ *
+ * Deliberately not next-intl's formatter: these strings live under
+ * `LICENSE-CONTENT` in `src/content/`, and routing them through the message
+ * catalogue would move prose into `messages/`, which is the boundary the whole
+ * two-licence file layout exists to keep visible. Same reasoning as
+ * `ResultSummary`'s `{saved}`.
+ *
+ * An unknown token is left standing rather than blanked. A caption that reads
+ * "about {seconds}s" is an obvious bug in review; one that reads "about s" looks
+ * like a copy decision and ships.
+ */
+export function fillNote(
+  line: string,
+  values: Readonly<Record<string, string | number>>,
+): string {
+  return line.replace(/\{(\w+)\}/g, (whole, token: string) =>
+    token in values ? String(values[token]) : whole,
+  );
 }

@@ -115,6 +115,23 @@
       "w": "Resize from the left edge"
     }
   },
+  "trim": {
+    "start": "Start",
+    "end": "End",
+    "startHandle": "Trim start, in seconds",
+    "endHandle": "Trim end, in seconds",
+    "selected": "{seconds}s selected"
+  },
+  "frameRange": {
+    "first": "First frame",
+    "last": "Last frame",
+    "selected": "{count, plural, one {# frame} other {# frames}}",
+    "selectAll": "Select every frame"
+  },
+  "embed": {
+    "copy": "Copy",
+    "copied": "Copied"
+  },
   "engine": {
     "stage": {
       "probe": "Reading the file…",
@@ -144,8 +161,7 @@
       "browserUnsupported": {
         "noVideoDecoder": "This browser cannot decode video at all, so video input is unavailable here.",
         "noVideoEncoder": "This browser cannot create MP4 files.",
-        "iosVideoBudget": "iPhones and iPads do not have enough memory to convert video in the browser. GIF files work normally here.",
-        "noImageDecoder": "This browser cannot read animated WebP."
+        "iosVideoBudget": "iPhones and iPads do not have enough memory to convert video in the browser. GIF files work normally here."
       }
     },
     "actions": {

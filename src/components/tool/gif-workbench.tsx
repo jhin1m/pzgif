@@ -46,14 +46,22 @@ import { useObjectUrl } from "@/hooks/use-object-url";
 import type {
   InputProbe,
   JobSpec,
+  JobStats,
   RecoveryAction,
+  SizeEstimate,
 } from "@/lib/media/types";
 import { formatBytes, formatDelta } from "@/lib/format-bytes";
 import type { ToolContent } from "@/lib/tools/content";
 import type { MediaFormat } from "@/lib/tools/registry";
 
 /**
- * The GIF-in, GIF-out workbench: one job flow, four tools.
+ * The workbench: one job flow, eight tools.
+ *
+ * The name is still `GifWorkbench` because GIF is on one side of every job it
+ * runs — in for resize, crop, speed, reverse, `gif-to-mp4` and
+ * `split-gif-to-frames`, out for `mp4-to-gif` and `webp-to-gif`. What Phase 7
+ * changed is that the *other* side is no longer always GIF too, which is what
+ * `output` below describes.
  *
  * ── Why this exists, and why the compressor is not folded into it ──────────
  * Resize, crop, speed and reverse differ in exactly three places — which
@@ -103,6 +111,46 @@ export interface WorkbenchContext {
   /** True while the engine owns the settings. */
   locked: boolean;
   flow: ToolFlowState;
+  /**
+   * The last live size prediction, or null.
+   *
+   * Only ever non-null on a page that opted into `liveEstimate`, and always a
+   * range: the calibration data shows a 22x spread in bytes-per-pixel at
+   * identical settings driven purely by content, so a point value would be
+   * confidently wrong exactly where it is read most carefully. Label it an
+   * estimate wherever it is rendered.
+   */
+  estimate: SizeEstimate | null;
+}
+
+/**
+ * What the tool produces, for the three places the answer is not "a GIF".
+ *
+ * Answered by the page, not by the registry: `split-gif-to-frames` has two
+ * entries in `outputFormats`, so the registry cannot say which one a given run
+ * produced. Getting it wrong is not cosmetic — `format` is what
+ * `chainTargets()` filters on, and a wrong value offers a `.zip` to a tool that
+ * will fail on it with `decode-failed`.
+ */
+export interface WorkbenchOutput {
+  /** Registry format of the produced file. Drives the next-tools chips. */
+  format: MediaFormat;
+  /** Download extension, leading dot included. */
+  extension: string;
+}
+
+/** GIF in, GIF out — the six tools that need no descriptor of their own. */
+const GIF_OUTPUT: WorkbenchOutput = { format: "gif", extension: ".gif" };
+const gifOutput = () => GIF_OUTPUT;
+
+/** Everything the done state's media frame is given to render itself. */
+export interface ResultMediaContext {
+  /** Object URL for the produced blob. Revoked when the job is reset. */
+  url: string;
+  blob: Blob | null;
+  stats: JobStats;
+  /** The page's own `resultAlt`, already resolved against the catalogue. */
+  alt: string;
 }
 
 export interface GifWorkbenchProps {
@@ -125,10 +173,70 @@ export interface GifWorkbenchProps {
   buildSpec(values: ControlValues, probe: InputProbe | null): JobSpec;
   /** Appended to the input's stem, e.g. `-resized`. */
   downloadSuffix: string;
+  /**
+   * What this tool produces, given the finished blob — or null before there is
+   * one, which is when the sticky bar still has to name a download.
+   *
+   * A function rather than a constant because one tool genuinely cannot answer
+   * it in advance. `gif-to-mp4` asks the browser which codec it can encode and
+   * falls back to VP8 in WebM where AVC is unavailable, so the container is a
+   * property of the device, decided inside the encode worker. A file named
+   * `.mp4` that actually holds WebM is one nothing will open.
+   *
+   * Defaults to GIF in, GIF out.
+   */
+  output?(blob: Blob | null): WorkbenchOutput;
+  /**
+   * Fills the done state's media frame. Defaults to an `<img>`.
+   *
+   * A render prop rather than a `kind` enum because the three cases share no
+   * shape: `<img>` for a GIF, `<video>` with the playback attributes for an MP4,
+   * and — for a ZIP, which has nothing to show — a summary of what is inside it.
+   *
+   * **Whatever it returns must fill the frame and not resize it.** The frame is
+   * a fixed `h-60 md:h-72` box inside a panel whose height is reserved from
+   * first paint against measured numbers; a child that sizes itself from its
+   * content puts CLS back on the tool pages.
+   */
+  resultMedia?(context: ResultMediaContext): ReactNode;
   /** Live consequences of the current settings, under the controls. */
   notice?(context: WorkbenchContext): ReactNode;
   /** Replaces the animated source preview. Crop puts its overlay here. */
   preview?(context: WorkbenchContext & { sourceUrl: string }): ReactNode;
+  /**
+   * Replaces the dropzone when this device cannot run this tool at all.
+   *
+   * Rendered *instead of* the dropzone, inside the same fixed-height box, so the
+   * page says so above the fold and nothing moves. That is the whole point:
+   * `plan.md`'s iOS decision obliges `mp4-to-gif` to refuse before a file is
+   * chosen, because a refusal that arrives after someone picked a clip is a
+   * broken tool with extra steps — and iOS Safari is a large share of the mobile
+   * traffic a GIF utility attracts.
+   *
+   * The device is only knowable after hydration, so this must be decided in an
+   * effect and the server must render the dropzone. Swapping one fixed box for
+   * another costs no layout shift.
+   */
+  unavailable?: ReactNode;
+  /**
+   * Replaces `content.actions.disabledReason` beside the idle primary.
+   *
+   * The stock reason is "add a file first", which is the wrong sentence on a
+   * device that will not accept one. It is `aria-describedby` on the primary, so
+   * a screen-reader user on iOS would otherwise be told to do the one thing the
+   * page has just said is impossible.
+   */
+  idleReason?: string;
+  /**
+   * Re-prices the job as the settings move, through `runEstimate`.
+   *
+   * Off by default, and deliberately: an estimate is a full decode plus two
+   * sample encodes, which on the four GIF→GIF tools would spend a job's worth of
+   * memory to predict a number those pages do not show. `mp4-to-gif` turns it on
+   * because "will this be huge?" is the question that decides whether a
+   * video-to-GIF conversion happens at all.
+   */
+  liveEstimate?: boolean;
   /** Which of `errors.ts`'s offers this tool has a control for. */
   changeableSettings?: readonly ChangeableSetting[];
   applySetting?(
@@ -150,8 +258,13 @@ export function GifWorkbench({
   controls,
   buildSpec,
   downloadSuffix,
+  output = gifOutput,
+  resultMedia,
   notice,
   preview,
+  unavailable,
+  idleReason,
+  liveEstimate = false,
   changeableSettings,
   applySetting,
   children,
@@ -263,9 +376,42 @@ export function GifWorkbench({
     return () => clearInterval(timer);
   }, [flow]);
 
+  /**
+   * Re-prices the job a beat after the settings stop moving.
+   *
+   * The delay is not politeness. Each estimate decodes the whole selection and
+   * runs two sample encodes, and `useMediaJob` cancels the previous one when a
+   * new one starts — so a dragged slider without this would start and abandon a
+   * decode per animation frame, each admitted against the same budget.
+   *
+   * Only while a file is loaded and idle: during a job the settings are locked
+   * and the estimate cannot change, and after one the real byte count exists,
+   * which is strictly better than any prediction of it.
+   */
+  // `job.estimate` and not `job`: `useMediaJob` returns a fresh object literal
+  // on every render, so depending on the whole thing re-arms this effect every
+  // time anything re-renders — and each estimate's own `setState` is a render.
+  // That is a loop with a 500 ms period that never stops: a file sitting idle
+  // would decode itself and run two sample encodes, forever. `estimate` is a
+  // `useCallback` with stable deps, which is the identity that actually matters.
+  const runEstimate = job.estimate;
+  useEffect(() => {
+    if (!liveEstimate || !file || flow !== "loaded") return;
+    const timer = setTimeout(() => runEstimate(file, buildSpec(values, probe)), 500);
+    return () => clearTimeout(timer);
+  }, [buildSpec, file, flow, liveEstimate, probe, runEstimate, values]);
+
   const context = useMemo<WorkbenchContext>(
-    () => ({ values, setValue, probe, file, locked, flow }),
-    [file, flow, locked, probe, setValue, values],
+    () => ({
+      values,
+      setValue,
+      probe,
+      file,
+      locked,
+      flow,
+      estimate: job.state.estimate,
+    }),
+    [file, flow, job.state.estimate, locked, probe, setValue, values],
   );
 
   const controlDefs = controls(context);
@@ -289,9 +435,10 @@ export function GifWorkbench({
         })
       : null;
 
+  const produced = output(resultBlob);
   const downloadName = file
-    ? `${file.name.replace(/\.[^.]+$/, "")}${downloadSuffix}.gif`
-    : `output${downloadSuffix}.gif`;
+    ? `${file.name.replace(/\.[^.]+$/, "")}${downloadSuffix}${produced.extension}`
+    : `output${downloadSuffix}${produced.extension}`;
 
   const sourceAlt = content.labels?.sourceAlt ?? t("sourcePreviewAlt");
   const resultAlt = content.labels?.resultAlt ?? t("resultPreviewAlt");
@@ -354,14 +501,16 @@ export function GifWorkbench({
               as un-prompted CLS unless both branches fill the same box. */}
           <div className="flex h-60 flex-col gap-3 md:h-72 lg:h-84">
             {flow === "idle" ? (
-              <Dropzone
-                toolSlug={slug}
-                accept={accept}
-                onFile={handleFile}
-                title={content.dropzone.title}
-                caption={content.dropzone.caption}
-                className="min-h-0 flex-1"
-              />
+              (unavailable ?? (
+                <Dropzone
+                  toolSlug={slug}
+                  accept={accept}
+                  onFile={handleFile}
+                  title={content.dropzone.title}
+                  caption={content.dropzone.caption}
+                  className="min-h-0 flex-1"
+                />
+              ))
             ) : (
               <>
                 <div className="flex flex-wrap items-center gap-3">
@@ -454,11 +603,18 @@ export function GifWorkbench({
                   a different shape on three of these four tools, and an
                   aspect-ratio box would move the ad slot below it. */}
               <div className="mt-4 h-60 overflow-hidden rounded-card border border-line bg-surface-2 md:h-72">
-                <img
-                  src={resultUrl}
-                  alt={resultAlt}
-                  className="size-full object-contain"
-                />
+                {resultMedia?.({
+                  url: resultUrl,
+                  blob: resultBlob,
+                  stats,
+                  alt: resultAlt,
+                }) ?? (
+                  <img
+                    src={resultUrl}
+                    alt={resultAlt}
+                    className="size-full object-contain"
+                  />
+                )}
               </div>
 
               {/* Both counts are measured from the real blobs — the input the
@@ -497,14 +653,12 @@ export function GifWorkbench({
                   <NextTools
                     slug={slug}
                     label={t("nextTools")}
-                    // All four tools behind this workbench are GIF in, GIF out,
-                    // so the produced format is a literal rather than a lookup.
                     result={
                       resultBlob
                         ? {
                             blob: resultBlob,
                             name: downloadName,
-                            format: "gif",
+                            format: produced.format,
                           }
                         : null
                     }
@@ -589,7 +743,9 @@ export function GifWorkbench({
             disabled={flow === "idle" || locked}
             describedBy={`${slug}-primary-reason`}
             panelHint={
-              flow === "idle" ? content.actions.disabledReason : undefined
+              flow === "idle"
+                ? (idleReason ?? content.actions.disabledReason)
+                : undefined
             }
           />
 
@@ -619,7 +775,9 @@ export function GifWorkbench({
             // `aria-describedby` target and that would make it unreadable.
             className="sr-only text-center text-caption text-fg-muted md:not-sr-only md:block"
           >
-            {flow === "idle" ? content.actions.disabledReason : t("runsLocally")}
+            {flow === "idle"
+              ? (idleReason ?? content.actions.disabledReason)
+              : t("runsLocally")}
           </p>
         </SettingsPanel>
       }

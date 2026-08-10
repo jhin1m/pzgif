@@ -11,7 +11,7 @@
  * that arrives after the user was told the job would fit.
  */
 
-import type { TimingSpec } from "../types";
+import type { DecodedFrame, TimingSpec } from "../types";
 
 /**
  * The source seconds a job actually reads, after `trimSec` is clamped to the
@@ -81,6 +81,42 @@ export function plannedFrameCount(decodedCount: number, timing: TimingSpec): num
 export function lastNeededIndex(decodedCount: number, timing: TimingSpec): number {
   const to = timing.range?.to;
   return to === undefined ? decodedCount - 1 : Math.min(decodedCount, to) - 1;
+}
+
+/**
+ * Keeps one frame in `n` from an **already decoded** list, preserving the
+ * animation's total running time.
+ *
+ * The duration handling is the whole function. A dropped frame's time does not
+ * disappear — it is added to the frame that replaces it on screen — so a loop
+ * that ran for two seconds still runs for two seconds with half the frames. Any
+ * implementation that only filters the array silently doubles the playback
+ * speed, which on a Discord emoji reads as a broken conversion rather than as a
+ * smaller file.
+ *
+ * Distinct from `selectsFrame`, which runs *during* decoding and is the cheap
+ * path. This one exists for the auto-fit search, where the frames are already
+ * resident and re-decoding to drop half of them would cost far more than it
+ * saves. It returns new frame objects sharing the original pixel buffers, so it
+ * allocates nothing per pixel.
+ */
+export function keepEveryNthFrame(
+  frames: readonly DecodedFrame[],
+  n: number,
+): DecodedFrame[] {
+  const stride = Math.max(1, Math.round(n));
+  if (stride === 1) return [...frames];
+
+  const kept: DecodedFrame[] = [];
+  for (const [index, frame] of frames.entries()) {
+    if (index % stride === 0) {
+      kept.push({ rgba: frame.rgba, durationMs: frame.durationMs });
+      continue;
+    }
+    // Its time goes to whichever frame is currently on screen.
+    kept[kept.length - 1].durationMs += frame.durationMs;
+  }
+  return kept;
 }
 
 /**

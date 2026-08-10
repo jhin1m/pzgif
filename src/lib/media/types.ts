@@ -59,6 +59,27 @@ export interface GeometrySpec {
   rotate?: Rotation;
   /** Target width after cropping and rotation. Height follows aspect ratio. */
   targetWidth: number;
+  /**
+   * Permits scaling a source *up* to `targetWidth`. Off everywhere else.
+   *
+   * Upscaling normally invents detail, so the engine refuses it: `FrameGeometry`
+   * clamps the output to the source width. The Discord sticker pipeline is the
+   * one caller that has to override that, because Discord rejects anything other
+   * than exactly 320×320 — a 200×200 source scaled honestly to 200×200 is a file
+   * the destination will not take. The page says the result will look soft.
+   */
+  upscale?: boolean;
+  /**
+   * Forbids admission control from narrowing the output to make a job fit.
+   *
+   * Admission control's default is to shed width first, because for a tool whose
+   * width the user chose a smaller GIF is a smaller version of what they asked
+   * for. For a job whose destination fixes the size it is a *different* file:
+   * a 240×240 Discord sticker is not a smaller sticker, it is a rejected upload.
+   * Pinning makes the search shed frame rate instead, and refuse — with a
+   * concrete shorter offer at the right size — when even that is not enough.
+   */
+  pinWidth?: boolean;
 }
 
 /**
@@ -119,6 +140,61 @@ export interface JobSpec {
   output: OutputSpec;
   /** Hard ceiling on decoded frames, below whatever the device tier allows. */
   maxFrames?: number;
+  /**
+   * Lets this job exceed the tier's `defaultMaxWidth`, up to this width.
+   *
+   * `defaultMaxWidth` is a *default* — a sensible ceiling for a tool whose output
+   * width the user chose — and not the memory constraint. The constraint is
+   * `budgetBytes`, and it still applies unchanged: raising this ceiling lets
+   * admission control consider a wider plan, it does not let one through.
+   *
+   * The Discord server banner is why this exists. Discord publishes 960×540 for
+   * that surface, which is above every tier's default, so without this the preset
+   * would silently produce 640×360 and claim it fits a shape it does not.
+   */
+  widthCeiling?: number;
+}
+
+/**
+ * One auto-fit attempt's encoder settings.
+ *
+ * Every field is a real dial the encoder is given, and every attempt is a real
+ * encode — so "try 3 of 5" is a count of work done, not a progress animation.
+ */
+export interface AutofitSettings {
+  /** gifski's scale. Ignored by gifenc. */
+  quality: number;
+  /** Palette size for gifenc. gifski always uses 256. */
+  colours: number;
+  /** Keep 1 frame in N. 1 = keep every frame. */
+  keepEveryNth: number;
+}
+
+/** Progress through an auto-fit search. Emitted as each attempt starts. */
+export interface AutofitAttempt extends AutofitSettings {
+  /** 1-based index of the attempt now running. */
+  index: number;
+  /**
+   * The most attempts this device will make.
+   *
+   * An upper bound, not a prediction: the search stops the moment something
+   * fits, which is usually attempt one or two because it starts from a sampled
+   * estimate rather than the top of the ladder.
+   */
+  max: number;
+}
+
+/** What the search settled on. Attached to `JobStats` when a search ran. */
+export interface AutofitOutcome extends AutofitSettings {
+  /** Attempts actually encoded. */
+  attempts: number;
+  /**
+   * False when nothing reached the budget and this is the smallest we produced.
+   *
+   * A real state, not an error: the file is still the user's best available
+   * result and is still downloadable. The page has to say it will be rejected.
+   */
+  fits: boolean;
 }
 
 /** What admission control decided before a single frame was decoded. */
@@ -208,6 +284,8 @@ export interface JobStats {
   decodePath: "native" | "fallback";
   /** True when the watchdog fired and the job completed on the fallback encoder. */
   encoderFellBack: boolean;
+  /** Present only on an auto-fit job. Absent means one encode at fixed settings. */
+  autofit?: AutofitOutcome;
 }
 
 /** Main thread → pipeline worker. */
@@ -215,7 +293,22 @@ export type JobRequest =
   | { type: "run"; jobId: number; spec: JobSpec; file: File }
   | { type: "cancel"; jobId: number }
   | { type: "estimate"; jobId: number; spec: JobSpec; file: File }
-  | { type: "probe"; jobId: number; file: File };
+  | { type: "probe"; jobId: number; file: File }
+  /**
+   * Encode repeatedly until the output lands under `budgetBytes`.
+   *
+   * A distinct request rather than a flag on `run` because the two have
+   * different memory shapes: this one holds the decoded frames resident across
+   * attempts and copies them per encode, so it is admitted against a tighter
+   * budget. Folding it into `run` would apply that penalty to every job.
+   */
+  | {
+      type: "autofit";
+      jobId: number;
+      spec: JobSpec;
+      file: File;
+      budgetBytes: number;
+    };
 
 /** Pipeline worker → main thread. */
 export type JobEvent =
@@ -225,6 +318,8 @@ export type JobEvent =
   | { type: "preview"; jobId: number; bitmap: ImageBitmap }
   | { type: "estimate"; jobId: number; estimate: SizeEstimate }
   | { type: "probed"; jobId: number; probe: InputProbe }
+  /** An auto-fit attempt has started encoding at these settings. */
+  | { type: "attempt"; jobId: number; attempt: AutofitAttempt }
   | { type: "done"; jobId: number; blob: Blob; stats: JobStats }
   | { type: "error"; jobId: number; error: MediaError };
 

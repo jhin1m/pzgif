@@ -24,6 +24,7 @@
  * job, and peak residency is the constraint the whole engine is built around.
  */
 
+import { attemptCap, planSearch, REFERENCE_COLOURS, REFERENCE_QUALITY } from "./autofit";
 import { stageWeights } from "./calibration";
 import { detectCapabilities, fallbackEncoder, resolveEncoder } from "./capability";
 import { inputRefusal, openFrameSource, probeInput } from "./decode";
@@ -32,11 +33,14 @@ import { admit } from "./plan";
 import { ProgressReporter } from "./progress";
 import { applyDirection } from "./ops/reverse";
 import { retime } from "./ops/speed";
+import { keepEveryNthFrame } from "./ops/frame-select";
 import { firstFrameBitmap } from "./encode/preview";
 import { estimateFromSample } from "./estimate";
 import { releaseDownscaleScratch } from "./downscale";
+import { TIER_BUDGETS } from "./limits";
 import type {
   AcceptedPlan,
+  AutofitSettings,
   DecodedFrame,
   GifEncoderId,
   JobEvent,
@@ -327,6 +331,236 @@ export async function runJob(
       return;
     }
     host.emit({ type: "error", jobId, error: toMediaError(error) });
+  }
+}
+
+/**
+ * The share of the frame budget an auto-fit job may decode into.
+ *
+ * A normal job transfers its frames to the encode worker and holds nothing. An
+ * auto-fit job cannot: it may need those frames again for a second attempt, and
+ * re-decoding a ten-second clip three times is slow enough to read as a hang.
+ * So the frames stay resident and each attempt encodes a *copy*, which is one
+ * more full-size buffer alive at once than `frameBufferBytes()` accounts for.
+ *
+ * Two thirds is that third buffer, budgeted before anything is decoded rather
+ * than discovered as an OOM on the device with the least room to spare.
+ */
+const AUTOFIT_BUDGET_SHARE = 2 / 3;
+
+/** Copies the frame list so the originals survive the transfer to the encoder. */
+function copyFrames(frames: readonly DecodedFrame[]): DecodedFrame[] {
+  return frames.map((frame) => ({
+    rgba: new Uint8Array(frame.rgba),
+    durationMs: frame.durationMs,
+  }));
+}
+
+/**
+ * Encodes repeatedly until the output lands under `budgetBytes`.
+ *
+ * ── What makes this honest ─────────────────────────────────────────────────
+ * Every attempt is a real encode of the real frames at real settings, so "try 3
+ * of 5" counts work that happened. The search *stops* the moment something fits,
+ * which is why the count is reported as "of up to 5" in the UI — the maximum is
+ * a device cap, not a prediction.
+ *
+ * Nothing here reports that a file fits without having produced it. That is the
+ * point of running the search at all rather than trusting the estimator: the
+ * sampled estimate carries a ±20% band, and a "Fits ✓" drawn from the middle of
+ * that band is wrong one time in several on exactly the files that sit near the
+ * ceiling.
+ *
+ * ── When nothing fits ──────────────────────────────────────────────────────
+ * The smallest attempt is returned with `fits: false`. It is still a real file
+ * and still downloadable — the user may want it for a surface with a looser
+ * limit — and the page says plainly that Discord will reject it. Throwing away
+ * the work and showing an error would be a worse answer to the same fact.
+ */
+export async function runAutofit(
+  jobId: number,
+  file: File,
+  spec: JobSpec,
+  budgetBytes: number,
+  host: PipelineHost,
+  signal: AbortSignal,
+): Promise<void> {
+  const startedAt = performance.now();
+  const capabilities = detectCapabilities();
+  const tierBudget = TIER_BUDGETS[capabilities.tier];
+  let reporter: ProgressReporter | null = null;
+  let frames: DecodedFrame[] = [];
+
+  try {
+    const probe = await probeInput(file);
+    let encoder = resolveEncoder(
+      spec.output.kind === "gif" ? spec.output.encoder : undefined,
+      capabilities,
+    );
+    reporter = new ProgressReporter(
+      stageWeights(inputKindOf(probe.format), encoder),
+      (progress) => host.emit({ type: "progress", jobId, progress }),
+    );
+    reporter.enter("probe");
+
+    const wrongInput = inputRefusal(probe, spec);
+    if (wrongInput) {
+      host.emit({ type: "refused", jobId, error: wrongInput });
+      return;
+    }
+
+    const admission = admit(probe, spec, capabilities, {
+      ...tierBudget,
+      budgetBytes: Math.floor(tierBudget.budgetBytes * AUTOFIT_BUDGET_SHARE),
+    });
+    if (!admission.ok) {
+      host.emit({ type: "refused", jobId, error: admission.error });
+      return;
+    }
+    const plan = admission.plan;
+    host.emit({ type: "accepted", jobId, plan });
+
+    const decodeStartedAt = performance.now();
+    const decoded = await decodeAll(file, spec, plan, probe, reporter, host, jobId, signal);
+    const decodeMs = performance.now() - decodeStartedAt;
+    if (signal.aborted) throw cancelledError();
+
+    frames = applyTimingOps(decoded.frames, spec);
+    const { width, height } = decoded;
+
+    /** One attempt, on a copy, in a worker of its own. */
+    const encodeAt = async (settings: AutofitSettings): Promise<EncodeOutcome> => {
+      const attemptFrames = copyFrames(keepEveryNthFrame(frames, settings.keepEveryNth));
+      reporter?.enter("encode");
+      return host.encode(
+        {
+          kind: "gif",
+          encoder,
+          width,
+          height,
+          quality: settings.quality,
+          colours: settings.colours,
+        },
+        attemptFrames,
+        {
+          watchdogMs: watchdogBudgetMs(attemptFrames.length, width, height),
+          onFrame: (done, total) => reporter?.report(done, total),
+        },
+      );
+    };
+
+    // The seed, from two sample encodes rather than a formula. Without it the
+    // search starts at the top of the ladder and spends an encode per rung
+    // discovering what this already knows.
+    const reference = await estimateFromSample(
+      frames,
+      {
+        width,
+        height,
+        frames: frames.length,
+        encoder,
+        quality: REFERENCE_QUALITY,
+        colours: REFERENCE_COLOURS,
+      },
+      async (sample) => {
+        const outcome = await host.encode(
+          {
+            kind: "gif",
+            encoder,
+            width,
+            height,
+            quality: REFERENCE_QUALITY,
+            colours: REFERENCE_COLOURS,
+          },
+          copyFrames(sample),
+          { watchdogMs: watchdogBudgetMs(sample.length, width, height), onFrame: () => {} },
+        );
+        return outcome.blob.size;
+      },
+    );
+    if (signal.aborted) throw cancelledError();
+
+    const max = attemptCap(capabilities.tier);
+    const search = planSearch(reference?.bytes ?? 0, budgetBytes, encoder, max);
+
+    let best: { blob: Blob; settings: AutofitSettings; encodeMs: number } | null = null;
+    let attempts = 0;
+    let fellBack = false;
+
+    for (const [index, settings] of search.entries()) {
+      if (signal.aborted) throw cancelledError();
+      host.emit({
+        type: "attempt",
+        jobId,
+        attempt: { ...settings, index: index + 1, max },
+      });
+      attempts += 1;
+
+      let outcome: EncodeOutcome;
+      try {
+        outcome = await encodeAt(settings);
+      } catch (error) {
+        const hung = (error as { hang?: boolean }).hang === true;
+        if (!hung || signal.aborted) throw error;
+        // The frames are still here — only the copy went to the worker that
+        // hung — so the retry costs one encode rather than a second decode.
+        fellBack = true;
+        encoder = fallbackEncoder(encoder);
+        reporter.enter("retry");
+        outcome = await encodeAt(settings);
+      }
+
+      // Strictly smaller, so an equal-sized later attempt does not replace a
+      // higher-quality earlier one. The ladder descends in quality, so the first
+      // attempt at a given size is always the best-looking one.
+      if (!best || outcome.blob.size < best.blob.size) {
+        best = { blob: outcome.blob, settings, encodeMs: outcome.encodeMs };
+      }
+      if (outcome.blob.size <= budgetBytes) break;
+    }
+
+    if (signal.aborted) throw cancelledError();
+    if (!best) {
+      // `planSearch` never returns an empty list, so reaching this means the
+      // loop was skipped for a reason the taxonomy should carry rather than a
+      // crash with no state.
+      throw decodeFailedError({ canOfferFallback: false, detail: "no auto-fit attempt ran" });
+    }
+
+    const outputFrames = keepEveryNthFrame(frames, best.settings.keepEveryNth).length;
+    reporter.finish();
+
+    const stats: JobStats = {
+      outBytes: best.blob.size,
+      frames: outputFrames,
+      width,
+      height,
+      encoder,
+      decodeMs: Math.round(decodeMs),
+      encodeMs: Math.round(best.encodeMs),
+      totalMs: Math.round(performance.now() - startedAt),
+      decodePath: "native",
+      encoderFellBack: fellBack,
+      autofit: {
+        ...best.settings,
+        attempts,
+        fits: best.blob.size <= budgetBytes,
+      },
+    };
+
+    host.emit({ type: "done", jobId, blob: best.blob, stats });
+  } catch (error) {
+    if (signal.aborted) {
+      host.emit({ type: "error", jobId, error: cancelledError() });
+      return;
+    }
+    host.emit({ type: "error", jobId, error: toMediaError(error) });
+  } finally {
+    // The resident set is the whole reason this job is admitted against a
+    // tighter budget. Holding it a moment longer than the search needs would
+    // spend that concession on nothing.
+    frames.length = 0;
+    releaseDownscaleScratch();
   }
 }
 

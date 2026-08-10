@@ -9,6 +9,18 @@ dependencies: [3]
 
 # Phase 9: Content SEO and Legal
 
+> **[Progress 2026-08-10] The machinery slice shipped; the editorial content pages remain.**
+>
+> Delivered this pass, verified by `tsc`, 356 unit tests, `next build` (both new
+> routes prerender static ●), `check:static` 24/24, and the two guards:
+>
+> - **Acceptable Use** and **Accessibility** pages — hand-written `src/content/legal/*.json` + routes — completing the set of **eight** legal/trust pages. `LEGAL_ROUTES`, the footer, `sitemap.ts` and `legal.test.ts` (word floors, no-orphan, single-address) all follow.
+> - **Homepage `WebSite` + `Organization` JSON-LD** (`site-json-ld.tsx`), rendered once on `/`, no rating.
+> - **`scripts/check-structured-data.mjs`** — fails the build on `aggregateRating`, `FAQPage` or `HowTo` markup — wired into `package.json` and CI. `design-guidelines.md` §10 amended to drop the obsolete `FAQPage` requirement (FAQ UI kept).
+> - **Redirect map** — `src/lib/seo/redirects.ts` (empty, typed) wired via `next.config.ts` `redirects()`, with `redirects.test.ts` locking the from-not-live / to-live invariant before the list is ever non-empty.
+>
+> **Still open in this phase:** the 6–10 hand-written non-tool content pages (incl. the gifski side-by-side comparison — the AdSense evidence pack), and the sitewide canonical/JSON-LD audit that Phase 11 verifies. Open question 1 (named operator) is already answered — Louis Le — via the legal slice.
+
 ## Overview
 
 Build the SEO machinery and the legal pages. **The homepage is no longer in this phase** — it shipped in the homepage soul pass. Runs in parallel with the tool phases — none of it depends on the media engine.
@@ -131,11 +143,11 @@ entries are out of scope.
 - [ ] **6-10 non-tool content pages published and indexed**, including the gifski side-by-side comparison page
 - [ ] `sitemap.ts` emits real per-page content dates, not build timestamps
 - [ ] `BreadcrumbList` + `WebApplication` validate; `WebApplication` carries `offers.price: 0` and **no rating**
-- [ ] A CI grep fails the build on `aggregateRating`, so a future session cannot "fix" the missing rating by inventing one
-- [ ] No `FAQPage` or `HowTo` JSON-LD anywhere in the codebase
+- [x] A CI grep fails the build on `aggregateRating`, so a future session cannot "fix" the missing rating by inventing one
+- [x] No `FAQPage` or `HowTo` JSON-LD anywhere in the codebase
 - [ ] Self-referential canonical on every page; no hreflang while there is one locale
-- [ ] All eight legal/trust pages live — Terms, Privacy, Cookie, Acceptable Use, About, Contact, DMCA, Accessibility — with a real named operator on About and a working `contact@` address
-- [ ] 404 page and redirect map in place
+- [x] All eight legal/trust pages live — Terms, Privacy, Cookie, Acceptable Use, About, Contact, DMCA, Accessibility — with a real named operator on About and a working `contact@` address
+- [x] 404 page and redirect map in place
 - [ ] FAQ answers present in the SSG HTML and revealed by browser find-in-page
 - [ ] Footer lists exactly the 9 shipped tools + the Discord cluster, plus the AGPL source link
 - [ ] Every route statically prerendered

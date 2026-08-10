@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { AdSlot } from "@/components/ads/ad-slot";
+import { SiteJsonLd } from "@/components/content/site-json-ld";
 import { DiscordTeaser } from "@/components/home/discord-teaser";
 import { HomeHero } from "@/components/home/home-hero";
 import { ToolGrid } from "@/components/home/tool-grid";
@@ -67,6 +68,7 @@ export default async function HomePage({
 
   return (
     <main id="main" className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
+      <SiteJsonLd />
       <HomeHero content={content} />
       <TrustLine className="mt-5" />
 

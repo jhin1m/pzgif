@@ -2,6 +2,8 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import about from "@/content/legal/about.json";
+import acceptableUse from "@/content/legal/acceptable-use.json";
+import accessibility from "@/content/legal/accessibility.json";
 import contact from "@/content/legal/contact.json";
 import cookies from "@/content/legal/cookies.json";
 import dmca from "@/content/legal/dmca.json";
@@ -30,6 +32,8 @@ import { legalContent, type LegalContent } from "./legal";
 
 const RAW: Readonly<Record<string, unknown>> = {
   about,
+  "acceptable-use": acceptableUse,
+  accessibility,
   contact,
   cookies,
   dmca,
@@ -185,6 +189,8 @@ describe("the anti-template guard", () => {
     // reduced to four paragraphs stops being one.
     const FLOORS: Readonly<Record<string, number>> = {
       about: 400,
+      "acceptable-use": 380,
+      accessibility: 380,
       contact: 220,
       cookies: 320,
       dmca: 400,

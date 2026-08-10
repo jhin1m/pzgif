@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
+import { toolRedirects } from "./src/lib/seo/redirects";
 import { WASM_BASE_PATH } from "./src/lib/site-config";
 
 /**
@@ -177,6 +178,12 @@ const nextConfig: NextConfig = {
   pageExtensions: [...devOnlyPageExtensions, "tsx", "ts", "jsx", "js"],
   env: {
     NEXT_PUBLIC_COMMIT_SHA: resolveCommitSha(),
+  },
+  // Permanent redirects for renamed tool slugs. The list is empty today — see
+  // `src/lib/seo/redirects.ts` for why the mechanism ships before it is used.
+  // This is the capability whose absence ruled out `output: "export"` above.
+  async redirects() {
+    return toolRedirects();
   },
   async headers() {
     return [

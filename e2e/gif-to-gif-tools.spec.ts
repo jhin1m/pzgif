@@ -294,7 +294,7 @@ test.describe("the four pages themselves", () => {
       expect(html).toContain(route.prose);
       // FAQ rich results were removed from Search on 2026-05-07; the markup can
       // now only be flagged.
-      expect(html).not.toContain("FAQPage");
+      expect(html).not.toContain("FAQPage"); // structured-data-guard-allow: asserts absence
     });
   }
 

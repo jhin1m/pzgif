@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 import about from "@/content/legal/about.json";
+import acceptableUse from "@/content/legal/acceptable-use.json";
+import accessibility from "@/content/legal/accessibility.json";
 import contact from "@/content/legal/contact.json";
 import cookies from "@/content/legal/cookies.json";
 import dmca from "@/content/legal/dmca.json";
@@ -19,6 +21,8 @@ import { LEGAL_ROUTES, liveRoutes } from "@/lib/tools/registry";
  */
 const LEGAL_CONTENT: Readonly<Record<string, { updated: string }>> = {
   about,
+  "acceptable-use": acceptableUse,
+  accessibility,
   contact,
   cookies,
   dmca,

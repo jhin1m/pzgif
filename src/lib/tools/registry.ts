@@ -217,15 +217,20 @@ export interface LegalRoute {
 }
 
 /**
- * The six pages this deployment serves, in footer order.
+ * The eight pages this deployment serves, in footer order.
  *
  * Trust-building pages first, obligations after: a visitor deciding whether to
- * drop a file scans for "who is this", not for "what are the terms".
+ * drop a file scans for "who is this", not for "what are the terms". About and
+ * Contact lead; the obligations run from Terms through DMCA; the Accessibility
+ * statement sits last because it is a promise about the site rather than a
+ * condition on the visitor.
  *
- * Acceptable Use and an Accessibility statement complete the set of eight the
- * plan calls for. They are not listed here because they are not built, and a
- * footer link to a page that does not exist is a 404 in the internal link graph
- * — the same rule `status: "live"` enforces for tools.
+ * This is the complete set of eight the plan calls for — Acceptable Use and the
+ * Accessibility statement, added last, close it. Every slug here must have both
+ * a `src/content/legal/<slug>.json` file and a route, because a footer link to a
+ * page that does not exist is a 404 in the internal link graph — the same rule
+ * `status: "live"` enforces for tools, and `legal.test.ts` asserts the content
+ * files and this list agree exactly.
  */
 export const LEGAL_ROUTES: readonly LegalRoute[] = [
   { slug: "about", name: "About" },
@@ -233,7 +238,9 @@ export const LEGAL_ROUTES: readonly LegalRoute[] = [
   { slug: "terms", name: "Terms" },
   { slug: "privacy", name: "Privacy" },
   { slug: "cookies", name: "Cookie Policy" },
+  { slug: "acceptable-use", name: "Acceptable Use" },
   { slug: "dmca", name: "DMCA" },
+  { slug: "accessibility", name: "Accessibility" },
 ] as const;
 
 export const TOOL_GROUP_ORDER: readonly ToolGroup[] = [

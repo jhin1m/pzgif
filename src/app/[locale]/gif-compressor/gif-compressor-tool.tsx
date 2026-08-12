@@ -578,6 +578,7 @@ export function GifCompressorTool({
                 fromBytes={file.size}
                 toBytes={resultBlob?.size ?? stats.outBytes}
                 savedLine={content.result.savedLine}
+                grewLine={t("grewLine")}
                 encodedIn={t("encodedIn", {
                   seconds: (stats.totalMs / 1000).toFixed(1),
                 })}

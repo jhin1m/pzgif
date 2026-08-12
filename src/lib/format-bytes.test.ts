@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatBytes, formatDelta } from "./format-bytes";
+import { deltaDirection, formatBytes, formatDelta } from "./format-bytes";
 
 /**
  * These numbers are the evidence for the product's central claim, so the thing
@@ -48,5 +48,31 @@ describe("formatDelta", () => {
   it("distinguishes no change from a rounding artefact", () => {
     expect(formatDelta(100_000, 100_000)).toBe("no change");
     expect(formatDelta(0, 5_000)).toBe("—");
+  });
+});
+
+describe("deltaDirection", () => {
+  it("agrees with the word the badge prints", () => {
+    // The colour and the word come from one rounded percentage on purpose. If
+    // these two ever disagreed, the panel would warn about a growth it also
+    // described as "no change".
+    for (const [from, to] of [
+      [2_400_000, 480_000],
+      [100_000, 104_000],
+      [100_000, 100_000],
+      [0, 5_000],
+      // A 0.4% growth: real bytes, but below what a whole percent can show.
+      [100_000, 100_400],
+    ] as const) {
+      const label = formatDelta(from, to);
+      const expected = label.includes("larger")
+        ? "larger"
+        : label.includes("smaller")
+          ? "smaller"
+          : label === "no change"
+            ? "none"
+            : "unknown";
+      expect(deltaDirection(from, to), label).toBe(expected);
+    }
   });
 });

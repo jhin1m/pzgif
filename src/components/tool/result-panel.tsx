@@ -1,8 +1,13 @@
 import type { ReactNode } from "react";
-import { Check, Download } from "lucide-react";
+import { AlertTriangle, ArrowUp, Check, Download } from "lucide-react";
 import { LoopMark } from "@/components/brand/marks";
 import { Badge } from "@/components/ui/badge";
-import { formatBytes, formatDelta } from "@/lib/format-bytes";
+import {
+  deltaDirection,
+  formatBytes,
+  formatDelta,
+  type DeltaDirection,
+} from "@/lib/format-bytes";
 import { cn } from "@/lib/utils";
 
 /**
@@ -61,6 +66,13 @@ import { cn } from "@/lib/utils";
  * Re-measure whenever the done state gains or loses a row. `e2e/` asserts the
  * panel never exceeds its reservation at these widths, so a drift fails the
  * suite rather than quietly returning CLS to the tool pages.
+ *
+ * **Known residual.** `grewLine` is longer than several tools' `savedLine`, so a
+ * job whose output came out *bigger* can wrap the sentence one line further than
+ * the band was measured against — about 24px, at the narrowest widths only. It
+ * is kept under the longest shipped `savedLine` for that reason, and it is
+ * accepted for the same reason as the notes below: reserving a second line on
+ * every load to cover an exceptional outcome costs more than the outcome does.
  *
  * **Known residual.** The `plan.downgraded` and `plan.truncated` notes are not
  * reserved. They render in the same commit as the result, so they do not shift
@@ -185,32 +197,53 @@ export function ResultPanel({
  * decorate something. `--accent-text` is the token annotated "text-safe" and is
  * the only teal that clears the contrast floor in both themes.
  *
- * The badge deliberately does not turn red when the file grew. "+4% larger" is
- * a legitimate outcome of re-encoding an already-optimised GIF at a higher
- * quality, and colouring it as an error would mislabel a correct result. The
- * word carries the direction; the colour carries none of it.
+ * ── What happens when the file grew ────────────────────────────────────────
+ * It turns amber, not red. "+4% larger" is a legitimate outcome of re-encoding
+ * an already-optimised GIF at a higher quality — nothing failed — so `danger`
+ * would mislabel a correct result as an error. But leaving it in the product's
+ * accent was the opposite mistake: accent is the colour every *good* result on
+ * this page wears, so a grown file was being congratulated in the same breath
+ * as an 80% saving, and the one word separating them sat inside a pill the eye
+ * had already read as a win. Amber is the honest middle — "this is not what you
+ * came for, look closer" — and it is the same token the size warnings use.
+ *
+ * The arrow is there for the same reason §7.6 exists: the direction survives
+ * greyscale, forced-colors mode, and a reader who does not parse the sign.
  */
 export function SizeDelta({
   from,
   to,
   deltaLabel,
+  direction,
   className,
 }: {
   from: string;
   to: string;
   deltaLabel: string;
+  /** Omitted where there is nothing to warn about — the gallery, mostly. */
+  direction?: DeltaDirection;
   className?: string;
 }) {
+  const grew = direction === "larger";
+
   return (
     <div className={cn("flex flex-wrap items-baseline gap-2.5", className)}>
       <span className="tabular text-fg-muted line-through">{from}</span>
       <span aria-hidden="true" className="text-fg-muted">
         →
       </span>
-      <span className="tabular text-[1.25rem] font-medium text-accent-text">
+      <span
+        className={cn(
+          "tabular text-[1.25rem] font-medium",
+          grew ? "text-warning-text" : "text-accent-text",
+        )}
+      >
         {to}
       </span>
-      <Badge variant="accent">{deltaLabel}</Badge>
+      <Badge variant={grew ? "warning" : "accent"}>
+        {grew ? <ArrowUp aria-hidden="true" className="size-3.5" /> : null}
+        {deltaLabel}
+      </Badge>
     </div>
   );
 }
@@ -254,6 +287,16 @@ export interface ResultSummaryProps {
    * routing it through the ICU formatter would put prose in `messages/`.
    */
   savedLine: string;
+  /**
+   * What the same slot says when the file came out *bigger*.
+   *
+   * The slot used to go blank on that outcome, which left the loudest thing on
+   * the panel a green tick — so the one result a visitor needs to act on was
+   * also the one the panel explained least. This is a UI string rather than
+   * per-tool content: it states a mechanical fact about the encoder that reads
+   * identically on every tool, so it lives in `messages/`.
+   */
+  grewLine: string;
   /** "encoded in 4.2s" — formatted by the caller, which owns the catalogue. */
   encodedIn: string;
   downloadHref: string;
@@ -272,6 +315,7 @@ export function ResultSummary({
   fromBytes,
   toBytes,
   savedLine,
+  grewLine,
   encodedIn,
   downloadHref,
   downloadName,
@@ -294,6 +338,14 @@ export function ResultSummary({
   const saved = fromBytes - toBytes;
   const worthSaying = fromBytes > 0 && saved / fromBytes >= 0.005;
 
+  // The mark answers "did I get what I came for?", not "did the job run?" — the
+  // job running is already evident from the file sitting above it. A tick over
+  // a file that grew answers the second question while the visitor is asking
+  // the first, so on that outcome the same circle carries a warning instead.
+  // Both are one 200ms pop; §6's rule is about looping, not about which glyph.
+  const direction = deltaDirection(fromBytes, toBytes);
+  const grew = direction === "larger";
+
   return (
     <div className={className}>
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2.5">
@@ -301,23 +353,42 @@ export function ResultSummary({
           <span
             className={cn(
               "grid size-7 flex-none place-items-center rounded-full",
-              "bg-progress/15 text-accent-text",
+              grew
+                ? "bg-warning/15 text-warning-text"
+                : "bg-progress/15 text-accent-text",
               "animate-[pz-check-pop_200ms_ease-out_1]",
             )}
           >
-            <Check aria-hidden="true" className="size-4.5" strokeWidth={2.6} />
+            {grew ? (
+              <AlertTriangle
+                aria-hidden="true"
+                className="size-4.5"
+                strokeWidth={2.4}
+              />
+            ) : (
+              <Check aria-hidden="true" className="size-4.5" strokeWidth={2.6} />
+            )}
           </span>
           <SizeDelta
             from={formatBytes(fromBytes)}
             to={formatBytes(toBytes)}
             deltaLabel={formatDelta(fromBytes, toBytes)}
+            direction={direction}
           />
         </div>
         <span className="tabular text-caption text-fg-muted">{encodedIn}</span>
       </div>
 
+      {/* One slot, three outcomes, one line box — see `RESERVED_HEIGHT`. It
+          claims a saving only when there is one, explains the growth when there
+          is growth, and stays empty on a change too small for either sentence
+          to be true. */}
       <p className="mt-2.5 min-h-[1.5em] text-sm text-fg-secondary">
-        {worthSaying ? savedLine.replace("{saved}", formatBytes(saved)) : null}
+        {worthSaying
+          ? savedLine.replace("{saved}", formatBytes(saved))
+          : grew
+            ? grewLine
+            : null}
       </p>
 
       {notes}

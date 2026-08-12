@@ -798,6 +798,7 @@ function Results() {
             fromBytes={2_400_000}
             toBytes={480_000}
             savedLine="You just cut {saved} out of it."
+            grewLine="Bigger than the file you dropped in — that one was already well optimised."
             encodedIn="encoded in 4.2s"
             downloadHref="#"
             downloadName="loop-final-compressed.gif"
@@ -815,15 +816,16 @@ function Results() {
       </div>
       <div>
         {/* The case the sentence must not claim. Re-encoding an already
-            optimised GIF at a higher quality legitimately grows it, and the
-            summary drops the "you saved" line rather than printing a negative
-            saving — while the badge still says so in words. */}
+            optimised GIF at a higher quality legitimately grows it, so the
+            summary swaps the tick for a warning, turns the delta amber, and
+            replaces the "you saved" line with the one that explains it. */}
         <Label>complete — output larger than the input</Label>
         <ResultPanel>
           <ResultSummary
             fromBytes={480_000}
             toBytes={499_200}
             savedLine="You just cut {saved} out of it."
+            grewLine="Bigger than the file you dropped in — that one was already well optimised."
             encodedIn="encoded in 3.8s"
             downloadHref="#"
             downloadName="loop-final-compressed.gif"
@@ -931,7 +933,10 @@ function Badges() {
         <TrustLine />
       </Row>
       <Row name="size delta">
-        <SizeDelta from="2.4 MB" to="480 KB" deltaLabel="−80%" />
+        <SizeDelta from="2.4 MB" to="480 KB" deltaLabel="−80%" direction="smaller" />
+        {/* The outcome the panel has to be honest about: same component, amber
+            instead of accent, and an arrow that survives greyscale. */}
+        <SizeDelta from="480 KB" to="499 KB" deltaLabel="+4% larger" direction="larger" />
       </Row>
       <Row name="settings panel">
         <SettingsPanel

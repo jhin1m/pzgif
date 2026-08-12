@@ -136,11 +136,38 @@ describe("SizeDelta", () => {
     expect(markup).toContain("2.4 MB");
     expect(markup).toContain("480 KB");
   });
+
+  it("does not wear the accent when the file grew", () => {
+    // Accent is what every good result on the page wears. A grown file wearing
+    // it was the panel congratulating an outcome the visitor has to act on.
+    const grew = renderToStaticMarkup(
+      <SizeDelta
+        from="480 KB"
+        to="499 KB"
+        deltaLabel="+4% larger"
+        direction="larger"
+      />,
+    );
+    expect(grew).toContain("text-warning-text");
+    expect(grew).not.toContain("text-accent-text");
+
+    const shrank = renderToStaticMarkup(
+      <SizeDelta
+        from="2.4 MB"
+        to="480 KB"
+        deltaLabel="−80% smaller"
+        direction="smaller"
+      />,
+    );
+    expect(shrank).toContain("text-accent-text");
+    expect(shrank).not.toContain("text-warning-text");
+  });
 });
 
 describe("ResultSummary", () => {
   const BASE = {
     savedLine: "You just cut {saved} out of it.",
+    grewLine: "This came out bigger than what you dropped in.",
     encodedIn: "encoded in 4.2s",
     downloadHref: "blob:x",
     downloadName: "loop-compressed.gif",
@@ -171,13 +198,35 @@ describe("ResultSummary", () => {
   it("does not claim a saving when the file grew", () => {
     // Re-encoding an already-optimised GIF at a higher quality legitimately
     // produces a larger file. Every `savedLine` is written in the language of
-    // having gained something, so on this outcome the sentence is dropped —
-    // while the badge still says what happened, in words.
+    // having gained something, so on this outcome the sentence is replaced
+    // rather than blanked — the slot explains the growth instead.
     const markup = renderToStaticMarkup(
       <ResultSummary {...BASE} fromBytes={480_000} toBytes={499_200} />,
     );
     expect(markup).not.toContain("You just cut");
     expect(markup).toContain("+4% larger");
+    expect(markup).toContain("This came out bigger than what you dropped in.");
+  });
+
+  it("does not decorate a grown file as a success", () => {
+    // The tick answers "did the job run?" while the visitor is asking "did I
+    // get what I came for?". On this outcome the same circle warns instead, in
+    // warning colours rather than the accent every good result wears.
+    const grew = renderToStaticMarkup(
+      <ResultSummary {...BASE} fromBytes={480_000} toBytes={499_200} />,
+    );
+    expect(grew).toContain("bg-warning/15");
+    expect(grew).not.toContain("bg-progress/15");
+    // Still one pop, not a loop — §6 governs the motion, not the glyph.
+    expect(grew).toContain("pz-check-pop_200ms_ease-out_1");
+    expect(grew).not.toContain("infinite");
+
+    const shrank = renderToStaticMarkup(
+      <ResultSummary {...BASE} fromBytes={2_400_000} toBytes={480_000} />,
+    );
+    expect(shrank).toContain("bg-progress/15");
+    expect(shrank).not.toContain("bg-warning/15");
+    expect(shrank).not.toContain("This came out bigger");
   });
 
   it("keeps the sentence's line box whether or not it is filled", () => {

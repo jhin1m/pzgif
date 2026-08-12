@@ -76,6 +76,7 @@
     "keepTabOpen": "Your device is doing the work. Keep this tab open — closing it cancels the job.",
     "done": "Done",
     "encodedIn": "encoded in {seconds}s",
+    "grewLine": "Bigger than the file you dropped in — that one was already well optimised.",
     "sourceMeta": "{width}×{height} · {frames} frames",
     "sourceMetaUnknown": "{width}×{height}",
     "sourcePreviewAlt": "The GIF you loaded",

@@ -34,6 +34,26 @@ export function formatBytes(bytes: number): string {
 }
 
 /**
+ * Which way the file went, at the precision the badge actually prints.
+ *
+ * The rounding lives here rather than at the call sites so the word and the
+ * colour are decided by one number. A panel whose badge reads "no change" while
+ * its icon warns about growth is the panel disagreeing with itself, and that is
+ * only avoidable if both read the same rounded percentage.
+ */
+export type DeltaDirection = "smaller" | "larger" | "none" | "unknown";
+
+export function deltaDirection(
+  fromBytes: number,
+  toBytes: number,
+): DeltaDirection {
+  if (fromBytes <= 0) return "unknown";
+  const change = Math.round(((toBytes - fromBytes) / fromBytes) * 100);
+  if (change === 0) return "none";
+  return change < 0 ? "smaller" : "larger";
+}
+
+/**
  * The size-delta pill: "−80% smaller", or "+4% larger" when it grew.
  *
  * A compressor that made the file bigger has to say so plainly. It happens —
@@ -42,8 +62,9 @@ export function formatBytes(bytes: number): string {
  * measurement on the page that proves the tool works into the one that lies.
  */
 export function formatDelta(fromBytes: number, toBytes: number): string {
-  if (fromBytes <= 0) return "—";
+  const direction = deltaDirection(fromBytes, toBytes);
+  if (direction === "unknown") return "—";
+  if (direction === "none") return "no change";
   const change = Math.round(((toBytes - fromBytes) / fromBytes) * 100);
-  if (change === 0) return "no change";
   return change < 0 ? `−${Math.abs(change)}% smaller` : `+${change}% larger`;
 }

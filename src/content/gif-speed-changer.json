@@ -1,5 +1,6 @@
 {
   "slug": "gif-speed-changer",
+  "updated": "2026-08-06",
   "title": "GIF speed changer — speed up or slow down a GIF",
   "lead": "Play a GIF anywhere from a quarter speed to four times faster. You choose how: keep every frame and restretch the timing, or drop frames and keep the timing — the two produce noticeably different files, and the difference is explained rather than decided for you.",
   "meta": {
@@ -22,21 +23,48 @@
       "label": "Speed",
       "hint": "Below 1× the GIF plays slower and lasts longer. Above 1× it plays faster and finishes sooner.",
       "options": [
-        { "value": "0.25", "label": "0.25× — quarter speed" },
-        { "value": "0.5", "label": "0.5× — half speed" },
-        { "value": "0.75", "label": "0.75× — slightly slower" },
-        { "value": "1.5", "label": "1.5× — slightly faster" },
-        { "value": "2", "label": "2× — twice as fast" },
-        { "value": "3", "label": "3× — three times faster" },
-        { "value": "4", "label": "4× — four times faster" }
+        {
+          "value": "0.25",
+          "label": "0.25× — quarter speed"
+        },
+        {
+          "value": "0.5",
+          "label": "0.5× — half speed"
+        },
+        {
+          "value": "0.75",
+          "label": "0.75× — slightly slower"
+        },
+        {
+          "value": "1.5",
+          "label": "1.5× — slightly faster"
+        },
+        {
+          "value": "2",
+          "label": "2× — twice as fast"
+        },
+        {
+          "value": "3",
+          "label": "3× — three times faster"
+        },
+        {
+          "value": "4",
+          "label": "4× — four times faster"
+        }
       ]
     },
     "method": {
       "label": "How",
       "hint": "Retiming keeps the motion smooth and the file about the same size. Dropping frames makes it choppier and the file smaller.",
       "options": [
-        { "value": "retime", "label": "Keep every frame, change the delays" },
-        { "value": "drop", "label": "Drop frames, keep the delays" }
+        {
+          "value": "retime",
+          "label": "Keep every frame, change the delays"
+        },
+        {
+          "value": "drop",
+          "label": "Drop frames, keep the delays"
+        }
       ]
     },
     "methodRetimeOnly": {

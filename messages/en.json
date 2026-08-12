@@ -15,7 +15,8 @@
     "convert": "Convert",
     "presets": "Discord presets",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "guides": "Guides"
   },
   "theme": {
     "switchToDark": "Switch to dark theme",
@@ -55,7 +56,8 @@
     "legal": "Legal",
     "allTools": "All tools",
     "blurb": "Browser-native GIF tools. Your files stay on your device.",
-    "trustShort": "No upload. No server copy."
+    "trustShort": "No upload. No server copy.",
+    "guides": "Guides"
   },
   "notFound": {
     "title": "That page does not exist",
@@ -181,6 +183,27 @@
       "installFallbackDecoder": "Download the extra decoder ({megabytes} MB)",
       "tryOtherBrowser": "Chrome, Edge or Safari on a computer can do this",
       "report": "Report this failure"
+    }
+  },
+  "guides": {
+    "updated": "Last updated",
+    "toolsHeading": "Tools for this",
+    "moreHeading": "More guides",
+    "backToGuides": "All guides",
+    "discordTable": {
+      "caption": "Discord asset limits per surface, with the date each figure was last read from Discord's own documentation.",
+      "surface": "Surface",
+      "canvas": "Canvas",
+      "fileSize": "Discord's file-size limit",
+      "length": "Length cap",
+      "frameRate": "Frame-rate cap",
+      "verified": "Verified",
+      "exact": "exactly — other sizes are rejected",
+      "notPublished": "Not published",
+      "ourTarget": "this site aims at {size}",
+      "noCap": "None published",
+      "seconds": "{count} s",
+      "fps": "{count} fps"
     }
   }
 }

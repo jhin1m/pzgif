@@ -1,5 +1,6 @@
 {
   "slug": "resize-gif",
+  "updated": "2026-08-06",
   "title": "Resize GIF — change GIF dimensions online",
   "lead": "Set a GIF to an exact pixel width, or scale it by a percentage. The height follows the original proportions, the animation and its timing are preserved frame for frame, and the whole job runs in this tab.",
   "meta": {
@@ -22,8 +23,14 @@
       "label": "Size by",
       "hint": "Pixels when a platform gave you a number. Percent when you just want it smaller.",
       "options": [
-        { "value": "pixels", "label": "Exact width in pixels" },
-        { "value": "percent", "label": "Percentage of the original" }
+        {
+          "value": "pixels",
+          "label": "Exact width in pixels"
+        },
+        {
+          "value": "percent",
+          "label": "Percentage of the original"
+        }
       ]
     },
     "width": {
@@ -34,10 +41,22 @@
       "label": "Scale",
       "hint": "50% removes three quarters of the pixels. That is usually the point where a GIF stops being awkward to share.",
       "options": [
-        { "value": "75", "label": "75% — a light trim" },
-        { "value": "50", "label": "50% — half size" },
-        { "value": "33", "label": "33% — a third" },
-        { "value": "25", "label": "25% — quarter size" }
+        {
+          "value": "75",
+          "label": "75% — a light trim"
+        },
+        {
+          "value": "50",
+          "label": "50% — half size"
+        },
+        {
+          "value": "33",
+          "label": "33% — a third"
+        },
+        {
+          "value": "25",
+          "label": "25% — quarter size"
+        }
       ]
     }
   },

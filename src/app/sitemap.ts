@@ -7,8 +7,16 @@ import cookies from "@/content/legal/cookies.json";
 import dmca from "@/content/legal/dmca.json";
 import privacy from "@/content/legal/privacy.json";
 import terms from "@/content/legal/terms.json";
+import { GUIDE_CONTENT } from "@/lib/content/guides-content";
+import { TOOL_UPDATED } from "@/lib/tools/updated";
 import { SITE_URL } from "@/lib/site-config";
-import { LEGAL_ROUTES, liveRoutes } from "@/lib/tools/registry";
+import {
+  GUIDES_BASE_PATH,
+  GUIDE_ROUTES,
+  LEGAL_ROUTES,
+  guidePath,
+  liveRoutes,
+} from "@/lib/tools/registry";
 
 /**
  * `updated` for each legal page, keyed by slug.
@@ -41,12 +49,16 @@ const LEGAL_CONTENT: Readonly<Record<string, { updated: string }>> = {
  * the single edit that adds it here, to the related-tools blocks, and to nothing
  * else by accident.
  *
- * The legal pages carry a real `lastModified`, taken from the `updated` field of
- * their own content file. Not a build timestamp: "everything changed" on every
- * deploy tells a crawler the site changed and then gives it nothing changed to
- * find, which is a negative quality signal rather than a neutral one. The tool
- * entries have no date for the honest reason that their content files do not
- * carry one yet — inventing one here would be the same lie in a smaller font.
+ * **Every URL here carries a real `lastModified`, taken from the `updated` field
+ * of the page's own content file.** Not a build timestamp: "everything changed"
+ * on every deploy tells a crawler the site changed and then gives it nothing
+ * changed to find, which is a negative quality signal rather than a neutral one.
+ * The date lives with the prose in all three cases — tools, guides and legal —
+ * because the prose is the thing whose changing means anything to a crawler.
+ *
+ * The homepage is the one exception, and deliberately: it is a composite of the
+ * hero copy, the live tool grid and the preset teaser, so no single content file
+ * owns its date. `changeFrequency` carries what is honestly known about it.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
@@ -57,8 +69,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     ...liveRoutes().map((route) => ({
       url: `${SITE_URL}/${route.slug}`,
+      lastModified: TOOL_UPDATED[route.slug],
       changeFrequency: "monthly" as const,
       priority: 0.8,
+    })),
+    // The guides hub, then the guides. Ranked above the legal pages and below
+    // the tools: nobody searches for this site's Terms, and the guides are the
+    // pages someone might arrive at from a search without wanting a tool yet.
+    {
+      url: `${SITE_URL}${GUIDES_BASE_PATH}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    },
+    ...GUIDE_ROUTES.map((guide) => ({
+      url: `${SITE_URL}${guidePath(guide.slug)}`,
+      lastModified: GUIDE_CONTENT[guide.slug].updated,
+      changeFrequency: "yearly" as const,
+      priority: 0.6,
     })),
     // Lower priority than a tool page, and that is the accurate signal rather
     // than a modest one: nobody arrives at this site searching for its Terms.

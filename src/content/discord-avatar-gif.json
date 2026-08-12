@@ -1,5 +1,6 @@
 {
   "slug": "discord-avatar-gif",
+  "updated": "2026-08-10",
   "title": "Discord avatar GIF — small, round, and read at a glance",
   "lead": "The picture beside your name is drawn at about the size of a fingernail and masked into a circle. Whatever survives that is your avatar. This page builds one at the canvas Discord recommends and shows you the result at the scale it will be seen, which is the only test that matters.",
   "meta": {
@@ -26,10 +27,22 @@
       "label": "Colours",
       "hint": "A generous palette is wasted on something this small. Reducing it here is one of the safest savings on the site.",
       "options": [
-        { "value": "256", "label": "256 — the full palette" },
-        { "value": "128", "label": "128 — no visible difference" },
-        { "value": "64", "label": "64 — still hard to tell apart" },
-        { "value": "32", "label": "32 — bold shapes hold up" }
+        {
+          "value": "256",
+          "label": "256 — the full palette"
+        },
+        {
+          "value": "128",
+          "label": "128 — no visible difference"
+        },
+        {
+          "value": "64",
+          "label": "64 — still hard to tell apart"
+        },
+        {
+          "value": "32",
+          "label": "32 — bold shapes hold up"
+        }
       ]
     },
     "keepEveryNth": {
@@ -52,9 +65,18 @@
     "previewCaption": "The sizes an avatar is actually drawn at",
     "previewMessage": "posted a message",
     "previewSamples": [
-      { "px": 40, "label": "beside a message" },
-      { "px": 32, "label": "in the member list" },
-      { "px": 80, "label": "on the profile card" }
+      {
+        "px": 40,
+        "label": "beside a message"
+      },
+      {
+        "px": 32,
+        "label": "in the member list"
+      },
+      {
+        "px": 80,
+        "label": "on the profile card"
+      }
     ],
     "nextStep": "Next: User Settings → Profile, then set the avatar. Whether an animated one can be applied depends on your own account, and your client is the place that answers it.",
     "cropNote": "Non-square sources have their middle taken, and then the corners are hidden by a circular mask. Keep the subject centred and away from the edges.",

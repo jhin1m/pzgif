@@ -1,0 +1,62 @@
+{
+  "slug": "gif-frame-rate-limits",
+  "title": "Why a 60fps GIF is not 60fps",
+  "updated": "2026-08-10",
+  "meta": {
+    "title": "GIF frame rates — why 60fps is impossible and 30fps is approximate",
+    "description": "GIF stores frame delays in hundredths of a second, and browsers ignore the two shortest values. That puts a hard ceiling at 50fps and makes most frame rates unreachable."
+  },
+  "summary": "The format stores delays in hundredths of a second. That makes 50fps the ceiling and 30fps an approximation.",
+  "lead": "Export a clip at 60 frames per second, convert it to GIF, and the GIF will not play at 60 frames per second. Depending on what produced it, it will play at 50, or at 33, or — in the worst and commonest failure — at 10, six times slower than you asked for. None of this is a bug in the converter. It falls out of a two-byte field in a file format from 1989, and once you see the arithmetic the whole set of strange GIF timing behaviours becomes predictable.",
+  "sections": [
+    {
+      "heading": "The field that causes all of this",
+      "level": 2,
+      "paragraphs": [
+        "Each frame in a GIF carries its own delay, stored as a whole number of **hundredths of a second**. Not milliseconds — centiseconds. That is the entire resolution available for timing, and it is not adjustable.",
+        "So the frame rates a GIF can express are exactly 100 divided by a whole number. 100 divided by 2 is 50 frames per second. 100 divided by 3 is 33.3. Then 25, then 20, then 16.7, then 14.3, then 12.5. Between 50 and 33 there is nothing at all. There is no way to write 60, or 48, or 30, or 24, because none of them divide 100 evenly.",
+        "An encoder handed a 60fps source has to round. Sixty frames per second is a delay of 1.67 centiseconds, which rounds either to 2 — giving 50fps, and the clip runs slightly long — or to 1, which is where the real trouble starts."
+      ]
+    },
+    {
+      "heading": "The clamp that makes fast GIFs slow",
+      "level": 2,
+      "paragraphs": [
+        "Every browser treats delays of 0 and 1 centiseconds as if they were **10 centiseconds**. A tenth of a second. Ten frames per second.",
+        "This is a convention from the 1990s, when a GIF with a zero delay would render as fast as the machine could manage and peg the CPU of whoever opened the page. Rather than let that happen, browsers substituted a sane value, and the behaviour has been carried forward ever since because the web is full of files that depend on it.",
+        "The consequence is a cliff, not a slope. A GIF at 2 centiseconds per frame plays at 50fps. The same GIF at 1 centisecond per frame — nominally twice as fast — plays at 10fps, five times slower. Ask an encoder for 100fps and you get a slideshow.",
+        "This is the single most common cause of \"my sped-up GIF came out slower than the original\", and it is why the speed tool on this site refuses to shorten a delay past 20 milliseconds. Past that floor the only honest way to make an animation faster is to show fewer frames, so that is what it does — and it reports how many it dropped, because a frame count that changed quietly is a surprise waiting to happen somewhere else."
+      ]
+    },
+    {
+      "heading": "So what are the real frame rates?",
+      "level": 2,
+      "paragraphs": [
+        "**50fps** is the ceiling — a 2-centisecond delay, the shortest any browser will honour. Very few GIFs use it, because at that rate the file is enormous and the difference from 25 is barely visible on the kind of content GIFs carry.",
+        "**33fps** at 3 centiseconds is as close as the format gets to the 30fps that most video is shot at. It is 11% fast, which is not visible on a reaction loop and is visible on anything with speech or music in the source.",
+        "**25fps** at 4 centiseconds is the sweet spot for smooth motion at a sane file size, and it happens to be exactly half of 50, which makes it a clean target when converting from 50fps sources.",
+        "**20, 16.7, 12.5 and 10fps** are the usual working range for anything that has to fit a size budget. Below 10 the eye starts reading it as a sequence of pictures rather than as motion, though slow content tolerates it fine."
+      ]
+    },
+    {
+      "heading": "Why your 30fps source comes out wrong",
+      "level": 2,
+      "paragraphs": [
+        "A 30fps video frame lasts 33.33 milliseconds. The nearest whole centisecond is 3, and 3 centiseconds is 30 milliseconds. Every frame is 3.33 milliseconds short, and the error does not cancel out — it accumulates. Three hundred frames, which is ten seconds of source, come out as nine seconds of GIF.",
+        "That is playback about a tenth faster than the original. On a silent loop nobody notices. On anything cut to a beat, or on a clip where the timing is the joke, it is enough to feel wrong without being obvious enough to diagnose.",
+        "The format does allow a way out, because the delays are per-frame rather than global. Nothing stops an encoder alternating 3, 3 and 4 centiseconds, which averages to exactly 10 centiseconds per three frames — precisely 30fps, with a tiny amount of jitter nobody can see. It is a legitimate technique and not every encoder bothers with it.",
+        "The simpler answer, if timing matters to you, is to pick a frame rate the format can express and let the converter resample to it. Choosing 25 deliberately gives you an exactly correct 25fps GIF. Choosing 30 and hoping gives you an approximately correct one."
+      ]
+    },
+    {
+      "heading": "What this means when you are converting",
+      "level": 2,
+      "paragraphs": [
+        "Do not ask for a frame rate above 50. It cannot happen, and depending on how the rounding lands you may get 10 instead.",
+        "Prefer the values the format can hit exactly — 50, 25, 20, 10 — over the ones from video, which are 60, 30 and 24. The conversion has to resample either way; picking a reachable target means the resampling is clean rather than a rounding error smeared across every frame.",
+        "Remember that frame rate is also the second-biggest lever on file size, roughly linear in the frame count. Halving it halves the file. On most GIF content the drop from 25 to 12.5 costs far less perceptually than the equivalent saving taken out of the frame dimensions or the colour palette would.",
+        "And if you want to see the individual frames a GIF actually contains — the real count, at the real delays, rather than what the source video claimed — splitting it into frames is the direct way to check."
+      ]
+    }
+  ]
+}

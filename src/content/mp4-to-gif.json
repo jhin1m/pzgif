@@ -1,5 +1,6 @@
 {
   "slug": "mp4-to-gif",
+  "updated": "2026-08-10",
   "title": "MP4 to GIF — turn a clip into a loop, in your browser",
   "lead": "Pick the seconds you want with the two trim handles, choose a frame rate and a width, and the clip becomes an animated GIF without leaving this tab. The predicted size updates as you move the sliders, so you find out whether the result will be usable before you commit to making it.",
   "meta": {

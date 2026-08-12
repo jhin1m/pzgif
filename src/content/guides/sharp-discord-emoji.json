@@ -1,0 +1,67 @@
+{
+  "slug": "sharp-discord-emoji",
+  "title": "How to make a Discord emoji that isn't blurry",
+  "updated": "2026-08-10",
+  "meta": {
+    "title": "How to make a sharp Discord emoji — why yours came out blurry",
+    "description": "A Discord emoji is read at about 32 pixels. Blur almost always comes from framing, not from resolution. Here is what actually fixes it."
+  },
+  "summary": "It is nearly always the framing, not the resolution. Crop tight, then worry about the file size.",
+  "lead": "The emoji you uploaded looked fine in the file picker and turned into a grey smudge in the message. That is the normal outcome, and the usual fixes — more pixels, higher quality, a bigger source video — make it worse rather than better. The reason is that a Discord emoji is read at roughly a thirtieth of the area you designed it at, and almost everything that survives that reduction is decided before you touch a compression setting.",
+  "sections": [
+    {
+      "heading": "The size it is actually read at",
+      "level": 2,
+      "paragraphs": [
+        "The file is 128×128. Sitting inline in a line of message text it is drawn at around **32 pixels**. Sent on its own with no other text it gets the larger treatment, around 48. The full 128 is what you see in the emoji picker and essentially nowhere else.",
+        "Thirty-two pixels is about the width of this sentence's first two characters. At that size a face is a handful of pixels across, text is unreadable in every typeface ever made, and any detail thinner than about three pixels in the source has been averaged out of existence.",
+        "So the question is never \"how do I keep this sharp at 128\". It is \"what is still legible at 32\", and the answer to that is a composition question. Everything else in this page follows from it."
+      ]
+    },
+    {
+      "heading": "Blur cause one: the subject is too small in the frame",
+      "level": 2,
+      "paragraphs": [
+        "This is the cause in most cases, and it does not look like a resolution problem, which is why people reach for the wrong fix.",
+        "Take a 1920×1080 clip of someone reacting, square it off and shrink it to 128×128, and the face — which occupied maybe a fifth of the frame height — is now 25 pixels tall. There is nothing wrong with the encoding. There is simply no face left. Adding pixels back does not help, because the emoji is still displayed at 32.",
+        "The fix is to **crop hard before scaling**. Crop to the face, the hand, the object, the two words — whatever the emoji is actually about — until it fills the square. A tight crop of a mediocre source beats a full-frame crop of a pristine one every time at this size. If you take one thing from this page, it is this paragraph.",
+        "A useful test: shrink your source to a 32-pixel-wide thumbnail before you do anything else and look at it. If you cannot tell what it is, no amount of encoding will rescue it, and you need a tighter crop or a different moment."
+      ]
+    },
+    {
+      "heading": "Blur cause two: the downscale itself",
+      "level": 2,
+      "paragraphs": [
+        "Going from 1080 pixels to 128 in a single step is a reduction of more than eight times, and most image scalers do that badly — they sample sparsely, which produces aliasing on edges and a shimmering, unstable look on anything that moves. The result reads as both blurry and noisy at once, which is a strange combination and a reliable fingerprint of this problem.",
+        "The fix is mechanical: halve the image repeatedly until you are within about a factor of two of the target, then do the final step. Each halving averages neighbouring pixels properly, so detail is condensed rather than sampled away. The tools on this site do this internally for every resize, so it is not something you have to arrange — but it is worth knowing about if you are preparing the source somewhere else first.",
+        "The same reasoning is why you should crop before scaling rather than after. Cropping first means the scaler has less to throw away, so less of what you care about lands in the bin."
+      ]
+    },
+    {
+      "heading": "Blur cause three: spending the 256 KB on frames",
+      "level": 2,
+      "paragraphs": [
+        "Discord's emoji ceiling is 256 KB, and it is a hard rejection rather than a warning. Every frame you keep is a share of that budget that the remaining frames do not get, and when the budget runs out the encoder has to degrade something.",
+        "At 128×128 the natural instinct is to protect the frame rate and give up colours, because dropping frames feels like damaging the animation. It is the wrong way round. A 12-frame loop at full palette reads cleanly at 32 pixels; a 40-frame loop squeezed into the same 256 KB has visible palette banding and dither speckle, and at 32 pixels that speckle is the only thing you can see.",
+        "Most emoji ideas work at eight to fifteen frames. If yours genuinely needs forty, it is probably a sticker rather than an emoji — that surface has double the budget and six times the canvas."
+      ]
+    },
+    {
+      "heading": "Blur cause four: dithering, which is fixing the wrong problem",
+      "level": 2,
+      "paragraphs": [
+        "Dithering scatters pixels of adjacent palette colours to disguise banding in a gradient. On a large image it works well. At emoji size it is actively harmful: the scattered pixels are the same size as the features, so instead of blending into a smooth gradient they read as dirt on the image — and they inflate the file, because a fine checkerboard is the hardest thing there is for GIF's compressor to store.",
+        "If your source has soft gradients and you are fighting banding, the better move is to reduce what needs a gradient. Tighter crop, flatter subject, stronger contrast. Emoji that work are almost always high-contrast and graphically simple, and that is not an aesthetic preference — it is what survives being drawn 32 pixels across."
+      ]
+    },
+    {
+      "heading": "A working order",
+      "level": 2,
+      "paragraphs": [
+        "Pick the shortest span that carries the idea — a second or two, rarely more. Crop square and tight, so the subject fills the frame. Cut the frame rate until motion just starts to feel stepped, then go back one step. Scale to 128. Check the result at 32 pixels, not at 128.",
+        "The dedicated emoji page here does the last three of those automatically and searches for the largest settings that still land under 256 KB, using real encodes rather than an estimate, then shows the result at 32, 48 and 128 pixels side by side so you are judging it at the size it will be read at. The one thing it cannot do for you is choose the crop, which is the step that decides whether any of the rest matters.",
+        "For a crop you want to choose yourself rather than take from the centre, do that first with the crop tool and bring the result over."
+      ]
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 {
   "slug": "gif-to-mp4",
+  "updated": "2026-08-10",
   "title": "GIF to MP4 — make a heavy loop light again",
   "lead": "The same animation, in a video container, at a fraction of the weight — and with the embed code you need to drop it into a page so it behaves exactly like the GIF it replaces. Encoding happens on your own machine; the file is never uploaded.",
   "meta": {
@@ -26,9 +27,18 @@
       "label": "Visual quality",
       "hint": "Sets how many bits each second of picture is allowed. Crisp suits screen recordings with text; Small suits anything filmed, where the eye forgives far more.",
       "options": [
-        { "value": "balanced", "label": "Balanced" },
-        { "value": "crisp", "label": "Crisp — for text and line art" },
-        { "value": "small", "label": "Small — for filmed footage" }
+        {
+          "value": "balanced",
+          "label": "Balanced"
+        },
+        {
+          "value": "crisp",
+          "label": "Crisp — for text and line art"
+        },
+        {
+          "value": "small",
+          "label": "Small — for filmed footage"
+        }
       ]
     }
   },

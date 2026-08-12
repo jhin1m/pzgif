@@ -1,0 +1,66 @@
+{
+  "slug": "discord-image-size-limits",
+  "title": "Every Discord asset size limit, in one table",
+  "updated": "2026-08-10",
+  "meta": {
+    "title": "Discord image size limits — emoji, sticker, banner and avatar, verified",
+    "description": "The real dimensions and file-size caps for Discord emoji, stickers, server banners and avatars — with the figures Discord publishes separated from the ones it does not."
+  },
+  "summary": "The four surfaces, their real caps, and which numbers Discord has never actually published.",
+  "lead": "Search for Discord's asset limits and you will find a dozen pages confidently repeating figures that are wrong, half-right, or right for a surface other than the one you are looking at. The table below is generated from the same configuration the tools on this site encode against, so it cannot drift from what they actually produce — and it says outright which numbers come from Discord and which are conventions nobody at Discord ever wrote down.",
+  "sections": [
+    {
+      "heading": "The one distinction that matters",
+      "level": 2,
+      "paragraphs": [
+        "Discord publishes a maximum file size for exactly two of these four surfaces. For the other two it publishes dimensions and says nothing at all about bytes.",
+        "That silence is not an oversight you should fill in with a number from a forum post. It genuinely means there is no published ceiling, and every \"avatars must be under 10 MB\" you will read is somebody's guess that got repeated until it looked official. The table marks those cells as not published rather than inventing a figure, and where this site's tools aim at a size for such a surface, that target is ours and is labelled as ours.",
+        "The practical difference: a file that exceeds a published limit is **rejected at upload**, and you will know immediately. A file that is merely large on a surface with no published limit will usually go through, and the only cost is how long it takes to load for everyone who sees it."
+      ]
+    },
+    {
+      "heading": "Emoji",
+      "level": 2,
+      "paragraphs": [
+        "128×128 pixels, and a hard 256 KB ceiling that Discord does state. This is the one figure in this whole area that has never been in dispute.",
+        "The dimensions are a recommendation rather than a gate — a larger image uploads fine and Discord scales it down for display — but there is no reason to send one. Extra pixels are spent entirely on being thrown away by the scaler, and on a 256 KB budget that is the most expensive mistake available. An animated emoji at 128 pixels is already tight; at 256 pixels it is hopeless.",
+        "256 KB is a genuinely small budget for an animation. Getting there almost always means fewer frames rather than fewer colours, which is the opposite of most people's instinct."
+      ]
+    },
+    {
+      "heading": "Stickers",
+      "level": 2,
+      "paragraphs": [
+        "320×320 pixels **exactly**, 512 KB, at most 5 seconds, at most 60 frames per second. Stickers are the strictest surface Discord has, and the only one where the dimensions are enforced rather than suggested — a 300×300 file is refused, so a small source has to be scaled up rather than left as it is.",
+        "The two caps that catch people are the last two, because neither appears in most guides and both are checked at upload. An otherwise perfect sticker that runs for six seconds is rejected after you have done all the work. So is one whose frame rate reads above 60, which is easy to produce by accident when converting from a high-frame-rate video.",
+        "The 512 KB budget is double the emoji one, and it has to cover six times the pixel area at exact dimensions. In practice the length cap is doing you a favour: five seconds is not many frames, and that is most of how a sticker fits."
+      ]
+    },
+    {
+      "heading": "Server banner",
+      "level": 2,
+      "paragraphs": [
+        "960×540, and no published file-size limit.",
+        "This is the surface with the most contaminated search results. The figure **680×240** appears everywhere, including in one of this project's own early design documents, and it matches no Discord surface at all. It is almost certainly a garbled version of the 600×240 that the community quotes for *profile* banners — a completely different surface, on a different part of the product, whose dimensions Discord documents nowhere. Encoding a banner at 680×240 produces a file that Discord letterboxes on every single view.",
+        "Because there is no published byte cap, the useful constraint on a banner is behavioural rather than technical: a server banner animates for roughly five seconds when someone opens the server and then holds a still frame. Anything past that point is bytes that nobody will ever see rendered. That is why the banner preset here targets five seconds even though nothing forces it to."
+      ]
+    },
+    {
+      "heading": "Avatar",
+      "level": 2,
+      "paragraphs": [
+        "128×128, and no published file-size limit — despite the 256 KB figure that circulates widely, which is the emoji ceiling borrowed and applied to a surface it does not govern.",
+        "Animated avatars require Nitro to set, which is a Discord account question rather than a file question, and it is the reason this surface gets less scrutiny than the others. The file itself is undemanding: it is displayed at a small size in a circular mask, so detail near the corners is discarded by the crop before anyone sees it, and a centre-weighted composition matters far more than resolution does."
+      ]
+    },
+    {
+      "heading": "Why these figures carry a date",
+      "level": 2,
+      "paragraphs": [
+        "Discord edits these articles. The emoji documentation changed in late July 2026 and the sticker and banner articles changed within the following week — three revisions inside a fortnight, on pages that had been stable for years before that.",
+        "So every row in the table above shows the date it was last read from Discord's own support article, with a link to the article. That is a more useful promise than \"we keep this updated\", which is a thing a solo operator cannot honestly guarantee about figures that move this fast. If the date is old and the number matters to you, follow the link — it is right there for exactly that reason.",
+        "The same figures drive the automatic fitting on the preset pages, so a change to them changes what the tools produce in the same commit. There is no second copy of these numbers anywhere in this site to fall out of step."
+      ]
+    }
+  ]
+}

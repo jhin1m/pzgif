@@ -1,5 +1,6 @@
 {
   "slug": "discord-emoji-gif",
+  "updated": "2026-08-10",
   "title": "Discord emoji GIF — 128 by 128, under 256 KB, fitted for you",
   "lead": "An animated custom emoji has to weigh 256 KB or less. Almost everyone who hits that wall reaches for the resolution first, and almost everyone is reaching for the wrong dial — the weight is in the frame count. This page resizes, then trims the loop rather than the picture.",
   "meta": {
@@ -26,10 +27,22 @@
       "label": "Colours",
       "hint": "How many distinct shades each frame may use. Emoji are usually bold, flat artwork, which survives a small palette better than a photograph would.",
       "options": [
-        { "value": "256", "label": "256 — the full palette" },
-        { "value": "128", "label": "128 — safe for most artwork" },
-        { "value": "64", "label": "64 — bold shapes and outlines" },
-        { "value": "32", "label": "32 — logos and single-colour art" }
+        {
+          "value": "256",
+          "label": "256 — the full palette"
+        },
+        {
+          "value": "128",
+          "label": "128 — safe for most artwork"
+        },
+        {
+          "value": "64",
+          "label": "64 — bold shapes and outlines"
+        },
+        {
+          "value": "32",
+          "label": "32 — logos and single-colour art"
+        }
       ]
     },
     "keepEveryNth": {
@@ -52,9 +65,18 @@
     "previewCaption": "How it reads at emoji size",
     "previewMessage": "ship it",
     "previewSamples": [
-      { "px": 32, "label": "inline with a message" },
-      { "px": 48, "label": "sent on its own" },
-      { "px": 128, "label": "the file itself" }
+      {
+        "px": 32,
+        "label": "inline with a message"
+      },
+      {
+        "px": 48,
+        "label": "sent on its own"
+      },
+      {
+        "px": 128,
+        "label": "the file itself"
+      }
     ],
     "nextStep": "Next: Server Settings → Emoji → Upload Emoji. The name needs at least two characters and may only use letters, numbers and underscores.",
     "cropNote": "Anything that is not already square has its middle taken. Emoji reward cropping in close, so this is usually an improvement rather than a compromise.",

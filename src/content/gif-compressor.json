@@ -1,5 +1,6 @@
 {
   "slug": "gif-compressor",
+  "updated": "2026-08-06",
   "title": "GIF compressor — shrink GIF file size online",
   "lead": "Make a GIF smaller without the muddy, banded look most compressors leave behind. Everything runs inside this tab — and the before/after slider shows the real byte counts, so you can judge the trade for yourself instead of taking our word for it.",
   "meta": {
@@ -34,10 +35,22 @@
       "label": "Colours",
       "hint": "256 keeps the full palette and the best-looking output. Fewer colours shrinks the palette table in every frame — clean on flat art, visible banding on photos.",
       "options": [
-        { "value": "256", "label": "256 — best quality" },
-        { "value": "128", "label": "128 — good balance" },
-        { "value": "64", "label": "64 — small file" },
-        { "value": "32", "label": "32 — flat art only" }
+        {
+          "value": "256",
+          "label": "256 — best quality"
+        },
+        {
+          "value": "128",
+          "label": "128 — good balance"
+        },
+        {
+          "value": "64",
+          "label": "64 — small file"
+        },
+        {
+          "value": "32",
+          "label": "32 — flat art only"
+        }
       ]
     },
     "width": {

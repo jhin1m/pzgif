@@ -5,115 +5,111 @@
   <img alt="PZGIF — GIF tools that never upload your file" src=".github/assets/hero-light.svg" width="100%">
 </picture>
 
-<br>
+<br><br>
 
 [![Live](https://img.shields.io/badge/live-pzgif.com-2F5DE8?style=for-the-badge&logoColor=white)](https://pzgif.com)
 [![CI](https://img.shields.io/github/actions/workflow/status/jhin1m/pzgif/ci.yml?branch=main&style=for-the-badge&label=CI&labelColor=14171F)](https://github.com/jhin1m/pzgif/actions/workflows/ci.yml)
 [![Licence](https://img.shields.io/badge/code-AGPL--3.0-0E9C93?style=for-the-badge&labelColor=14171F)](./LICENSE)
 
-<sub><b>5 of 14 routes live</b> &nbsp;·&nbsp; <a href="#tools">Tools</a> &nbsp;·&nbsp; <a href="#the-engine">Engine</a> &nbsp;·&nbsp; <a href="#getting-started">Getting started</a> &nbsp;·&nbsp; <a href="#why-the-source-is-public">Licence</a></sub>
+<sub><a href="#the-difference">The difference</a> &nbsp;·&nbsp; <a href="#the-tools">Tools</a> &nbsp;·&nbsp; <a href="#the-engine">Engine</a> &nbsp;·&nbsp; <a href="#run-it">Run it</a> &nbsp;·&nbsp; <a href="#why-the-source-is-public">Licence</a></sub>
 
 </div>
 
----
-
-## What it does
+<br>
 
 Drop a GIF or a video in. It is decoded, transformed and re-encoded by your own
-CPU, inside a Web Worker. The bytes never leave the machine — there is nothing
-to delete afterwards, because nothing was ever sent.
+CPU, inside a Web Worker in the tab you already have open. There is nothing to
+delete afterwards, because nothing was ever sent.
 
-| | Upload-based GIF site | **PZGIF** |
-|---|---|---|
-| Where the work happens | their server | **your tab** |
-| What leaves your machine | the whole file | **nothing** |
-| Retention policy you must trust | yes | **there is no copy to retain** |
-| Ceiling | their queue and rate limit | **your device's memory** |
+<br>
 
-## The three rules
+## The difference
 
-Everything in this repo bends to these. They are not style preferences.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/promise-dark.svg">
+  <img alt="An upload-based GIF site sends the whole file to its server. PZGIF keeps it in the tab and never contacts one." src=".github/assets/promise-light.svg" width="100%">
+</picture>
 
-| | Rule | Why |
-|:--:|---|---|
-| **1** | **No page is cross-origin isolated.** | `COEP: require-corp` breaks ad serving and `credentialless` is unsupported in Safari. Multi-threaded WASM needs `SharedArrayBuffer`, which needs isolation — so it is out permanently. `pnpm check:forbidden` enforces this mechanically. |
-| **2** | **Progress is never faked.** | Every percentage derives from a real counter — a decoded-frame index or an encoder callback. When progress is genuinely unknown, the UI shows an indeterminate track, not an invented ramp. |
-| **3** | **Prose is never templated.** | Fourteen near-identical pages filled from one template is what Google's scaled-content-abuse policy penalises, site-wide. The registry owns structure only; every word of explainer copy is hand-written. |
+<br>
 
-## Tools
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/stats-dark.svg">
+  <img alt="Zero bytes leave the machine. Nine tools share one engine. All of it runs in a single Web Worker." src=".github/assets/stats-light.svg" width="100%">
+</picture>
 
-Scope is fixed at **9 tools + a Discord preset cluster**. `src/lib/tools/registry.ts`
-is the single typed source for routes, nav, footer and sitemap.
+<br>
 
-<table>
-<tr><th align="left">Edit</th><th align="left">Convert</th><th align="left">Discord presets</th></tr>
-<tr valign="top"><td>
+## The tools
 
-- ✅ GIF compressor
-- ✅ Resize GIF
-- ✅ Crop GIF
-- ✅ GIF speed changer
-- ✅ Reverse GIF
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/tools-dark.svg">
+  <img alt="Edit: GIF compressor, resize, crop, speed changer, reverse — all live. Convert: MP4 to GIF, GIF to MP4, WebP to GIF, split to frames. Discord presets: hub, emoji, sticker, banner, avatar." src=".github/assets/tools-light.svg" width="100%">
+</picture>
 
-</td><td>
+Scope is fixed at nine tools and a Discord preset cluster, and it is not going
+to grow. `src/lib/tools/registry.ts` is the one typed source for routes, nav,
+footer and sitemap — `status` there is authoritative, and the sitemap filters on
+it so a crawl never lands on a 404.
 
-- ⬜ MP4 → GIF
-- ⬜ GIF → MP4
-- ⬜ WebP → GIF
-- ⬜ Split GIF to frames
-
-</td><td>
-
-- ⬜ GIF for Discord *(hub)*
-- ⬜ Emoji
-- ⬜ Sticker
-- ⬜ Banner
-- ⬜ Avatar
-
-</td></tr>
-</table>
-
-<sub>✅ shipped · ⬜ route defined, page not yet live. `status` in the registry is authoritative; the sitemap filters on it so a crawl never hits a 404.</sub>
+<br>
 
 ## The engine
 
-All of `src/lib/media/` runs inside a Web Worker. The main thread never decodes a frame.
-
-```
-File input
-  ├─ video          → mediabunny (demux) → WebCodecs VideoDecoder
-  ├─ animated GIF   → modern-gif          (every browser — Safari has no ImageDecoder)
-  └─ animated WebP  → ImageDecoder        (where present)
-                              │
-                              ▼
-              OffscreenCanvas in a Web Worker
-        resize · crop · speed · reverse · frame select
-                              │
-                              ▼  RGBA frames
-  ┌───────────────────────────┼───────────────────────────┐
-  ▼                           ▼                           ▼
-gifski-wasm                gifenc                  WebCodecs encoder
-optimised GIF          live preview only            MP4 / WebM
-```
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/engine-dark.svg">
+  <img alt="Video, animated GIF and animated WebP are decoded, transformed on an OffscreenCanvas inside a Web Worker, then re-encoded by gifski-wasm, gifenc or a WebCodecs encoder." src=".github/assets/engine-light.svg" width="100%">
+</picture>
 
 **gifski is the differentiator.** Most browser-side competitors ship `gif.js` or
-`gifenc` and look visibly worse. The cost of that choice is the licence below.
+`gifenc` and look visibly worse for it. The cost of choosing better output is the
+licence at the bottom of this page.
 
-**Limits are computed, not guessed.** gifski holds `frames × w × h × 4 × 2` bytes
-resident and cannot stream, so admission control refuses a job *before* decode
-with concrete alternative settings — never an OOM mid-job. Input file size is
-not the binding constraint and is never advertised as one.
+**Limits are computed, not guessed.** gifski holds every frame resident and
+cannot stream, so admission control refuses a job *before* decode and offers
+concrete alternative settings — never an OOM halfway through. Input file size is
+not the binding constraint, and is never advertised as one.
 
-## Getting started
+<br>
 
-Requires **Node ≥ 20.9** and **pnpm**.
+## Three rules that override everything
+
+They are not style preferences. Each one has a script that enforces it.
+
+> **One — no page is cross-origin isolated.**
+> `COEP: require-corp` breaks ad serving and `credentialless` is unsupported in
+> Safari. Multi-threaded WASM needs `SharedArrayBuffer`, which needs isolation,
+> so it is out permanently. `pnpm check:forbidden` fails the build if anything
+> reintroduces it.
+
+> **Two — progress is never faked.**
+> Every percentage comes off a real counter: a decoded-frame index or an encoder
+> callback. When progress is genuinely unknown the UI shows an indeterminate
+> track and the word *Preparing…*, not an invented ramp.
+
+> **Three — prose is never templated.**
+> Fourteen near-identical pages filled from one template is exactly what Google's
+> scaled-content-abuse policy penalises, and the penalty is site-wide. The
+> registry owns structure only. Every word of explainer copy is hand-written.
+
+<br>
+
+## Run it
+
+Node ≥ 20.9 and pnpm.
 
 ```bash
 pnpm install
-pnpm dev          # Turbopack dev server on :3000
+pnpm dev
 ```
 
-### Scripts
+That is the whole setup — no services, no keys, no database. `pnpm preview`
+builds and runs on workerd, which is the real deploy target; `pnpm start` runs
+the Next server and is not.
+
+<details>
+<summary><b>Every other script</b></summary>
+
+<br>
 
 | Command | What it does |
 |---|---|
@@ -122,24 +118,25 @@ pnpm dev          # Turbopack dev server on :3000
 | `pnpm lint` | ESLint — Next 16 removed `next lint` |
 | `pnpm test` | Vitest |
 | `pnpm test:e2e` | Playwright, against a production build |
-| `pnpm bench` | Engine benchmarks (`playwright.bench.config.ts`) |
+| `pnpm bench` | Engine benchmarks |
+| `pnpm deploy` | Verifies the source SHA, builds, ships to Cloudflare |
 
-<details>
-<summary><b>Guard scripts</b> — each one exists because something broke once</summary>
-
-<br>
+Each guard below exists because something broke once:
 
 | Command | Fails when |
 |---|---|
-| `pnpm check:forbidden` | Anything reintroduces `COOP`/`COEP`/`SharedArrayBuffer` — rule 1 |
+| `pnpm check:forbidden` | Anything reintroduces `COOP`/`COEP`/`SharedArrayBuffer` |
 | `pnpm check:static` | A route stops being statically prerenderable |
 | `pnpm check:landing` | The landing bundle grows past its budget |
-| `pnpm check:heavy` | A heavy dep (e.g. `@ffmpeg/core`) reaches a client chunk |
+| `pnpm check:heavy` | A heavy dependency reaches a client chunk |
 | `pnpm check:source-sha` | The footer's source link stops matching the built commit |
 
 </details>
 
-## Layout
+<details>
+<summary><b>Where things live</b></summary>
+
+<br>
 
 ```
 src/app/[locale]/          SSG shells — [locale]/layout.tsx IS the root layout
@@ -150,35 +147,44 @@ src/content/               hand-written per-tool copy — data files, not .tsx
 src/components/            shared components; ui/ holds shadcn primitives
 messages/                  next-intl UI strings
 public/wasm/<version>/     .wasm binaries, immutable-cached
+.github/assets/            README artwork — regenerate with generate.py
 ```
 
-## Docs
+</details>
+
+<details>
+<summary><b>Documents that outrank this one</b></summary>
+
+<br>
 
 | File | Governs |
 |---|---|
-| [`CLAUDE.md`](./CLAUDE.md) | **Read first.** The rules above plus the conventions easiest to get wrong |
+| [`CLAUDE.md`](./CLAUDE.md) | **Read first.** The three rules plus the conventions easiest to get wrong |
 | [`docs/tech-stack.md`](./docs/tech-stack.md) | Architecture, library choices, rejected alternatives |
 | [`docs/design-guidelines.md`](./docs/design-guidelines.md) | Tokens, component states, ad-slot law, a11y |
 | [`docs/infrastructure-runbook.md`](./docs/infrastructure-runbook.md) | Everything needing an account or a DNS record |
 
-> `docs/wireframe/*.html` is the visual source of truth and a voice reference —
-> but its numbers are **unverified** until the copy audit clears them. Do not
-> reuse them.
+`docs/wireframe/*.html` is the visual source of truth and a voice reference — but
+its *numbers* are unverified until the copy audit clears them. Do not reuse them.
+
+</details>
+
+<br>
 
 ## Why the source is public
 
-`gifski`, the encoder that makes PZGIF's output visibly better than the usual
-`gif.js`/`gifenc` competitors, is AGPL-3.0. Delivering it to a browser is
-*conveyance*, so this client is published under the AGPL too. The footer of
-every page links to the exact commit that page was built from.
+`gifski` — the encoder that makes the output visibly better than the usual
+`gif.js` and `gifenc` competitors — is AGPL-3.0. Delivering it to a browser is
+*conveyance*, so this client is published under the AGPL too. The footer of every
+page links to the exact commit that page was built from.
 
-Site copy and brand assets are a separate work and are **not** AGPL — see
-[`LICENSE-CONTENT`](./LICENSE-CONTENT) and [`NOTICE`](./NOTICE). You can run and
-modify this privately with the content in place; to publish, bring your own.
+Site copy and brand assets are a separate work and are **not** AGPL; see
+[`LICENSE-CONTENT`](./LICENSE-CONTENT) and [`NOTICE`](./NOTICE). Run and modify
+this privately with the content in place. To publish, bring your own.
 
-## Licence
+**Code** — [GNU AGPL-3.0-or-later](./LICENSE) &nbsp;·&nbsp; **Content and brand** — [all rights reserved](./LICENSE-CONTENT)
 
-**Code** — [GNU AGPL-3.0-or-later](./LICENSE) · **Content and brand** — [all rights reserved](./LICENSE-CONTENT)
+<br>
 
 <div align="center"><sub>
 

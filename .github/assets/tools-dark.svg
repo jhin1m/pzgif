@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 452" width="1280" height="452" role="img" aria-labelledby="ttl dsc">
+  <title id="ttl">The nine PZGIF tools and the Discord preset cluster</title>
+  <desc id="dsc">Edit: compressor, resize, crop, speed, reverse. Convert: MP4 to GIF, GIF to MP4, WebP to GIF, split to frames. Discord presets: hub, emoji, sticker, banner, avatar.</desc>
+  <defs>
+    <radialGradient id="glowA" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#3D5AFE" stop-opacity="0.34"/>
+      <stop offset="100%" stop-color="#3D5AFE" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#0E9C93" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#0E9C93" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="frame">
+      <rect x="0" y="0" width="1280" height="452" rx="24"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#frame)">
+    <rect width="1280" height="452" fill="#0B0D12"/>
+    <circle cx="1040" cy="-40" r="360" fill="url(#glowA)"/>
+    <circle cx="140" cy="492" r="320" fill="url(#glowB)"/>
+  </g>
+  <rect x="0.75" y="0.75" width="1278.5" height="450.5" rx="24" fill="none" stroke="#1F2937" stroke-width="1.5"/>
+  <text x="64" y="68" font-size="11.5" fill="#6E90FF" font-weight="700" letter-spacing="1.6">EDIT</text>
+  <text x="440" y="68" font-size="12" fill="#9AA1B0" font-weight="700" text-anchor="end">5</text>
+  <line x1="64" y1="84" x2="440" y2="84" stroke="#1F2937" stroke-width="1.25" stroke-linecap="butt"/>
+  <rect x="64" y="108" width="40" height="40" rx="11" fill="#161E33" stroke="#6E90FF" stroke-width="1.25"/>
+  <path d="M 75,123 L 81,128 L 75,133" fill="none" stroke="#6E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 93,123 L 87,128 L 93,133" fill="none" stroke="#6E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="84" y1="120" x2="84" y2="136" stroke="#6E90FF" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="3 3"/>
+  <text x="120" y="133" font-size="16" fill="#F8F9FB" font-weight="600">GIF compressor</text>
+  <circle cx="432" cy="128" r="4.5" fill="#2DD4C0"/>
+  <rect x="64" y="164" width="40" height="40" rx="11" fill="#161E33" stroke="#6E90FF" stroke-width="1.25"/>
+  <rect x="75" y="175" width="12" height="12" rx="2" fill="none" stroke="#6E90FF" stroke-width="1.7"/>
+  <rect x="81" y="181" width="12" height="12" rx="2" fill="none" stroke="#6E90FF" stroke-width="1.7" stroke-dasharray="3 2.5"/>
+  <text x="120" y="189" font-size="16" fill="#F8F9FB" font-weight="600">Resize GIF</text>
+  <circle cx="432" cy="184" r="4.5" fill="#2DD4C0"/>
+  <rect x="64" y="220" width="40" height="40" rx="11" fill="#161E33" stroke="#6E90FF" stroke-width="1.25"/>
+  <path d="M 79,230 v 15 h 15" fill="none" stroke="#6E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 74,235 h 15 v 15" fill="none" stroke="#6E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="120" y="245" font-size="16" fill="#F8F9FB" font-weight="600">Crop GIF</text>
+  <circle cx="432" cy="240" r="4.5" fill="#2DD4C0"/>
+  <rect x="64" y="276" width="40" height="40" rx="11" fill="#161E33" stroke="#6E90FF" stroke-width="1.25"/>
+  <path d="M 76,290 L 83,296 L 76,302" fill="none" stroke="#6E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 84,290 L 91,296 L 84,302" fill="none" stroke="#6E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="120" y="301" font-size="16" fill="#F8F9FB" font-weight="600">GIF speed changer</text>
+  <circle cx="432" cy="296" r="4.5" fill="#2DD4C0"/>
+  <rect x="64" y="332" width="40" height="40" rx="11" fill="#161E33" stroke="#6E90FF" stroke-width="1.25"/>
+  <path d="M 77,354 a 7.5,7.5 0 1 1 3,5.5" fill="none" stroke="#6E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 74,348 L 77,354.5 L 83,351" fill="none" stroke="#6E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="120" y="357" font-size="16" fill="#F8F9FB" font-weight="600">Reverse GIF</text>
+  <circle cx="432" cy="352" r="4.5" fill="#2DD4C0"/>
+  <text x="464" y="68" font-size="11.5" fill="#6E90FF" font-weight="700" letter-spacing="1.6">CONVERT</text>
+  <text x="808" y="68" font-size="12" fill="#9AA1B0" font-weight="700" text-anchor="end">4</text>
+  <line x1="464" y1="84" x2="808" y2="84" stroke="#1F2937" stroke-width="1.25" stroke-linecap="butt"/>
+  <rect x="464" y="108" width="40" height="40" rx="11" fill="#191D26" stroke="#1F2937" stroke-width="1.25"/>
+  <path d="M 474,122 l 6,6 l -6,6 z" fill="#9AA1B0" stroke="#9AA1B0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 482,128 h 4" fill="none" stroke="#9AA1B0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="485" y="123" width="9" height="10" rx="1.5" fill="none" stroke="#9AA1B0" stroke-width="1.7"/>
+  <text x="520" y="133" font-size="16" fill="#9AA1B0" font-weight="450">MP4 → GIF</text>
+  <circle cx="800" cy="128" r="4.5" fill="none" stroke="#374151" stroke-width="1.5"/>
+  <rect x="464" y="164" width="40" height="40" rx="11" fill="#191D26" stroke="#1F2937" stroke-width="1.25"/>
+  <rect x="474" y="179" width="9" height="10" rx="1.5" fill="none" stroke="#9AA1B0" stroke-width="1.7"/>
+  <path d="M 485,184 h 4" fill="none" stroke="#9AA1B0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 488,178 l 6,6 l -6,6 z" fill="#9AA1B0" stroke="#9AA1B0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="520" y="189" font-size="16" fill="#9AA1B0" font-weight="450">GIF → MP4</text>
+  <circle cx="800" cy="184" r="4.5" fill="none" stroke="#374151" stroke-width="1.5"/>
+  <rect x="464" y="220" width="40" height="40" rx="11" fill="#191D26" stroke="#1F2937" stroke-width="1.25"/>
+  <rect x="474" y="232" width="11" height="11" rx="2" fill="none" stroke="#9AA1B0" stroke-width="1.7"/>
+  <rect x="483" y="237" width="11" height="11" rx="2" fill="#14171F" stroke="#9AA1B0" stroke-width="1.7"/>
+  <text x="520" y="245" font-size="16" fill="#9AA1B0" font-weight="450">WebP → GIF</text>
+  <circle cx="800" cy="240" r="4.5" fill="none" stroke="#374151" stroke-width="1.5"/>
+  <rect x="464" y="276" width="40" height="40" rx="11" fill="#191D26" stroke="#1F2937" stroke-width="1.25"/>
+  <rect x="474" y="291" width="10" height="10" rx="1.5" fill="none" stroke="#9AA1B0" stroke-width="1.7"/>
+  <rect x="486" y="287" width="7" height="7" rx="1.5" fill="none" stroke="#9AA1B0" stroke-width="1.5"/>
+  <rect x="486" y="298" width="7" height="7" rx="1.5" fill="none" stroke="#9AA1B0" stroke-width="1.5"/>
+  <text x="520" y="301" font-size="16" fill="#9AA1B0" font-weight="450">Split to frames</text>
+  <circle cx="800" cy="296" r="4.5" fill="none" stroke="#374151" stroke-width="1.5"/>
+  <text x="840" y="68" font-size="11.5" fill="#6E90FF" font-weight="700" letter-spacing="1.6">DISCORD PRESETS</text>
+  <text x="1216" y="68" font-size="12" fill="#9AA1B0" font-weight="700" text-anchor="end">5</text>
+  <line x1="840" y1="84" x2="1216" y2="84" stroke="#1F2937" stroke-width="1.25" stroke-linecap="butt"/>
+  <rect x="840" y="108" width="40" height="40" rx="11" fill="#191D26" stroke="#1F2937" stroke-width="1.25"/>
+  <rect x="851" y="119" width="7" height="7" rx="1.5" fill="none" stroke="#9AA1B0" stroke-width="1.6"/>
+  <rect x="862" y="119" width="7" height="7" rx="1.5" fill="none" stroke="#9AA1B0" stroke-width="1.6"/>
+  <rect x="851" y="130" width="7" height="7" rx="1.5" fill="none" stroke="#9AA1B0" stroke-width="1.6"/>
+  <rect x="862" y="130" width="7" height="7" rx="1.5" fill="none" stroke="#9AA1B0" stroke-width="1.6"/>
+  <text x="896" y="133" font-size="16" fill="#9AA1B0" font-weight="450">Preset hub</text>
+  <circle cx="1208" cy="128" r="4.5" fill="none" stroke="#374151" stroke-width="1.5"/>
+  <rect x="840" y="164" width="40" height="40" rx="11" fill="#191D26" stroke="#1F2937" stroke-width="1.25"/>
+  <circle cx="860" cy="184" r="9" fill="none" stroke="#9AA1B0" stroke-width="1.7"/>
+  <circle cx="857" cy="182" r="1.4" fill="#9AA1B0"/>
+  <circle cx="863" cy="182" r="1.4" fill="#9AA1B0"/>
+  <path d="M 856,187 a 5,4 0 0 0 8,0" fill="none" stroke="#9AA1B0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="896" y="189" font-size="16" fill="#9AA1B0" font-weight="450">Emoji</text>
+  <circle cx="1208" cy="184" r="4.5" fill="none" stroke="#374151" stroke-width="1.5"/>
+  <rect x="840" y="220" width="40" height="40" rx="11" fill="#191D26" stroke="#1F2937" stroke-width="1.25"/>
+  <path d="M 851,233 a 2,2 0 0 1 2,-2 h 14 a 2,2 0 0 1 2,2 v 9 l -7,7 h -9 a 2,2 0 0 1 -2,-2 z" fill="none" stroke="#9AA1B0" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 869,242 h -5 a 2,2 0 0 0 -2,2 v 5" fill="none" stroke="#9AA1B0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="896" y="245" font-size="16" fill="#9AA1B0" font-weight="450">Sticker</text>
+  <circle cx="1208" cy="240" r="4.5" fill="none" stroke="#374151" stroke-width="1.5"/>
+  <rect x="840" y="276" width="40" height="40" rx="11" fill="#191D26" stroke="#1F2937" stroke-width="1.25"/>
+  <rect x="850" y="291" width="20" height="10" rx="2" fill="none" stroke="#9AA1B0" stroke-width="1.7"/>
+  <line x1="853" y1="296" x2="861" y2="296" stroke="#9AA1B0" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="896" y="301" font-size="16" fill="#9AA1B0" font-weight="450">Banner</text>
+  <circle cx="1208" cy="296" r="4.5" fill="none" stroke="#374151" stroke-width="1.5"/>
+  <rect x="840" y="332" width="40" height="40" rx="11" fill="#191D26" stroke="#1F2937" stroke-width="1.25"/>
+  <circle cx="860" cy="349" r="4.5" fill="none" stroke="#9AA1B0" stroke-width="1.7"/>
+  <path d="M 852,361 a 8,7 0 0 1 16,0" fill="none" stroke="#9AA1B0" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="860" cy="352" r="10" fill="none" stroke="#9AA1B0" stroke-width="1.3" opacity="0.45"/>
+  <text x="896" y="357" font-size="16" fill="#9AA1B0" font-weight="450">Avatar</text>
+  <circle cx="1208" cy="352" r="4.5" fill="none" stroke="#374151" stroke-width="1.5"/>
+  <circle cx="70" cy="414" r="4.5" fill="#2DD4C0"/>
+  <text x="84" y="418" font-size="13" fill="#9AA1B0" font-weight="600">live</text>
+  <circle cx="140" cy="414" r="4.5" fill="none" stroke="#374151" stroke-width="1.5"/>
+  <text x="154" y="418" font-size="13" fill="#9AA1B0" font-weight="450">route defined, page not yet shipped</text>
+  <text x="1216" y="418" font-size="12.5" fill="#9AA1B0" font-weight="450" text-anchor="end" font-family="'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">src/lib/tools/registry.ts is the single source</text>
+</svg>

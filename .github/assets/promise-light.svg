@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 372" width="1280" height="372" role="img" aria-labelledby="ttl dsc">
+  <title id="ttl">Upload-based GIF sites versus PZGIF</title>
+  <desc id="dsc">An upload-based site sends your whole file to its server. PZGIF keeps the file in the tab and never contacts a server.</desc>
+  <defs>
+    <radialGradient id="glowA" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#3D5AFE" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#3D5AFE" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#0E9C93" stop-opacity="0.09"/>
+      <stop offset="100%" stop-color="#0E9C93" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="frame">
+      <rect x="0" y="0" width="1280" height="372" rx="24"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#frame)">
+    <rect width="1280" height="372" fill="#FFFFFF"/>
+    <circle cx="1040" cy="-40" r="360" fill="url(#glowA)"/>
+    <circle cx="140" cy="412" r="320" fill="url(#glowB)"/>
+  </g>
+  <defs>
+    <marker id="aDanger" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="9" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,4 L0,8 z" fill="#B91C1C"/>
+    </marker>
+    <marker id="aAccent" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="9" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,4 L0,8 z" fill="#0B7A73"/>
+    </marker>
+  </defs>
+  <rect x="0.75" y="0.75" width="1278.5" height="370.5" rx="24" fill="none" stroke="#E1E4EA" stroke-width="1.5"/>
+  <rect x="64" y="56" width="536" height="260" rx="18" fill="#F8F9FB" stroke="#E1E4EA" stroke-width="1.25"/>
+  <text x="92" y="96" font-size="19" fill="#6B7280" font-weight="700">An upload-based GIF site</text>
+  <circle cx="96" cy="245" r="2.5" fill="#C7CCD6"/>
+  <text x="110" y="250" font-size="14.5" fill="#6B7280" font-weight="450">Their queue, their rate limit, their bad day.</text>
+  <circle cx="96" cy="275" r="2.5" fill="#C7CCD6"/>
+  <text x="110" y="280" font-size="14.5" fill="#6B7280" font-weight="450">A retention policy you have no way to audit.</text>
+  <rect x="680" y="56" width="536" height="260" rx="18" fill="#F8F9FB" stroke="#2F5DE8" stroke-width="1.5"/>
+  <text x="708" y="96" font-size="19" fill="#111827" font-weight="700">PZGIF</text>
+  <circle cx="712" cy="245" r="2.5" fill="#C7CCD6"/>
+  <text x="726" y="250" font-size="14.5" fill="#6B7280" font-weight="450">Your device's memory is the only ceiling.</text>
+  <circle cx="712" cy="275" r="2.5" fill="#C7CCD6"/>
+  <text x="726" y="280" font-size="14.5" fill="#6B7280" font-weight="450">No copy to retain, so nothing to delete.</text>
+  <path d="M 96,132 h 36 l 16,16 v 52 a 6,6 0 0 1 -6,6 h -46 a 6,6 0 0 1 -6,-6 v -62 a 6,6 0 0 1 6,-6 z" fill="#F0F1F5" stroke="#C7CCD6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 132,132 v 16 h 16" fill="none" stroke="#C7CCD6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="122" y="228" font-size="12" fill="#6B7280" font-weight="600" text-anchor="middle">your file</text>
+  <path d="M 168,174 C 212,174 228,158 272,158" fill="none" stroke="#B91C1C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 5" marker-end="url(#aDanger)"/>
+  <text x="220" y="148" font-size="12" fill="#B91C1C" font-weight="650" text-anchor="middle">the whole file</text>
+  <path d="M 306.0,162.0 a 17.0,17.0 0 0 1 1.0,-33.0 a 23.0,23.0 0 0 1 43.0,-5.0 a 15.0,15.0 0 0 1 21.0,15.0 a 12.0,12.0 0 0 1 -3.0,23.0 z" fill="none" stroke="#B91C1C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="332" y="206" font-size="12" fill="#B91C1C" font-weight="600" text-anchor="middle">their server</text>
+  <rect x="712" y="128" width="176" height="92" rx="10" fill="#F0F1F5" stroke="#E1E4EA" stroke-width="1.25"/>
+  <line x1="712" y1="152" x2="888" y2="152" stroke="#E1E4EA" stroke-width="1.25" stroke-linecap="butt"/>
+  <circle cx="728" cy="140" r="3" fill="#C7CCD6"/>
+  <circle cx="741" cy="140" r="3" fill="#C7CCD6"/>
+  <circle cx="754" cy="140" r="3" fill="#C7CCD6"/>
+  <rect x="734" y="166" width="132" height="22" rx="6" fill="#DEF3F1"/>
+  <text x="800" y="181.5" font-size="11.5" fill="#0B7A73" font-weight="650" text-anchor="middle" font-family="'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">decode → encode</text>
+  <rect x="734" y="196" width="132" height="6" rx="3" fill="#F8F9FB"/>
+  <rect x="734" y="196" width="84" height="6" rx="3" fill="#0E9C93"/>
+  <text x="800" y="236" font-size="12" fill="#0B7A73" font-weight="700" text-anchor="middle">your tab</text>
+  <path d="M 908,174 C 944,174 952,150 994,150" fill="none" stroke="#C7CCD6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 6"/>
+  <path d="M 1028.0,164.0 a 17.0,17.0 0 0 1 1.0,-33.0 a 23.0,23.0 0 0 1 43.0,-5.0 a 15.0,15.0 0 0 1 21.0,15.0 a 12.0,12.0 0 0 1 -3.0,23.0 z" fill="none" stroke="#C7CCD6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="1020" y1="168" x2="1090" y2="124" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
+  <text x="1054" y="198" font-size="12" fill="#6B7280" font-weight="600" text-anchor="middle">never contacted</text>
+  <line x1="640" y1="84" x2="640" y2="156" stroke="#E1E4EA" stroke-width="1.25" stroke-linecap="round"/>
+  <line x1="640" y1="216" x2="640" y2="288" stroke="#E1E4EA" stroke-width="1.25" stroke-linecap="round"/>
+  <circle cx="640" cy="186" r="21" fill="#FFFFFF" stroke="#E1E4EA" stroke-width="1.25"/>
+  <text x="640" y="190.5" font-size="11.5" fill="#6B7280" font-weight="800" text-anchor="middle" letter-spacing="0.8">VS</text>
+</svg>

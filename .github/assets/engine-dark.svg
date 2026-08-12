@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 592" width="1280" height="592" role="img" aria-labelledby="ttl dsc">
+  <title id="ttl">The PZGIF engine</title>
+  <desc id="dsc">Video, animated GIF and animated WebP are decoded, handed to an OffscreenCanvas inside a Web Worker for resize, crop, speed, reverse and frame selection, then re-encoded by gifski-wasm, gifenc or a WebCodecs encoder.</desc>
+  <defs>
+    <radialGradient id="glowA" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#3D5AFE" stop-opacity="0.34"/>
+      <stop offset="100%" stop-color="#3D5AFE" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="#0E9C93" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#0E9C93" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="frame">
+      <rect x="0" y="0" width="1280" height="592" rx="24"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#frame)">
+    <rect width="1280" height="592" fill="#0B0D12"/>
+    <circle cx="1040" cy="-40" r="360" fill="url(#glowA)"/>
+    <circle cx="140" cy="632" r="320" fill="url(#glowB)"/>
+  </g>
+  <defs>
+    <marker id="aFlow" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="9" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,4 L0,8 z" fill="#6E90FF"/>
+    </marker>
+    <marker id="aOut" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="9" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,4 L0,8 z" fill="#2DD4C0"/>
+    </marker>
+  </defs>
+  <rect x="0.75" y="0.75" width="1278.5" height="590.5" rx="24" fill="none" stroke="#1F2937" stroke-width="1.5"/>
+  <text x="64" y="52" font-size="11.5" fill="#9AA1B0" font-weight="700" letter-spacing="1.6">INPUT</text>
+  <rect x="64" y="72" width="352" height="96" rx="14" fill="#14171F" stroke="#1F2937" stroke-width="1.25"/>
+  <text x="88" y="110" font-size="17" fill="#F8F9FB" font-weight="650">Video file</text>
+  <text x="88" y="138" font-size="13" fill="#9AA1B0" font-weight="450" font-family="'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">mediabunny demux → WebCodecs</text>
+  <rect x="464" y="72" width="352" height="96" rx="14" fill="#14171F" stroke="#1F2937" stroke-width="1.25"/>
+  <text x="488" y="110" font-size="17" fill="#F8F9FB" font-weight="650">Animated GIF</text>
+  <text x="488" y="138" font-size="13" fill="#9AA1B0" font-weight="450" font-family="'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">modern-gif — every browser</text>
+  <rect x="864" y="72" width="352" height="96" rx="14" fill="#14171F" stroke="#1F2937" stroke-width="1.25"/>
+  <text x="888" y="110" font-size="17" fill="#F8F9FB" font-weight="650">Animated WebP</text>
+  <text x="888" y="138" font-size="13" fill="#9AA1B0" font-weight="450" font-family="'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">ImageDecoder, where present</text>
+  <path d="M 240.0,168 L 240.0,242" fill="none" stroke="#6E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#aFlow)"/>
+  <path d="M 640.0,168 L 640.0,242" fill="none" stroke="#6E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#aFlow)"/>
+  <path d="M 1040.0,168 L 1040.0,242" fill="none" stroke="#6E90FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#aFlow)"/>
+  <text x="656.0" y="212" font-size="12.5" fill="#6E90FF" font-weight="600">decoded frames</text>
+  <rect x="64" y="248" width="1152" height="148" rx="16" fill="#191D26" stroke="#6E90FF" stroke-width="1.5" stroke-dasharray="7 6"/>
+  <text x="96" y="288" font-size="19" fill="#F8F9FB" font-weight="700">Web Worker · OffscreenCanvas</text>
+  <text x="96" y="314" font-size="14" fill="#9AA1B0" font-weight="450">The main thread never decodes a frame.</text>
+  <rect x="96" y="338" width="72" height="30" rx="15" fill="#14171F" stroke="#1F2937" stroke-width="1.25"/>
+  <text x="132.0" y="357.68" font-size="13" fill="#E1E4EA" font-weight="550" text-anchor="middle">resize</text>
+  <rect x="178" y="338" width="57" height="30" rx="15" fill="#14171F" stroke="#1F2937" stroke-width="1.25"/>
+  <text x="206.5" y="357.68" font-size="13" fill="#E1E4EA" font-weight="550" text-anchor="middle">crop</text>
+  <rect x="245" y="338" width="64" height="30" rx="15" fill="#14171F" stroke="#1F2937" stroke-width="1.25"/>
+  <text x="277.0" y="357.68" font-size="13" fill="#E1E4EA" font-weight="550" text-anchor="middle">speed</text>
+  <rect x="319" y="338" width="79" height="30" rx="15" fill="#14171F" stroke="#1F2937" stroke-width="1.25"/>
+  <text x="358.5" y="357.68" font-size="13" fill="#E1E4EA" font-weight="550" text-anchor="middle">reverse</text>
+  <rect x="408" y="338" width="115" height="30" rx="15" fill="#14171F" stroke="#1F2937" stroke-width="1.25"/>
+  <text x="465.5" y="357.68" font-size="13" fill="#E1E4EA" font-weight="550" text-anchor="middle">frame select</text>
+  <text x="1184" y="302" font-size="12.5" fill="#9AA1B0" font-weight="450" text-anchor="end" font-family="'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">gifski holds</text>
+  <text x="1184" y="322" font-size="12.5" fill="#2DD4C0" font-weight="650" text-anchor="end" font-family="'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">frames × w × h × 4 × 2</text>
+  <text x="1184" y="342" font-size="12.5" fill="#9AA1B0" font-weight="450" text-anchor="end" font-family="'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">resident — so limits are</text>
+  <text x="1184" y="362" font-size="12.5" fill="#9AA1B0" font-weight="450" text-anchor="end" font-family="'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">computed, never guessed</text>
+  <path d="M 240.0,396 L 240.0,452" fill="none" stroke="#2DD4C0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#aOut)"/>
+  <path d="M 640.0,396 L 640.0,452" fill="none" stroke="#2DD4C0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#aOut)"/>
+  <path d="M 1040.0,396 L 1040.0,452" fill="none" stroke="#2DD4C0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#aOut)"/>
+  <text x="656.0" y="428" font-size="12.5" fill="#2DD4C0" font-weight="600">RGBA frames</text>
+  <text x="64" y="440" font-size="11.5" fill="#9AA1B0" font-weight="700" letter-spacing="1.6">OUTPUT</text>
+  <rect x="64" y="458" width="352" height="96" rx="14" fill="#0F272A" stroke="#2DD4C0" stroke-width="1.5"/>
+  <text x="88" y="496" font-size="17" fill="#2DD4C0" font-weight="650">gifski-wasm</text>
+  <text x="88" y="524" font-size="13" fill="#9AA1B0" font-weight="450" font-family="'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">optimised GIF — the differentiator</text>
+  <rect x="464" y="458" width="352" height="96" rx="14" fill="#14171F" stroke="#1F2937" stroke-width="1.25"/>
+  <text x="488" y="496" font-size="17" fill="#F8F9FB" font-weight="650">gifenc</text>
+  <text x="488" y="524" font-size="13" fill="#9AA1B0" font-weight="450" font-family="'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">live preview only</text>
+  <rect x="864" y="458" width="352" height="96" rx="14" fill="#14171F" stroke="#1F2937" stroke-width="1.25"/>
+  <text x="888" y="496" font-size="17" fill="#F8F9FB" font-weight="650">WebCodecs encoder</text>
+  <text x="888" y="524" font-size="13" fill="#9AA1B0" font-weight="450" font-family="'SF Mono', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace">MP4 · WebM</text>
+</svg>

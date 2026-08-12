@@ -1,5 +1,6 @@
 {
   "slug": "crop-gif",
+  "updated": "2026-08-06",
   "title": "Crop GIF — cut a GIF down to the part that matters",
   "lead": "Drag a rectangle over the first frame, or type exact coordinates, and every frame is cut to the same region. Nothing is uploaded, and the crop is applied before the resize so the part you keep is sampled from full-resolution pixels.",
   "meta": {
@@ -22,10 +23,22 @@
       "label": "Shape",
       "hint": "Free lets the rectangle take any shape. The presets hold their ratio while you drag a corner.",
       "options": [
-        { "value": "free", "label": "Free" },
-        { "value": "1:1", "label": "Square — 1:1" },
-        { "value": "16:9", "label": "Widescreen — 16:9" },
-        { "value": "4:3", "label": "Classic — 4:3" }
+        {
+          "value": "free",
+          "label": "Free"
+        },
+        {
+          "value": "1:1",
+          "label": "Square — 1:1"
+        },
+        {
+          "value": "16:9",
+          "label": "Widescreen — 16:9"
+        },
+        {
+          "value": "4:3",
+          "label": "Classic — 4:3"
+        }
       ]
     },
     "rect": {

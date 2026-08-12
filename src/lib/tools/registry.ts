@@ -243,6 +243,94 @@ export const LEGAL_ROUTES: readonly LegalRoute[] = [
   { slug: "accessibility", name: "Accessibility" },
 ] as const;
 
+/**
+ * An editorial page: prose that answers a question, with no tool on it.
+ *
+ * ── Why these exist at all ──────────────────────────────────────────────────
+ * Without them the site is fourteen tool pages and eight policies, which is the
+ * exact shape an ad network rejects as "low value content" — a wall of
+ * near-identical utility pages with an app embedded in each. The guides are the
+ * pages that are worth reading when you are not holding a file, and they are
+ * also where the tool pages' internal links point outward to something other
+ * than another tool.
+ *
+ * ── Why `/guides/<slug>` and not top level ──────────────────────────────────
+ * Three reasons, in order of weight. The top-level namespace belongs to tool
+ * slugs, which are the commercial keywords, and a guide called `gif-vs-mp4`
+ * sitting beside a tool called `gif-to-mp4` invites exactly the confusion a URL
+ * is supposed to resolve. A path prefix is also the only thing that makes
+ * "publish a batch, watch Search Console, then publish the next" a filter you
+ * can actually apply. And a guide has a real parent — `BreadcrumbList` gets
+ * Home > Guides > page, where a top-level guide would need an invented
+ * intermediate crumb or a two-item breadcrumb that says nothing.
+ *
+ * Same hard rule as everywhere else in this file: structure only. Every word of
+ * a guide lives in `src/content/guides/<slug>.json`.
+ */
+export interface GuideRoute {
+  /** URL segment under `/guides/`, and the filename of its content file. */
+  readonly slug: string;
+  /** Nav, footer and hub-card label. Not a headline — the content file owns that. */
+  readonly name: string;
+  /**
+   * Tool slugs this guide should send a reader to.
+   *
+   * Validated against the registry exactly like a tool's `related`, and
+   * filtered to live routes before rendering. A guide that explains a problem
+   * and then links to a page that does not exist is worse than one that links
+   * nowhere.
+   */
+  readonly tools: readonly string[];
+}
+
+/**
+ * The published guides, in hub order.
+ *
+ * Ordered by how much of the audience the question reaches rather than by topic:
+ * "which format" and "why is it so big" are asked by everyone who ever made a
+ * GIF, the Discord pair by the cluster this site is built around, and the last
+ * two by people who have already hit something specific.
+ *
+ * **The gifski side-by-side comparison is deliberately absent.** Phase 1 gate G6
+ * — is gifski *visibly* better than `gifenc` at matched bytes — is generated but
+ * unscored, and Phase 1 pre-registered that every "visibly better" claim comes
+ * out of the copy if it fails. A page whose entire premise is that claim cannot
+ * be written before the judging, and writing it anyway is how a pre-registration
+ * becomes decoration. It is the seventh guide the moment G6 is scored.
+ */
+export const GUIDE_ROUTES: readonly GuideRoute[] = [
+  {
+    slug: "gif-vs-mp4-vs-webp",
+    name: "GIF vs MP4 vs WebP",
+    tools: ["gif-to-mp4", "mp4-to-gif", "webp-to-gif"],
+  },
+  {
+    slug: "why-is-my-gif-so-big",
+    name: "Why your GIF is so big",
+    tools: ["gif-compressor", "resize-gif", "gif-speed-changer"],
+  },
+  {
+    slug: "discord-image-size-limits",
+    name: "Discord image size limits",
+    tools: ["gif-for-discord", "discord-emoji-gif", "discord-sticker-gif"],
+  },
+  {
+    slug: "sharp-discord-emoji",
+    name: "A Discord emoji that is not blurry",
+    tools: ["discord-emoji-gif", "crop-gif", "resize-gif"],
+  },
+  {
+    slug: "gif-frame-rate-limits",
+    name: "Why a 60fps GIF is not 60fps",
+    tools: ["gif-speed-changer", "split-gif-to-frames", "gif-compressor"],
+  },
+  {
+    slug: "what-happens-to-your-file",
+    name: "What happens to your file",
+    tools: ["gif-compressor", "mp4-to-gif"],
+  },
+] as const;
+
 export const TOOL_GROUP_ORDER: readonly ToolGroup[] = [
   "edit",
   "convert",
@@ -331,4 +419,39 @@ export function chainTargets(
   return relatedLiveRoutes(slug).filter((route) =>
     route.inputFormats.includes(produced),
   );
+}
+
+/** The hub every guide sits under. One place, so no consumer hard-codes it. */
+export const GUIDES_BASE_PATH = "/guides";
+
+export function guidePath(slug: string): string {
+  return `${GUIDES_BASE_PATH}/${slug}`;
+}
+
+const GUIDE_BY_SLUG = new Map(GUIDE_ROUTES.map((guide) => [guide.slug, guide]));
+
+export function getGuide(slug: string): GuideRoute | undefined {
+  return GUIDE_BY_SLUG.get(slug);
+}
+
+/**
+ * The tools a guide links to, minus anything that has not shipped yet.
+ *
+ * The live filter is the same rule the sitemap and the related-tools grid
+ * follow, and it matters more here: a guide is read by someone who arrived from
+ * a search result and has no other context, so a link that 404s is the whole
+ * impression they get of the site.
+ */
+export function guideToolRoutes(slug: string): readonly ToolDefinition[] {
+  const guide = getGuide(slug);
+  if (!guide) return [];
+  return guide.tools
+    .map((toolSlug) => BY_SLUG.get(toolSlug))
+    .filter((route): route is ToolDefinition => route !== undefined)
+    .filter(isLive);
+}
+
+/** Every guide except the one being read — the "keep reading" list. */
+export function otherGuides(slug: string): readonly GuideRoute[] {
+  return GUIDE_ROUTES.filter((guide) => guide.slug !== slug);
 }

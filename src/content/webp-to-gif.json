@@ -1,5 +1,6 @@
 {
   "slug": "webp-to-gif",
+  "updated": "2026-08-10",
   "title": "WebP to GIF — for the places that still won't take WebP",
   "lead": "An animated WebP becomes an animated GIF, with its frame timing carried across intact. Every browser can do this here, Safari included, because the conversion is assembled from parts your browser already has rather than from a decoder only some of them ship.",
   "meta": {

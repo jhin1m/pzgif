@@ -1,5 +1,6 @@
 {
   "slug": "split-gif-to-frames",
+  "updated": "2026-08-10",
   "title": "Split GIF to frames — every picture, numbered, in one archive",
   "lead": "Pull an animation apart into individual PNG files, in order, zipped and ready to download. Pick the whole thing or a stretch of it. The archive is assembled in this tab, so nothing about your file reaches a server.",
   "meta": {

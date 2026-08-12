@@ -1,5 +1,6 @@
 {
   "slug": "gif-for-discord",
+  "updated": "2026-08-10",
   "title": "GIF for Discord — pick the surface, and the file is fitted to it",
   "lead": "Discord has four places an animation can go and four different sets of rules for them. Choose which one you are uploading to, drop the file, and the size and compression are worked out against that surface's own limits rather than a single number borrowed from somewhere else.",
   "meta": {
@@ -26,10 +27,22 @@
       "label": "Colours",
       "hint": "The size of the palette each frame indexes into. Fewer colours is a smaller file and flatter shading.",
       "options": [
-        { "value": "256", "label": "256 — the full palette" },
-        { "value": "128", "label": "128 — a good balance" },
-        { "value": "64", "label": "64 — noticeably smaller" },
-        { "value": "32", "label": "32 — flat artwork only" }
+        {
+          "value": "256",
+          "label": "256 — the full palette"
+        },
+        {
+          "value": "128",
+          "label": "128 — a good balance"
+        },
+        {
+          "value": "64",
+          "label": "64 — noticeably smaller"
+        },
+        {
+          "value": "32",
+          "label": "32 — flat artwork only"
+        }
       ]
     },
     "keepEveryNth": {
@@ -59,9 +72,18 @@
     "previewCaption": "At the size Discord will actually draw it",
     "previewMessage": "shipped it",
     "previewSamples": [
-      { "px": 32, "label": "beside text" },
-      { "px": 48, "label": "on its own" },
-      { "px": 96, "label": "the preset's own canvas" }
+      {
+        "px": 32,
+        "label": "beside text"
+      },
+      {
+        "px": 48,
+        "label": "on its own"
+      },
+      {
+        "px": 96,
+        "label": "the preset's own canvas"
+      }
     ],
     "nextStep": "Next: open Server Settings in Discord, find the section for the surface you chose, and upload the file you just downloaded.",
     "cropNote": "A file that is not the right shape has its middle taken. If the part that matters is off to one side, crop it yourself first and come back.",

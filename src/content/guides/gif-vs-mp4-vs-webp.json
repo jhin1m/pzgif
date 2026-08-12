@@ -1,0 +1,61 @@
+{
+  "slug": "gif-vs-mp4-vs-webp",
+  "title": "GIF vs MP4 vs WebP: which one to use for what",
+  "updated": "2026-08-10",
+  "meta": {
+    "title": "GIF vs MP4 vs WebP — which format to use, and when",
+    "description": "MP4 is smaller than GIF by an order of magnitude and WebP sits in between. Here is what each format can actually do, and the three questions that decide which one you want."
+  },
+  "summary": "MP4 wins on size and loses on where it plays. Here is how to pick without guessing.",
+  "lead": "Almost every comparison of these three formats ends with \"use MP4, GIF is obsolete\". That advice is right about the file sizes and wrong about the reason people keep making GIFs. The format you want is decided by where the file is going, not by which one compresses best — so this page works through what each one can actually do first, and then the three questions that pick one.",
+  "sections": [
+    {
+      "heading": "What a GIF actually is",
+      "level": 2,
+      "paragraphs": [
+        "A GIF is a stack of still images with a delay written between them. That is the whole design. There is no motion compensation, no prediction from one frame to the next, no notion that the pixels in frame 40 are mostly the same pixels as frame 39. Each frame is compressed on its own with LZW, a general-purpose algorithm from 1984 that knows nothing about images and less about video.",
+        "Worse, every frame is limited to **256 colours**, chosen from a palette stored inside the file. A photograph or a video still contains tens of thousands of distinct colours, so making a GIF of one means throwing almost all of them away and approximating the rest — which is where the banding on gradients and the speckle across skin tones come from. The colours are not compressed badly; they are simply not there any more.",
+        "So a GIF is large for two reasons at once. It stores frames that a video codec would not have stored, and it stores them with a compressor that cannot exploit the one thing that makes video compressible. A ten-second clip that is 900 KB as an MP4 is routinely 8 MB as a GIF, and the GIF is the one that looks worse.",
+        "None of that has stopped GIF, because it has one property nothing else does: it behaves like an image everywhere. It autoplays without a play button, it loops without asking, it needs no codec negotiation, and every piece of software written since about 1990 can open one. That is not nostalgia — it is a real technical property, and it is why the format refuses to die."
+      ]
+    },
+    {
+      "heading": "What MP4 does differently",
+      "level": 2,
+      "paragraphs": [
+        "An MP4 holding H.264 video does the thing GIF cannot: it looks at what changed. A keyframe is stored in full, and the frames after it are stored as instructions — this block of pixels moved four pixels left, this region is unchanged, this area has a small colour correction. For a screen recording where most of the screen is static, that is a reduction of one to two orders of magnitude, not a percentage.",
+        "It also keeps full colour. There is no 256-entry palette anywhere in the pipeline, so gradients stay smooth and skin does not turn into speckle. Between the two effects, a good MP4 at a tenth of the size of the equivalent GIF also looks obviously better, which is an unusual thing to be able to say about a compression trade-off.",
+        "The catch is that an MP4 is a video, and the world treats videos differently from images. It arrives in a player rather than in the page. Some surfaces show it with controls, some require a tap before it moves, some will not accept it as an upload at all, and some — profile pictures, custom emoji, sticker slots — are hard-wired to accept an image format and nothing else.",
+        "There is one more limitation worth knowing before you convert something with a transparent background: baseline H.264 has no alpha channel. Transparency does not survive the trip. It comes out as whatever colour was behind it, usually black."
+      ]
+    },
+    {
+      "heading": "Where WebP fits",
+      "level": 2,
+      "paragraphs": [
+        "Animated WebP is the format designed to be what GIF should have been. It has interframe compression, full colour rather than a 256-entry palette, a real alpha channel, and both lossy and lossless modes. On the same clip it lands far below a GIF and somewhat above an MP4, and it keeps GIF's useful property of being an image rather than a video.",
+        "It has been supported in every current desktop and mobile browser for years, so on the open web it is a safe default. The problem is everything that is not a browser. Chat clients, forum software, image hosts, presentation tools and messaging apps each made their own decision about animated WebP, and a good number of them will accept the upload, show the first frame, and never animate it — which is the worst of the three outcomes, because it looks like it worked.",
+        "That gap is the reason this site has a **WebP to GIF** tool and not a GIF to WebP one. Converting into WebP is easy to do and easy to regret; converting out of it, because the place you need to post the file only animates GIFs, is the request people actually have."
+      ]
+    },
+    {
+      "heading": "The three questions that decide it",
+      "level": 2,
+      "paragraphs": [
+        "**Does the destination accept a video file?** If it does — a web page you control, a Discord message, a document, anywhere with a real player — use MP4. Nothing else is close on size, and the quality is better rather than worse. This is the answer for most reaction clips, screen recordings and anything longer than a few seconds.",
+        "**Does it have to behave like an image?** Custom emoji, avatars, stickers, signatures, an inline element in software that only knows how to draw pictures. Then it is GIF, and the question stops being \"which format\" and becomes \"how do I make this GIF small enough\", which is a different page.",
+        "**Is it going on a web page you control, for people using browsers?** Then WebP, with a GIF or MP4 fallback if your audience includes things that are not browsers. You get most of MP4's size advantage and keep image semantics.",
+        "The honest summary is that GIF survives on compatibility alone, and that is a real reason rather than an excuse. When compatibility does not matter, the format loses on every axis at once — size, colour, sharpness, battery. When it does matter, nothing else will do, and then the job is to make the GIF as small as it can be without visibly falling apart."
+      ]
+    },
+    {
+      "heading": "Converting between them without making it worse",
+      "level": 2,
+      "paragraphs": [
+        "Going from video to GIF is lossy in a way that cannot be undone: colours are discarded to fit a palette, and frames are usually dropped to keep the file manageable. Do it once, from the highest-quality source you have, rather than converting a GIF that was itself made from a compressed clip. Every generation compounds.",
+        "Going the other way — GIF to MP4 — is close to free. The GIF has already thrown away everything it is going to throw away, so a video codec encoding those exact frames loses very little on top and shrinks the file dramatically. If you have a large GIF and the destination takes video, this conversion is almost always worth doing.",
+        "Whichever direction you are going, the conversion on this site happens inside your browser. The file is read, decoded, re-encoded and handed back without being uploaded anywhere, which also means the conversion is limited by your device rather than by a queue."
+      ]
+    }
+  ]
+}

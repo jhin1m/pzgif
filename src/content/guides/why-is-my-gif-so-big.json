@@ -1,0 +1,70 @@
+{
+  "slug": "why-is-my-gif-so-big",
+  "title": "Why your GIF is 6 MB, and the four levers that shrink it",
+  "updated": "2026-08-10",
+  "meta": {
+    "title": "Why your GIF is so big — and the four things that actually shrink it",
+    "description": "GIF size comes from pixels, frames, colours and noise. Pull the levers in the right order and a 6 MB file lands under 1 MB with almost nothing visible lost."
+  },
+  "summary": "Pixels, frames, colours, noise — in that order. Most of the size is in the first two.",
+  "lead": "A GIF that came out at 6 MB is not badly made. It is a format storing several hundred separate pictures with a compressor that cannot tell they are related. Once you know which four things the size is actually made of, shrinking it stops being trial and error: there is an order to pull them in, and the first two levers are worth more than the last two combined.",
+  "sections": [
+    {
+      "heading": "Where the bytes are",
+      "level": 2,
+      "paragraphs": [
+        "Start with the arithmetic, because it explains the whole thing. Before compression, one frame of a 800×600 animation is 480,000 pixels. A GIF stores each pixel as an index into a colour table, so roughly one byte each — about 470 KB per frame, uncompressed. Five seconds at 20 frames per second is a hundred of those. That is 47 MB before the compressor sees any of it.",
+        "The compressor gets that down to single-digit megabytes by finding horizontal runs of the same colour index and storing them once. It is good at flat areas and useless at everything else, and — this is the part that surprises people — it never once notices that frame 40 looks almost identical to frame 39. Video codecs are built entirely around that observation. GIF's compressor predates the idea.",
+        "So the size is a product of four things: how many pixels are in a frame, how many frames there are, how many colours the compressor has to distinguish between, and how much fine-grained noise there is to break up the runs it is looking for. Every real technique for shrinking a GIF is one of those four, wearing a different name."
+      ]
+    },
+    {
+      "heading": "Lever one: dimensions",
+      "level": 2,
+      "paragraphs": [
+        "This is the biggest lever by a wide margin, because it acts on both dimensions at once. Halving the width and the height leaves a quarter of the pixels, and the file usually falls by nearly as much. Going from 800 pixels wide to 400 is not a 50% saving; in practice it is closer to 70%.",
+        "It is also the lever with the least perceptual cost, because almost every GIF is displayed smaller than it was made. A reaction GIF in a chat window is rendered a few hundred pixels wide no matter what is inside the file, and the extra pixels are decoded, stored, transmitted and then thrown away by the scaler. Find out how wide the thing is actually shown, and make the file that wide.",
+        "One caveat that matters: downscaling badly can cost you more than it saves. A single crude resize step from 1080p straight down to 400 pixels produces aliasing and shimmer — high-frequency noise that the compressor then has to store, which is lever four working against you. Halving repeatedly until you are close to the target and then doing one final step is dramatically better, and it is what the resize and compress tools here do internally.",
+        "If part of the frame is not carrying the point, **cropping beats scaling**. Removing a third of the width discards those pixels entirely rather than approximating them, so the pixels that remain stay sharp."
+      ]
+    },
+    {
+      "heading": "Lever two: frames",
+      "level": 2,
+      "paragraphs": [
+        "File size is close to linear in frame count. Half the frames, half the file — with far less visible damage than the number suggests, because GIF playback is choppy to begin with and the eye is more forgiving of a slightly lower frame rate than of a blurry image.",
+        "There are two ways to have fewer frames, and they are not interchangeable. **Trimming** removes time from the ends, which is free of visual cost if the extra time was not carrying anything. Most GIFs cut from video have a second of dead air at the front and a fade at the back that nobody needs. Cut those first, always, before touching anything else.",
+        "**Dropping frames** keeps the whole clip but shows fewer moments of it. Going from 24 frames per second to 12 halves the file and is barely noticeable on most content; going to 8 is visible but often acceptable for a short loop; below that, fast motion starts to strobe. Slow content — a talking head, a slow pan, a subtle animation — tolerates far more aggressive dropping than a fast cut does.",
+        "One trap: you cannot reach an arbitrary frame rate by shortening the delay between frames. GIF stores delays in hundredths of a second, and browsers clamp very short delays up to a tenth of a second, so pushing past that floor makes the animation play **slower** rather than faster. The speed tool here handles that by dropping frames once the floor is reached, and tells you how many it dropped."
+      ]
+    },
+    {
+      "heading": "Lever three: colours",
+      "level": 2,
+      "paragraphs": [
+        "A GIF frame can index at most 256 colours. Using fewer than that shrinks the file, because a smaller palette means fewer distinct indices and therefore longer runs of the same value for the compressor to collapse.",
+        "How much this buys you depends entirely on the source. Flat illustration, line art, screenshots of text, logos, anything with large areas of solid colour — these often look identical at 64 colours and sometimes at 32, and the saving is substantial. Photographic content, film grain, skin, gradients and anything with a soft shadow will band visibly the moment the palette gets tight, and that banding is far more noticeable than a slightly smaller frame would have been.",
+        "This lever is also the one that interacts badly with the next one, which is why it belongs third rather than first."
+      ]
+    },
+    {
+      "heading": "Lever four: noise, and the dithering trap",
+      "level": 2,
+      "paragraphs": [
+        "Dithering is the standard fix for banding. Instead of snapping a gradient to the nearest four available colours and producing visible steps, the encoder scatters pixels of the neighbouring colours so that the eye blends them. It genuinely works, and it makes the file bigger — sometimes much bigger.",
+        "The reason is exactly the mechanism from the first section. LZW compresses runs of identical values. Dithering replaces smooth areas with a fine checkerboard of alternating values, which is the single most effective way to destroy every run in the image. A dithered gradient can cost more bytes than the untouched original did.",
+        "The same applies to anything else fine-grained: film grain, sensor noise, compression artefacts inherited from the source video, a subtle animated texture. All of it is incompressible, and all of it is spending your budget on detail nobody is looking at. Downscaling helps here twice over — it saves the pixels, and it averages the noise away as a side effect.",
+        "The practical consequence is that the trade-off is not \"quality versus size\" in one dimension. Cutting the palette causes banding; fixing the banding with dithering costs more than the palette cut saved. When you find yourself in that loop, the answer is almost always to go back to lever one and make the frame smaller instead."
+      ]
+    },
+    {
+      "heading": "The order to do it in",
+      "level": 2,
+      "paragraphs": [
+        "Trim the dead time. Scale to the size it is actually displayed at. Drop the frame rate as far as the motion tolerates. Only then reduce the palette, and stop as soon as you can see banding.",
+        "Doing it in that order matters because each step changes what the next one is worth. Cutting two seconds off the front means you are no longer paying to compress them; halving the dimensions means the palette reduction you were about to make is probably unnecessary. Working the other way round — starting with aggressive colour reduction on a full-size clip — produces a file that is both large and ugly.",
+        "If the target is a specific number rather than \"smaller\" — a size limit on an upload form, for instance — it is worth letting a search do the work. Guessing a setting, encoding, checking the size and guessing again is exactly the loop the automatic size-fitting on the Discord pages runs for you, with real encodes rather than an estimate."
+      ]
+    }
+  ]
+}

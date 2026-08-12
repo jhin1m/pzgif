@@ -109,6 +109,21 @@ export interface PresetCopy {
 export interface ToolContent {
   /** Must match a `registry.ts` slug. Asserted at build time by the page. */
   slug: string;
+  /**
+   * ISO `YYYY-MM-DD`, the date this page's copy last changed.
+   *
+   * The sitemap's `lastModified` for the route, and it lives here rather than in
+   * `registry.ts` because the date describes the prose and not the structure —
+   * a tool whose related-tools list is reordered has not been updated in any
+   * sense a crawler cares about. `registry.ts` owns structure and must not grow
+   * a field that changes every time a paragraph is rewritten.
+   *
+   * The alternative was a build timestamp, which is worse than no date at all:
+   * it tells a crawler that all fifteen pages changed on every deploy and then
+   * offers nothing changed to find, which is a negative quality signal rather
+   * than a neutral one.
+   */
+  updated: string;
   /** The page `h1`. Not the `<title>` — see `meta`. */
   title: string;
   lead: string;
@@ -234,6 +249,14 @@ export function toolContent(data: unknown, expectedSlug: string): ToolContent {
   if (content.slug !== expectedSlug) {
     throw new Error(
       `Content slug "${content.slug}" does not match the route "${expectedSlug}"`,
+    );
+  }
+  // The one other field checked here, for the same reason as the slug: a missing
+  // `updated` is invisible on the page and silently drops the route's real date
+  // out of the sitemap, which is the failure the field exists to prevent.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(content.updated)) {
+    throw new Error(
+      `Tool content "${expectedSlug}" has updated "${content.updated}", expected YYYY-MM-DD`,
     );
   }
   return content;

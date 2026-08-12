@@ -1,5 +1,6 @@
 {
   "slug": "reverse-gif",
+  "updated": "2026-08-06",
   "title": "Reverse GIF — play a GIF backwards or in a loop",
   "lead": "Run a GIF backwards, or forwards and then back so it returns to where it started. The ping-pong option doubles the frame count, so the page tells you what that costs on this device before the job starts rather than after it fails.",
   "meta": {
@@ -22,8 +23,14 @@
       "label": "Direction",
       "hint": "Ping-pong plays through and comes back, so the last frame joins the first without a jump.",
       "options": [
-        { "value": "reverse", "label": "Backwards — last frame first" },
-        { "value": "ping-pong", "label": "Ping-pong — forwards, then back" }
+        {
+          "value": "reverse",
+          "label": "Backwards — last frame first"
+        },
+        {
+          "value": "ping-pong",
+          "label": "Ping-pong — forwards, then back"
+        }
       ]
     }
   },

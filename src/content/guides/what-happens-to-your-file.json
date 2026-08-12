@@ -1,0 +1,68 @@
+{
+  "slug": "what-happens-to-your-file",
+  "title": "What happens to your file when you drop it here",
+  "updated": "2026-08-10",
+  "meta": {
+    "title": "What happens to your file — the no-upload pipeline, step by step",
+    "description": "A walk through what actually executes when you drop a GIF into PZGIF: which code touches the bytes, where they live, and how to verify none of it leaves your device."
+  },
+  "summary": "Step by step through the code path, and how to check the claim yourself in about ten seconds.",
+  "lead": "\"Your files never leave your device\" is a sentence on the front page of a great many sites that upload your files. It is not worth anything as a claim, so this page is the mechanism instead: what executes when you drop a file in, which part of your computer holds the bytes at each stage, and the two ways you can confirm all of it yourself without taking a word of it on trust.",
+  "sections": [
+    {
+      "heading": "Step one: the file is read, not sent",
+      "level": 2,
+      "paragraphs": [
+        "Dropping a file onto a web page hands the page a reference to it — a handle the browser gives out, which lets JavaScript read the bytes from your disk. It does not move the file anywhere. What happens next is entirely up to the code holding the handle, and this is the fork in the road where a conventional GIF site and this one go different ways.",
+        "The conventional path is a form post: the bytes are streamed to a server, a job is queued, something runs in a data centre, and a result comes back. Everything after that first step is somebody else's computer, and you are trusting a retention policy about a copy that now exists.",
+        "Here the handle is passed to a **worker thread** in the same tab, and the bytes are read into memory there. No network request is made, because there is no endpoint to make one to. This application has no upload route; it is a set of static files served from a CDN, and static files cannot accept a POST."
+      ]
+    },
+    {
+      "heading": "Step two: decoding, in a worker",
+      "level": 2,
+      "paragraphs": [
+        "A GIF is decoded by a WebAssembly decoder compiled from the same kind of library a server would use. Video sources take a different path and are decoded by WebCodecs, which is the browser's own hardware-accelerated video decoder — the same one that plays video on any other site, borrowed for a moment to turn your clip into frames.",
+        "Both run on a worker thread rather than on the thread that draws the page. That is why the interface stays responsive while a job runs, and why the progress bar can update at all. It also means a job can be genuinely cancelled: terminating the worker stops the work immediately rather than leaving it to finish invisibly.",
+        "The output of this stage is the expensive part. Every frame becomes raw pixels — four bytes each, no compression — so a few hundred frames of a modest animation is comfortably hundreds of megabytes in memory. That is the real constraint on what a browser can do, and it is the reason this site asks about your device before it starts rather than after."
+      ]
+    },
+    {
+      "heading": "Step three: the work, then the encode",
+      "level": 2,
+      "paragraphs": [
+        "Resizing, cropping, retiming and reversing all operate on those raw frames. They are ordinary array operations — no format is involved at this point, because the format was decoded away in the previous step.",
+        "Encoding turns the frames back into a file. Two encoders are available: one compiled to WebAssembly that produces better-looking GIFs, and one written in plain JavaScript that is faster on some browser engines. Which one runs depends on your browser, because the WebAssembly encoder measured roughly an order of magnitude slower under Firefox's engine than under Chrome's or Safari's — the same job, the same frames, a fifty-second encode against a four-second one. Firefox therefore gets the JavaScript encoder by default. That is a measurement, not a preference, and it is the sort of thing that is invisible unless somebody writes it down.",
+        "The finished file is a blob in memory. The download link points at that blob through a temporary URL that exists only inside your tab and stops resolving when the tab is closed."
+      ]
+    },
+    {
+      "heading": "What is stored, and for how long",
+      "level": 2,
+      "paragraphs": [
+        "Your file is held in memory for as long as the job runs, and released afterwards. It is not written to disk by this application, not put in the browser's database, and not kept in session storage.",
+        "Passing a result from one tool to another — finishing a compression and sending the output straight into the resizer — keeps the file in memory too. There is no persistence step in that handoff, which is a deliberate choice rather than an omission: writing it down would make the file survive a crash, and it would also make it survive everything else.",
+        "There is one thing this site does store on your device, and it would be dishonest to leave it out. The application's own code — the JavaScript, the stylesheets, the WebAssembly binaries — is cached by a service worker so the tools keep working when you are offline. That cache contains the site, not your files. Nothing you process ever enters it.",
+        "The site also sets no cookies. There is no account to log into, no preference that needs a server to remember it, and the internationalisation library that would ordinarily set one is explicitly configured not to."
+      ]
+    },
+    {
+      "heading": "Two ways to check all of this",
+      "level": 2,
+      "paragraphs": [
+        "**Watch the network.** Open your browser's developer tools, switch to the network panel, and run a job. You will see the page load, the code load, and the WebAssembly binary load — all of it before or at the moment you start. While the job runs and when it finishes, nothing outbound. A site that was uploading your file could not hide that, because the request would be right there in the list.",
+        "**Turn off your connection.** Load a tool page, disconnect from the internet, and run a job. It works. That is not a graceful-degradation trick — an offline tab cannot upload anything, so a tool that still functions with the network off is a tool that was never using it.",
+        "The second test is the more convincing of the two, because it does not require you to interpret anything. Either the file processes with the network unplugged or it does not.",
+        "Beyond that, the code that does all of this is public and licensed under the AGPL, and the footer of every page links to the exact commit that page was built from. That is the difference between a privacy claim and a privacy property: one asks you to believe a sentence, the other lets you read the function."
+      ]
+    },
+    {
+      "heading": "The cost of doing it this way",
+      "level": 2,
+      "paragraphs": [
+        "Your device does the work, so your device sets the ceiling. A recent laptop handles nearly anything; an older phone will not, and a browser tab that runs out of memory does not degrade gracefully — it dies, taking the job with it and usually showing you nothing that explains why.",
+        "So jobs are sized before they start, against what this device can actually hold, and the ones that will not fit are refused up front with a reason. A refusal in two seconds is a better outcome than a crash at forty, and much better than a GIF that silently comes out truncated. When you see one, it is an honest statement about your hardware and this file, not a paywall — there is no paid tier that would accept it either."
+      ]
+    }
+  ]
+}

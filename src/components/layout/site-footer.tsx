@@ -3,8 +3,11 @@ import { BrandMark, Wordmark } from "@/components/brand/marks";
 import { Link } from "@/i18n/navigation";
 import { BUILD_COMMIT_SHA, sourceUrlForThisBuild } from "@/lib/site-config";
 import {
+  GUIDES_BASE_PATH,
+  GUIDE_ROUTES,
   LEGAL_ROUTES,
   TOOL_GROUP_ORDER,
+  guidePath,
   routesInGroup,
   type ToolGroup,
 } from "@/lib/tools/registry";
@@ -80,12 +83,48 @@ export async function SiteFooter() {
           ))}
         </div>
 
+        {/* Guides get their own row rather than a fifth column. Two reasons: the
+            grid above is the tool inventory and a guide is not a tool, and a
+            fifth column is what made the reserved boxes overflow the last time
+            this footer grew. A row wraps instead.
+
+            Every guide is listed rather than just the hub. These are the only
+            non-tool pages worth an internal link from every page on the site,
+            and a sitewide link is the strongest one this site can give them. */}
+        <nav
+          aria-label={t("guides")}
+          className="mt-8 border-t border-line pt-5"
+        >
+          <p className="mb-3 text-label font-semibold uppercase tracking-[0.06em] text-fg-muted">
+            <Link
+              href={GUIDES_BASE_PATH}
+              className="no-underline hover:text-brand hover:underline hover:underline-offset-2"
+            >
+              {t("guides")}
+            </Link>
+          </p>
+          <ul className="flex flex-wrap gap-x-4 gap-y-2">
+            {GUIDE_ROUTES.map((guide) => (
+              <li key={guide.slug}>
+                <Link
+                  href={guidePath(guide.slug)}
+                  className="text-sm text-fg-secondary no-underline hover:text-brand hover:underline hover:underline-offset-2"
+                >
+                  {guide.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
         {/* Legal links sit in the bottom bar, not as a fourth column above.
             Those three columns are the tool inventory; a legal column beside
             them would read as "Terms is a tool you can use on a file". Here they
             keep company with the licence line and the source offer, which is
             what they actually are — the site's terms of engagement. */}
-        <nav aria-label={t("legal")} className="mt-8 border-t border-line pt-5">
+        {/* No divider of its own: the guides row above already drew one, and two
+            rules stacked six pixels apart read as a rendering fault. */}
+        <nav aria-label={t("legal")} className="mt-6">
           <ul className="flex flex-wrap gap-x-4 gap-y-2">
             {LEGAL_ROUTES.map((route) => (
               <li key={route.slug}>

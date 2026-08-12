@@ -1,5 +1,6 @@
 {
   "slug": "discord-banner-gif",
+  "updated": "2026-08-10",
   "title": "Discord banner GIF — 960 by 540, and it only plays for a moment",
   "lead": "A server banner is a wide 16:9 image across the top of the channel list. It animates briefly when somebody arrives and then holds a still frame, which makes the opening seconds the only part most people will ever see — and makes everything after them weight spent on nothing.",
   "meta": {
@@ -26,10 +27,22 @@
       "label": "Colours",
       "hint": "Banners are often photographic or gradient-heavy, and both show banding early. Reducing this is the first thing to try and the first thing to notice.",
       "options": [
-        { "value": "256", "label": "256 — needed for photographs" },
-        { "value": "128", "label": "128 — acceptable on illustration" },
-        { "value": "64", "label": "64 — flat artwork only" },
-        { "value": "32", "label": "32 — bold graphic panels" }
+        {
+          "value": "256",
+          "label": "256 — needed for photographs"
+        },
+        {
+          "value": "128",
+          "label": "128 — acceptable on illustration"
+        },
+        {
+          "value": "64",
+          "label": "64 — flat artwork only"
+        },
+        {
+          "value": "32",
+          "label": "32 — bold graphic panels"
+        }
       ]
     },
     "keepEveryNth": {
@@ -52,7 +65,10 @@
     "previewCaption": "Roughly how wide it sits above a channel list",
     "previewMessage": "across the top of the server",
     "previewSamples": [
-      { "px": 240, "label": "in the sidebar" }
+      {
+        "px": 240,
+        "label": "in the sidebar"
+      }
     ],
     "nextStep": "Next: Server Settings → Overview, then set the Server Banner Background. Whether that slot is available to a given server is something the Overview page itself will tell you.",
     "cropNote": "Anything that is not already 16:9 has its middle taken. Banners crop hard, so check that nothing important was living near an edge.",

@@ -1,5 +1,6 @@
 {
   "slug": "discord-sticker-gif",
+  "updated": "2026-08-10",
   "title": "Discord sticker GIF — exactly 320 by 320, and the two rules nobody mentions",
   "lead": "A sticker must be precisely 320 pixels square and no heavier than 512 KB. It must also run no longer than five seconds and no faster than sixty frames per second — two conditions that appear in almost no guide, and that quietly account for a great many refused uploads.",
   "meta": {
@@ -26,10 +27,22 @@
       "label": "Colours",
       "hint": "Stickers are drawn large enough that banding in a gradient becomes visible. Drop this only when the artwork is genuinely flat.",
       "options": [
-        { "value": "256", "label": "256 — keep every shade" },
-        { "value": "128", "label": "128 — usually indistinguishable" },
-        { "value": "64", "label": "64 — expect visible banding" },
-        { "value": "32", "label": "32 — flat vector art only" }
+        {
+          "value": "256",
+          "label": "256 — keep every shade"
+        },
+        {
+          "value": "128",
+          "label": "128 — usually indistinguishable"
+        },
+        {
+          "value": "64",
+          "label": "64 — expect visible banding"
+        },
+        {
+          "value": "32",
+          "label": "32 — flat vector art only"
+        }
       ]
     },
     "keepEveryNth": {
@@ -52,8 +65,14 @@
     "previewCaption": "At the size a sticker is drawn in a channel",
     "previewMessage": "sent as a sticker",
     "previewSamples": [
-      { "px": 160, "label": "in the conversation" },
-      { "px": 80, "label": "in the picker tray" }
+      {
+        "px": 160,
+        "label": "in the conversation"
+      },
+      {
+        "px": 80,
+        "label": "in the picker tray"
+      }
     ],
     "nextStep": "Next: Server Settings → Stickers → Upload Sticker, then give it the related emoji and a name of at least two characters.",
     "cropNote": "The square is compulsory here, so anything wide or tall loses its edges. Crop the region you want first if the middle is not it.",

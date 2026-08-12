@@ -132,7 +132,7 @@ pre-committed reversal in `phase-01` stands if judging later fails.
 | 6 | [GIF-to-GIF Tools](./phase-06-gif-to-gif-tools.md) | Complete 2026-08-05 · 26/26 E2E on Chromium and WebKit, outputs decoded | 5 |
 | 7 | [Cross-Format Tools](./phase-07-cross-format-tools.md) | Complete 2026-08-10 · 22/22 E2E on Chromium and WebKit, outputs decoded | 5 |
 | 8 | [Discord Preset Pages](./phase-08-discord-preset-pages.md) | Complete 2026-08-10 · 15/15 E2E on Chromium and WebKit, outputs decoded · one manual step outstanding | 5 |
-| 9 | [Content SEO and Legal](./phase-09-content-seo-and-legal.md) | Pending | 3 |
+| 9 | [Content SEO and Legal](./phase-09-content-seo-and-legal.md) | Complete 2026-08-10 except one page · machinery, 8 legal pages and 6 guides shipped · 206/206 E2E · **gifski comparison page blocked on G6** | 3 |
 | 10 | [Ads Consent and Analytics](./phase-10-ads-consent-and-analytics.md) | Pending | 3, 9 |
 | 11 | [QA Perf A11y and Launch](./phase-11-qa-perf-a11y-and-launch.md) | Pending | 6, 7, 8, 9, 10 |
 

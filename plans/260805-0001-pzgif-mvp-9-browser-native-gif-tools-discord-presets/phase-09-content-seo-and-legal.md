@@ -19,7 +19,48 @@ dependencies: [3]
 > - **`scripts/check-structured-data.mjs`** — fails the build on `aggregateRating`, `FAQPage` or `HowTo` markup — wired into `package.json` and CI. `design-guidelines.md` §10 amended to drop the obsolete `FAQPage` requirement (FAQ UI kept).
 > - **Redirect map** — `src/lib/seo/redirects.ts` (empty, typed) wired via `next.config.ts` `redirects()`, with `redirects.test.ts` locking the from-not-live / to-live invariant before the list is ever non-empty.
 >
-> **Still open in this phase:** the 6–10 hand-written non-tool content pages (incl. the gifski side-by-side comparison — the AdSense evidence pack), and the sitewide canonical/JSON-LD audit that Phase 11 verifies. Open question 1 (named operator) is already answered — Louis Le — via the legal slice.
+> **Still open after that pass:** the hand-written non-tool content pages, and the sitewide canonical/JSON-LD audit that Phase 11 verifies. Open question 1 (named operator) is already answered — Louis Le — via the legal slice.
+
+> **[Progress 2026-08-10] The content slice shipped. One page is deliberately held.**
+>
+> Verified by `tsc`, `eslint`, **376 unit tests**, `next build` (all six guides
+> and the hub prerender static ●), `check:static` **26/26**, `check:forbidden`,
+> `check:structured-data`, `check:landing`, `check:heavy`, and the **full
+> Playwright suite — 206 passed, 0 failed** across Chromium and WebKit.
+>
+> - **Six editorial guides at `/guides/<slug>`, plus a hub at `/guides`.** Route
+>   shape settled — see "Where the guides live" below. Every word hand-written;
+>   700-word floor asserted, and a cross-corpus duplicate-paragraph check now
+>   spans the guides, the hub and the About page.
+> - **The Discord limits table is generated from `presets/discord.ts`**, so the
+>   page and the encoders cannot disagree. `byteLimit: null` renders as "Not
+>   published" with our own target labelled separately; each row links its source
+>   article and shows its `verifiedOn` date.
+> - **Real content dates everywhere.** `updated` added to all 15 tool content
+>   files (taken from each file's own last git commit, not invented), to the six
+>   guides, and validated by `toolContent()`. `sitemap.ts` now emits a
+>   `lastModified` for every URL except the homepage, which is a composite and is
+>   honestly left undated. `sitemap.test.ts` asserts the route list, the dates,
+>   and that the module never reads the clock.
+> - **`robots.ts` extended** — `/dev/` and `/__bench` disallowed as a third
+>   layer behind `pageExtensions` and each page's own `noindex`. There are no
+>   result URLs to exclude; a finished file is an in-memory blob with no HTTP
+>   address, which the phase plan predates.
+> - **FAQ crawlability is now asserted** (`e2e/faq-crawlability.spec.ts`):
+>   answers present in the *raw served HTML* rather than the hydrated DOM, no
+>   `hidden` in the static markup, and `hidden="until-found"` applied after mount
+>   only where `beforematch` exists — with the WebKit branch asserted separately,
+>   because there the attribute fails closed.
+> - **Footer** carries a guides row; all six are sitewide internal links.
+>
+> **Deliberately not shipped: the gifski side-by-side comparison page.** Gate G6
+> — is gifski *visibly* better than `gifenc` at matched bytes — is generated but
+> **unscored**, and Phase 1 pre-registered that every "visibly better" claim
+> comes out of the copy if it fails. A page whose entire premise is that claim
+> cannot be written before the judging; writing it anyway would make the
+> pre-registration decoration. It becomes the seventh guide the moment G6 is
+> scored, and `GUIDE_ROUTES` carries that note. **Scoring G6 is now the blocker
+> on this phase's last page and on differentiator #1 being legible anywhere.**
 
 ## Overview
 
@@ -49,8 +90,17 @@ Two things here are load-bearing for the business rather than the product: the *
 | `FAQPage` | **Dead.** Deprecated 2025-05-08, stopped appearing in Search **2026-05-07**, docs removed 2026-06-15 | **No** |
 | `HowTo` | **Dead.** Removed from mobile 2023, then desktop | **No** |
 | `BreadcrumbList` | Live, still renders in results | **Yes**, every tool and preset page |
-| `WebApplication` | Live. Rich-result eligible only with `aggregateRating`/`review` | **Yes, with `offers.price: 0` and NO rating** |
+| `WebApplication` | Live. Rich-result eligible only with `aggregateRating`/`review` | **Yes, with `isAccessibleForFree: true` and NO rating** |
 | `WebSite` + `Organization` | Feeds site-name generation and entity understanding | **Yes, homepage only** |
+
+**On `offers` — amended 2026-08-10, during implementation.** This table asked for
+`offers.price: 0`. The code emits `isAccessibleForFree: true` instead and no
+`offers` node at all, because `offers` with a zero price reads to a parser as a
+product listing for a thing that is not a product, and it earns nothing: the
+rich result it feeds needs a rating this site correctly refuses to fabricate.
+`isAccessibleForFree` states the same fact in the vocabulary meant for it. The
+reasoning is recorded in `tool-json-ld.tsx`; this row was corrected to match the
+code rather than the other way round.
 
 **On `WebApplication` without a rating — this is deliberate and must survive future audits.** Google requires a rating for rich-result eligibility. PZGIF has no reviews at launch. Fabricating them is a structured-data spam violation that risks a manual action against a site whose entire model is organic search — a catastrophic downside for a cosmetic upside. Emit the markup, accept no rich result, gain the entity benefit. **Do not let a later "SEO fix" add synthetic ratings.**
 
@@ -75,6 +125,26 @@ Write 6-10 pages that need no engine, and publish them on the live domain **whil
 - "How to make a Discord emoji that isn't blurry"
 
 The gifski comparison page does triple duty: editorial content, link bait, and — critically — **the only surface where differentiator #1 is legible to a stranger**. The `BeforeAfterSlider` on a tool page compares the user's input to their output; it never shows gifski against a competitor, so a user cannot perceive the quality claim at the moment they decide.
+
+**[2026-08-10] Held, pending gate G6.** The other five shipped and a sixth was
+written in its place — "Why a 60fps GIF is not 60fps", which stands entirely on
+properties of the file format and on the browser delay clamp the engine already
+implements. The gifski page cannot be written on the same footing: its premise
+*is* the unscored claim, and Phase 1 pre-committed to deleting every "visibly
+better" line if the judging goes the other way. Score G6, then write it.
+
+### Where the guides live — `/guides/<slug>`, decided 2026-08-10
+
+Top-level was the alternative and it loses on three counts. The top-level
+namespace is the commercial keyword space, and a guide at `/gif-vs-mp4-vs-webp`
+sitting beside a tool at `/gif-to-mp4` invites exactly the confusion a URL exists
+to resolve. A path prefix is also the only thing that makes "publish a batch,
+watch Search Console, publish the next" a filter anyone can actually apply. And
+a guide has a real parent, so `BreadcrumbList` gets Home > Guides > page rather
+than an invented intermediate crumb or a two-item breadcrumb that says nothing.
+
+The hub is a seventh indexable page and carries the six internal links; the
+footer carries them sitewide as well.
 
 ### The scaled-content defence
 
@@ -112,9 +182,10 @@ entries are out of scope.
 
 - Create: `src/app/sitemap.ts`, `src/app/robots.ts`
 - Create: `src/app/[locale]/(legal)/terms/page.tsx`, `privacy/page.tsx`, `cookies/page.tsx`, `acceptable-use/page.tsx`, `about/page.tsx`
-- Create: `src/lib/seo/metadata.ts` (incl. `alternatesFor()`), `src/lib/seo/jsonld.ts`
-- Create: `src/components/content/faq-accordion.tsx` — `tool-grid.tsx`, `why-pzgif.tsx` and the preset teaser already exist under `src/components/home/`
-- Create: `src/content/legal/*.mdx`
+- ~~Create: `src/lib/seo/metadata.ts` (incl. `alternatesFor()`), `src/lib/seo/jsonld.ts`~~ — shipped as `src/lib/tools/metadata.ts` plus `tool-json-ld.tsx` / `site-json-ld.tsx` / `guide-json-ld.tsx`. No `alternatesFor()` helper: with one locale it would be a function that returns a canonical, which `toolMetadata()` already does. It is a one-line addition when locale #2 lands, and a wrapper written for a caller that does not exist is the abstraction this codebase keeps refusing
+- ~~Create: `src/components/content/faq-accordion.tsx`~~ — shipped as `faq-section.tsx` over `ui/accordion.tsx`
+- ~~Create: `src/content/legal/*.mdx`~~ — **`.json`, not MDX.** MDX lets prose import components, which dissolves the `LICENSE-CONTENT` boundary into a judgement call; see `inline-copy.tsx`
+- Create *(done 2026-08-10)*: `src/content/guides/*.json`, `src/content/guides.json`, `src/lib/content/guide.ts`, `src/lib/content/guides-content.ts`, `src/lib/tools/updated.ts`, `src/components/content/guide-page.tsx`, `guide-json-ld.tsx`, `discord-limits-table.tsx`, `src/app/[locale]/guides/{page.tsx,[slug]/page.tsx}`
 - Modify: `docs/design-guidelines.md` §10 — remove the `FAQPage` schema requirement
 
 ## Implementation Steps
@@ -138,19 +209,19 @@ entries are out of scope.
 
 ## Success Criteria
 
-- [ ] The shared content components and JSON-LD helpers exist and are consumed — not duplicated — by Phases 5-8
-- [ ] *(Verified in Phase 11, not here:)* every tool and preset page carries ≥400 words of hand-written, page-specific explainer plus its own FAQ. This phase owns the machinery and the non-tool pages; the tool phases own their own prose
-- [ ] **6-10 non-tool content pages published and indexed**, including the gifski side-by-side comparison page
-- [ ] `sitemap.ts` emits real per-page content dates, not build timestamps
-- [ ] `BreadcrumbList` + `WebApplication` validate; `WebApplication` carries `offers.price: 0` and **no rating**
+- [x] The shared content components and JSON-LD helpers exist and are consumed — not duplicated — by Phases 5-8
+- [x] *(Verified in Phase 11, not here:)* every tool and preset page carries ≥400 words of hand-written, page-specific explainer plus its own FAQ. Measured 2026-08-10: **875–1336 words** per page, lowest `discord-avatar-gif`. This phase owns the machinery and the non-tool pages; the tool phases own their own prose
+- [~] **6-10 non-tool content pages published**, including the gifski side-by-side comparison page — **six published** (five from the list above plus "Why a 60fps GIF is not 60fps"), **gifski comparison held pending gate G6**. "Indexed" is not verifiable before the domain serves
+- [x] `sitemap.ts` emits real per-page content dates, not build timestamps — asserted by `sitemap.test.ts`, including that the module never reads the clock
+- [x] `BreadcrumbList` + `WebApplication` validate; `WebApplication` carries `isAccessibleForFree: true` (see the amendment above) and **no rating**
 - [x] A CI grep fails the build on `aggregateRating`, so a future session cannot "fix" the missing rating by inventing one
 - [x] No `FAQPage` or `HowTo` JSON-LD anywhere in the codebase
-- [ ] Self-referential canonical on every page; no hreflang while there is one locale
+- [x] Self-referential canonical on every page; no hreflang while there is one locale — asserted per guide in `e2e/guides.spec.ts` and per policy in `e2e/legal-pages.spec.ts`
 - [x] All eight legal/trust pages live — Terms, Privacy, Cookie, Acceptable Use, About, Contact, DMCA, Accessibility — with a real named operator on About and a working `contact@` address
 - [x] 404 page and redirect map in place
-- [ ] FAQ answers present in the SSG HTML and revealed by browser find-in-page
-- [ ] Footer lists exactly the 9 shipped tools + the Discord cluster, plus the AGPL source link
-- [ ] Every route statically prerendered
+- [x] FAQ answers present in the SSG HTML and revealed by browser find-in-page — `e2e/faq-crawlability.spec.ts`. Find-in-page itself is browser chrome and cannot be driven from Playwright, so the assertion is on the mechanism it depends on, with the WebKit fail-closed branch checked separately
+- [x] Footer lists exactly the 9 shipped tools + the Discord cluster, plus the AGPL source link — and now the six guides
+- [x] Every route statically prerendered — `check:static`, 26/26
 
 ## Risk Assessment
 
@@ -163,5 +234,7 @@ entries are out of scope.
 
 ## Open questions
 
-1. Who is the named operator on the About page? Required before any ad-network application. Blocks nothing else.
+1. ~~Who is the named operator on the About page?~~ — resolved. **Louis Le**, in the legal slice.
 2. ~~Domain provisional~~ — resolved. `pzgif.com` was purchased on 2026-08-05, so `metadataBase`, canonicals and sitemap URLs are final from the start. No placeholder-URL cleanup pass is needed.
+3. ~~Where do the editorial pages live?~~ — resolved 2026-08-10. `/guides/<slug>` with a hub at `/guides`; reasoning above.
+4. **When is gate G6 scored?** Now the only thing standing between this phase and its last page. The judging pack has been sitting generated and unscored since Phase 1. Three judges, forced choice, ≥7 of 9 — the protocol is pre-registered and takes an afternoon. Until it happens the site has no surface on which differentiator #1 is legible to a stranger, and it is paying the AGPL obligation for a claim it has never checked.

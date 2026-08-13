@@ -94,6 +94,12 @@ Automated checks catch a minority of real issues. Required manual passes:
 **Comparative disparagement** — the weakest legal ground in the copy set
 - "Most browser-based GIF tools use a naive encoder and **you can see it** — banding, dirty edges, dithering noise" and "Same size budget, **visibly better result**". Both are gated on gate G6. If G6 failed, these come out in the same commit as the repositioning
 
+**Inherited from the preset-first settings work** (`plans/260813-1055-preset-first-tool-settings-ui-chips-promoted-primary-collapsible-settings/`)
+- The **preset chip labels and legends** on `/gif-compressor` and `/mp4-to-gif` (`presetChips` in each content file) are production copy and belong in this sign-off. `tool-copy.test.ts` already asserts no label is shared between the two rows; what it cannot assert is whether each label describes what its preset actually does.
+- The **settings disclosure** on those two routes joins the a11y sweep: passes 1, 3, 4 and 5 above now have a collapsed panel and a chip row to walk. Pass 2 must confirm the toggle announces as "Settings, button, collapsed/expanded" — it takes its name from the heading via `aria-labelledby` rather than a string of its own.
+- **iOS Safari collapse/expand on real hardware is unverified.** WebKit in Playwright is not Mobile Safari, and that plan recorded the criterion as unverified rather than marking it passed. It is a real-device item here.
+- That plan records a **pre-existing compressor defect**, not caused by it: the width slider can show a width the engine will not run, because the page never reads the device tier and `widthCapFor()` caps the job at 640 on desktop and 480 on every mobile tier. `plan.downgraded` cannot report it, because `wantedWidth` is already capped before the flag is computed. Either give the compressor a capabilities dependency or say so in the copy — but do not ship a slider that reads 1280 while the job runs 640.
+
 **Structural checks**
 - Mobile limits ("150 MB / 50 MB / 60 seconds") must be **runtime-computed per device tier**, never static copy — the binding constraint is decoded RGBA, not input size
 - "Keep inputs under roughly 50 MB — iOS Safari runs out of memory above that" is factually wrong in a way a user can disprove

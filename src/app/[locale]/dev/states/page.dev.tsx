@@ -15,6 +15,10 @@ import {
   SizeDelta,
 } from "@/components/tool/result-panel";
 import { SettingsPanel } from "@/components/tool/settings-panel";
+import {
+  DisclosureStates,
+  ToolPresetChipStates,
+} from "./settings-states";
 import { StickyActionBar } from "@/components/tool/sticky-action-bar";
 import { Accordion } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
@@ -952,6 +956,12 @@ function Badges() {
             defaultValue={128}
           />
         </SettingsPanel>
+      </Row>
+      <Row name="settings disclosure — collapsed below lg, forced open at ≥lg">
+        <DisclosureStates />
+      </Row>
+      <Row name="preset chips — the tool row, no dimensions">
+        <ToolPresetChipStates />
       </Row>
     </div>
   );

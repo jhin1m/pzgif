@@ -40,6 +40,18 @@ export interface FileChipProps {
   error?: string;
   /** Hide the × entirely — a chip in a read-only summary has nothing to remove. */
   removable?: boolean;
+  /**
+   * Keeps the × in the layout but inert, for the state where removing the file
+   * is temporarily not offered.
+   *
+   * Distinct from `removable={false}`, which is "there is nothing to remove
+   * here", and it has to be: unmounting the button narrows the chip by 34px, so
+   * a page that hid it for the length of a job moved everything to its right
+   * twice — once when the job started and once when it ended, both well outside
+   * the 500 ms window that would excuse the shift as prompted. Measured on
+   * `/gif-compressor`. Same rule as the settings panel: disabled, never hidden.
+   */
+  removeDisabled?: boolean;
   onRemove?: () => void;
   removeLabel?: string;
   className?: string;
@@ -54,6 +66,7 @@ export function FileChip({
   size,
   error,
   removable = true,
+  removeDisabled = false,
   onRemove,
   removeLabel = "Remove file",
   className,
@@ -93,6 +106,7 @@ export function FileChip({
         <button
           type="button"
           onClick={onRemove}
+          disabled={removeDisabled}
           aria-label={removeLabel}
           data-force={forceRemoveState}
           className={cn(
@@ -100,6 +114,7 @@ export function FileChip({
             "text-fg-muted hover:bg-surface-2 hover:text-fg",
             "data-[force=hover]:bg-surface-2 data-[force=hover]:text-fg",
             "after:absolute after:inset-[-10px] after:content-['']",
+            "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent",
             forceRemoveState === "focus" && "force-focus",
           )}
         >

@@ -33,8 +33,12 @@ import {
   shouldRenderSideBySide,
 } from "@/components/tool/before-after-slider";
 import { NextTools } from "@/components/tool/next-tools";
+import { PresetChips } from "@/components/tool/preset-chips";
 import { ResultPanel, ResultSummary } from "@/components/tool/result-panel";
-import { SettingsPanel } from "@/components/tool/settings-panel";
+import {
+  SettingsDisclosure,
+  SettingsPanel,
+} from "@/components/tool/settings-panel";
 import { SettingsForm } from "@/components/tool/settings/settings-form";
 import {
   booleanValue,
@@ -46,10 +50,19 @@ import {
 } from "@/components/tool/settings/control-schema";
 import { StickyActionBar } from "@/components/tool/sticky-action-bar";
 import { ToolPage } from "@/components/tool/tool-page";
+import { useToolIntent } from "@/components/tool/use-tool-intent";
 import { useHandoffFile } from "@/hooks/use-handoff-file";
 import { useObjectUrl } from "@/hooks/use-object-url";
 import { useJobProgress, useMediaJob } from "@/hooks/use-media-job";
 import { resolveEncoder } from "@/lib/media/capability";
+import {
+  COMPRESSOR_DEFAULT_VALUES,
+  COMPRESSOR_PRESETS,
+  COMPRESSOR_WIDTH_FALLBACK,
+  COMPRESSOR_WIDTH_MIN,
+  presetById,
+  type ToolPresetGroup,
+} from "@/lib/presets/tool-presets";
 import type { GifEncoderId, InputProbe, JobSpec } from "@/lib/media/types";
 import { formatBytes, formatDelta } from "@/lib/format-bytes";
 import type { ToolContent } from "@/lib/tools/content";
@@ -85,9 +98,19 @@ import type { ToolContent } from "@/lib/tools/content";
 
 const SLUG = "gif-compressor";
 
-/** Width slider bounds. The upper bound is the input's own width. */
-const WIDTH_MIN = 120;
-const WIDTH_FALLBACK_MAX = 1280;
+/**
+ * Width slider bounds, and the values the controls mount with.
+ *
+ * Both live beside the preset table rather than here: the presets resolve
+ * widths against the same floor and the same pre-probe fallback, and two
+ * copies of either number is how a preset ends up asking for a width its own
+ * slider will not display.
+ */
+const WIDTH_MIN = COMPRESSOR_WIDTH_MIN;
+const WIDTH_FALLBACK_MAX = COMPRESSOR_WIDTH_FALLBACK;
+
+/** The default preset. Restored by Reset and by dropping a second file. */
+const DEFAULT_PRESET_ID = "balanced";
 
 /**
  * The encoder cannot change while the tab is open — the user agent is fixed —
@@ -96,12 +119,8 @@ const WIDTH_FALLBACK_MAX = 1280;
  */
 const subscribeToNothing = () => () => {};
 
-const DEFAULT_VALUES: ControlValues = {
-  quality: 80,
-  colours: "256",
-  width: WIDTH_FALLBACK_MAX,
-  dropFrames: false,
-};
+/** `balanced`, resolved with no probe. One source, so the two cannot drift. */
+const DEFAULT_VALUES: ControlValues = COMPRESSOR_DEFAULT_VALUES;
 
 export function GifCompressorTool({
   content,
@@ -125,6 +144,28 @@ export function GifCompressorTool({
   const [probe, setProbe] = useState<InputProbe | null>(null);
   const [values, setValues] = useState<ControlValues>(DEFAULT_VALUES);
   const [elapsed, setElapsed] = useState(0);
+  /** Below `lg` only — at `≥lg` the panel is forced open and the toggle is gone. */
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  /**
+   * Which preset the values mean, if any.
+   *
+   * The same hook the workbench uses, and deliberately so: this page is not a
+   * `GifWorkbench` consumer, and a second copy of the probe-versus-intent state
+   * machine is exactly the drift red team found in the first draft.
+   */
+  const intent = useToolIntent(DEFAULT_PRESET_ID);
+  const { markCustom, readIntent, restoreDefault } = intent;
+
+  const presets = useMemo<ToolPresetGroup>(
+    () => ({
+      items: COMPRESSOR_PRESETS,
+      defaultId: DEFAULT_PRESET_ID,
+      legend: content.presetChips?.legend ?? "",
+      labels: content.presetChips?.labels ?? {},
+    }),
+    [content.presetChips],
+  );
 
   /**
    * The encoder this browser would pick on its own.
@@ -212,13 +253,33 @@ export function GifCompressorTool({
         if (!result) return;
         // The width slider starts where the file is, not at an arbitrary
         // default — "no change" has to be the state you begin in.
-        setValues((current) => ({
-          ...current,
-          width: Math.max(WIDTH_MIN, result.width),
-        }));
+        //
+        // Intent is read from the ref inside the updater: this callback was
+        // handed to `job.probe()` at drop time and is never recreated, so a
+        // captured state value would describe the page as it was then.
+        setValues((current) => {
+          const source = Math.max(WIDTH_MIN, result.width);
+          const active = readIntent();
+          const preset =
+            active.kind === "auto"
+              ? presetById(presets, active.presetId)
+              : undefined;
+          if (preset) return { ...current, ...preset.resolve({ probe: result }) };
+          // Custom intent: the user owns what they typed, but the width slider's
+          // upper bound is a fact about the file rather than a preference. Left
+          // alone, a control edited before the probe landed would freeze `width`
+          // at the pre-probe fallback of 1280 while the slider — whose `max` is
+          // now the source width — displayed 480 and `buildSpec` sent 1280.
+          // Clamping keeps a narrower width the user really chose and makes the
+          // displayed number and the executed one the same number again.
+          return {
+            ...current,
+            width: Math.min(numberValue(current, "width", source), source),
+          };
+        });
       });
     },
-    [job],
+    [job, presets, readIntent],
   );
 
   // A file dropped on the homepage arrives here already chosen. No-op on every
@@ -230,8 +291,11 @@ export function GifCompressorTool({
     setFile(null);
     setProbe(null);
     currentFileRef.current = null;
+    // Intent first, or the *next* file inherits the last one's edits and its
+    // width slider is never sized to it.
+    restoreDefault();
     setValues(DEFAULT_VALUES);
-  }, [job]);
+  }, [job, restoreDefault]);
 
   const run = useCallback(() => {
     // Re-entrancy guard. `Button`'s `loading` state only sets
@@ -245,17 +309,41 @@ export function GifCompressorTool({
     job.run(file, buildSpec(values));
   }, [buildSpec, file, job, locked, values]);
 
-  /** Reset returns the controls to their defaults *for this file*. */
+  /**
+   * Reset returns the controls to their defaults *for this file*, which now
+   * means selecting the default preset again.
+   */
   const resetSettings = useCallback(() => {
-    setValues({
-      ...DEFAULT_VALUES,
-      width: Math.max(WIDTH_MIN, probe?.width ?? WIDTH_FALLBACK_MAX),
-    });
-  }, [probe]);
+    restoreDefault();
+    const preset = presetById(presets, DEFAULT_PRESET_ID);
+    setValues(
+      preset
+        ? { ...DEFAULT_VALUES, ...preset.resolve({ probe }) }
+        : {
+            ...DEFAULT_VALUES,
+            width: Math.max(WIDTH_MIN, probe?.width ?? WIDTH_FALLBACK_MAX),
+          },
+    );
+  }, [presets, probe, restoreDefault]);
 
-  const setValue = useCallback((id: string, value: ControlValue) => {
-    setValues((current) => ({ ...current, [id]: value }));
-  }, []);
+  const setValue = useCallback(
+    (id: string, value: ControlValue) => {
+      setValues((current) => ({ ...current, [id]: value }));
+      markCustom();
+    },
+    [markCustom],
+  );
+
+  /** A chip click. Merged, so a key no preset owns is left alone. */
+  const selectPreset = useCallback(
+    (id: string) => {
+      intent.selectPreset(id);
+      const preset = presetById(presets, id);
+      if (!preset) return;
+      setValues((current) => ({ ...current, ...preset.resolve({ probe }) }));
+    },
+    [intent, presets, probe],
+  );
 
   /**
    * The elapsed readout. A real clock, shown only where there is no counter.
@@ -437,7 +525,10 @@ export function GifCompressorTool({
                   <FileChip
                     name={file?.name ?? ""}
                     size={formatBytes(file?.size ?? 0)}
-                    removable={!locked}
+                    // Kept in the layout while the job owns the file, not
+                    // unmounted: removing it narrows the chip and moves the
+                    // metadata badge beside it, twice per job.
+                    removeDisabled={locked}
                     onRemove={startOver}
                     removeLabel={tDropzone("removeFile")}
                   />
@@ -455,11 +546,20 @@ export function GifCompressorTool({
                           })
                       : "…"}
                   </Badge>
-                  {!locked ? (
-                    <Button variant="ghost" size="sm" onClick={startOver}>
-                      {t("chooseDifferent")}
-                    </Button>
-                  ) : null}
+                  {/* Disabled while the job owns the file, never unmounted.
+                      Removing it narrows this wrapping row by 158px, which on a
+                      viewport wide enough for the ad rail is the difference
+                      between one line and two — so the preview below it moved
+                      44px twice per job, and the second move lands long after
+                      the click that started it. */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={locked}
+                    onClick={startOver}
+                  >
+                    {t("chooseDifferent")}
+                  </Button>
                 </div>
 
                 {/* The source, playing, while the settings are tuned.
@@ -502,6 +602,11 @@ export function GifCompressorTool({
                 setSubmittedColours(
                   Number(stringValue(values, "colours", "256")),
                 );
+                // This path splices the engine's own plan into the spec and
+                // never touches `values`, so nothing else can clear the pressed
+                // chip — and a job running at 320px under a chip that says
+                // "Keep every detail" is the divergence the chips exist to stop.
+                markCustom();
                 const spec = buildSpec(values);
                 job.run(file, {
                   ...spec,
@@ -679,37 +784,24 @@ export function GifCompressorTool({
       }
       settings={
         <SettingsPanel>
-          <div className="flex items-center justify-between gap-3">
-            <span className="font-sans text-h4 font-semibold text-fg">
-              {t("settings")}
-            </span>
-            {flow === "idle" ? (
-              <Badge variant="neutral">{t("waitingForFile")}</Badge>
-            ) : locked ? (
-              <Badge variant="neutral">{t("lockedWhileEncoding")}</Badge>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={resetSettings}
-              >
-                {t("reset")}
-              </Button>
-            )}
-          </div>
-
-          <SettingsForm
-            controls={controls}
-            values={values}
-            onChange={setValue}
+          {/* Chips, then the primary, then the controls. The primary used to
+              sit under the whole panel, which put it below the fold in the
+              768–1023px band — wide enough that the sticky bar is gone, narrow
+              enough that the settings are still stacked above it. */}
+          <PresetChips
+            legend={presets.legend}
+            presets={presets.items}
+            labels={presets.labels}
+            selected={intent.presetId}
+            onSelect={selectPreset}
+            // The same condition `SettingsForm` uses. A chip clicked mid-job
+            // would desync the panel from the settings the job is running.
             disabled={flow === "idle" || locked}
-            describedBy="compressor-primary-reason"
-            panelHint={flow === "idle" ? content.actions.disabledReason : undefined}
           />
 
           {/* Hidden below md — the sticky bar carries the primary there. */}
           <Button
-            className="mt-2 hidden w-full md:inline-flex"
+            className="hidden w-full md:inline-flex"
             size="lg"
             variant={flow === "result" ? "secondary" : "primary"}
             onClick={run}
@@ -725,6 +817,9 @@ export function GifCompressorTool({
           >
             {flow === "result" ? content.actions.rerun : content.actions.run}
           </Button>
+          {/* Outside the disclosure below, deliberately: it is the primary's
+              `aria-describedby` target, and a description a visitor has to
+              expand a panel to reach is not one. */}
           <p
             id="compressor-primary-reason"
             // Visually hidden below `md`, where the sticky bar carries the
@@ -734,6 +829,35 @@ export function GifCompressorTool({
           >
             {flow === "idle" ? content.actions.disabledReason : t("runsLocally")}
           </p>
+
+          <SettingsDisclosure
+            id={SLUG}
+            heading={t("settings")}
+            open={settingsOpen}
+            onToggle={() => setSettingsOpen((current) => !current)}
+            aside={
+              flow === "idle" ? (
+                <Badge variant="neutral">{t("waitingForFile")}</Badge>
+              ) : locked ? (
+                <Badge variant="neutral">{t("lockedWhileEncoding")}</Badge>
+              ) : (
+                <Button variant="ghost" size="sm" onClick={resetSettings}>
+                  {t("reset")}
+                </Button>
+              )
+            }
+          >
+            <SettingsForm
+              controls={controls}
+              values={values}
+              onChange={setValue}
+              disabled={flow === "idle" || locked}
+              describedBy="compressor-primary-reason"
+              panelHint={
+                flow === "idle" ? content.actions.disabledReason : undefined
+              }
+            />
+          </SettingsDisclosure>
         </SettingsPanel>
       }
     >

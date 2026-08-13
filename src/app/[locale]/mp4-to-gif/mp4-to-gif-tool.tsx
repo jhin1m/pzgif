@@ -16,6 +16,12 @@ import { TrimRange, type TrimValue } from "@/components/tool/trim-range";
 import { useCapabilities } from "@/hooks/use-capabilities";
 import { formatBytes } from "@/lib/format-bytes";
 import { TIER_BUDGETS, affordableFrames, type TierBudget } from "@/lib/media/limits";
+import {
+  MP4_DESKTOP_DEFAULTS,
+  MP4_MOBILE_DEFAULTS,
+  mp4ToGifPresets,
+  type ToolPresetGroup,
+} from "@/lib/presets/tool-presets";
 import type { InputProbe, JobSpec } from "@/lib/media/types";
 import { fillNote, type ToolContent } from "@/lib/tools/content";
 
@@ -53,19 +59,25 @@ const SLUG = "mp4-to-gif";
 const MIN_WIDTH = 160;
 
 /**
- * Defaults, per device class.
+ * Defaults, per device class — the `balanced` row of each preset column.
  *
  * The desktop pair is the wireframe's. The mobile pair is not a smaller version
  * of it for tidiness — at 480 px and 15 fps the android tier's budget runs out
  * at under four seconds, which is below meme length, so the tool would refuse
  * almost everything it was offered. 320 px at 10 fps moves the refusal threshold
  * into territory where a real clip fits.
+ *
+ * Read from the preset table rather than declared twice, so the default chip
+ * and the fallback values cannot disagree about what "default" means.
  */
-const DESKTOP_DEFAULTS = { width: 480, fps: 15 } as const;
-const MOBILE_DEFAULTS = { width: 320, fps: 10 } as const;
+const DESKTOP_DEFAULTS = MP4_DESKTOP_DEFAULTS;
+const MOBILE_DEFAULTS = MP4_MOBILE_DEFAULTS;
 
 /** The wireframe's quality default. gifski's scale, not a percentage. */
-const DEFAULT_QUALITY = 80;
+const DEFAULT_QUALITY = DESKTOP_DEFAULTS.quality;
+
+/** Restored by Reset and by dropping a second clip. */
+const DEFAULT_PRESET_ID = "balanced";
 
 /**
  * The values the controls mount with, before any device or file is known.
@@ -157,6 +169,22 @@ export function Mp4ToGifTool({
   const budget = TIER_BUDGETS[tier];
   const isMobileTier = tier === "android-mobile" || tier === "ios";
   const profile = isMobileTier ? MOBILE_DEFAULTS : DESKTOP_DEFAULTS;
+
+  /**
+   * The chip row, resolved here because this is where the device tier is known.
+   *
+   * `GifWorkbench` is given a finished table and never learns what a tier is,
+   * which is the whole reason presets resolve on the page.
+   */
+  const presets = useMemo<ToolPresetGroup>(
+    () => ({
+      items: mp4ToGifPresets(isMobileTier),
+      defaultId: DEFAULT_PRESET_ID,
+      legend: content.presetChips?.legend ?? "",
+      labels: content.presetChips?.labels ?? {},
+    }),
+    [content.presetChips, isMobileTier],
+  );
 
   /**
    * True once the device has answered and the answer is no.
@@ -400,6 +428,7 @@ export function Mp4ToGifTool({
       accept={accept}
       defaultValues={DEFAULT_VALUES}
       valuesForProbe={valuesForProbe}
+      presets={presets}
       controls={controls}
       buildSpec={buildSpec}
       downloadSuffix="-gif"

@@ -1,7 +1,6 @@
 "use client";
 
 import { PresetChip } from "@/components/ui/preset-chip";
-import type { DiscordPreset, DiscordPresetId } from "@/lib/presets/discord";
 
 /**
  * The preset picker: a single-select group of toggle buttons.
@@ -19,20 +18,29 @@ import type { DiscordPreset, DiscordPresetId } from "@/lib/presets/discord";
  * be enforced here rather than by the platform, which is one line, and the group
  * keeps a `role="group"` with a real label so the set still reads as a set.
  *
- * The chips render the dimensions but **never a byte figure**. Three of the four
- * surfaces have no published limit, so a chip row that showed one per preset
- * would have to invent two of them — which is the wireframe's "≤10 MB" defect
- * reappearing in the smallest possible type.
+ * The Discord chips render the dimensions but **never a byte figure**. Three of
+ * the four surfaces have no published limit, so a chip row that showed one per
+ * preset would have to invent two of them — which is the wireframe's "≤10 MB"
+ * defect reappearing in the smallest possible type.
+ *
+ * ── One component, two callers ─────────────────────────────────────────────
+ * The tool pages' "start from one of these" row is the same control with the
+ * same semantics, so it is this component rather than a second one: `dimensions`
+ * was already optional and `legend` was already a plain hand-written string, so
+ * widening cost three prop types. A second chip component would have meant a
+ * second set of a11y semantics and a second `/dev/states` row to keep in step.
  */
 
 export interface PresetChipsProps {
   /** Hand-written per page. The `<legend>` of the group. */
   legend: string;
-  presets: readonly DiscordPreset[];
+  /** Ids in the order they are offered. `dimensions` is the Discord row only. */
+  presets: readonly { readonly id: string; readonly dimensions?: string }[];
   /** Chip label per preset, written for this page. */
   labels: Readonly<Record<string, string>>;
-  selected: DiscordPresetId;
-  onSelect(id: DiscordPresetId): void;
+  /** Null renders no pressed chip — the state where the values are the user's. */
+  selected: string | null;
+  onSelect(id: string): void;
   /** True while a job owns the settings — switching mid-encode is not offered. */
   disabled?: boolean;
 }
@@ -53,7 +61,7 @@ export function PresetChips({
           <PresetChip
             key={preset.id}
             label={labels[preset.id] ?? preset.id}
-            dimensions={`${preset.width}×${preset.height}`}
+            dimensions={preset.dimensions}
             selected={preset.id === selected}
             disabled={disabled}
             onClick={() => onSelect(preset.id)}

@@ -152,6 +152,12 @@ function AccordionRow({
         // handful of panels, and a FAQ page would otherwise add a landmark per
         // question. `aria-expanded` + `aria-controls` on the header is the pair
         // that carries the relationship.
+        // A test hook, and a load-bearing one: `.pz-acc-panel` and an id ending
+        // in `-panel` are both shared with the tool pages' settings disclosure,
+        // which deliberately does *not* take `hidden="until-found"`. The
+        // crawlability suite has to be able to say "the FAQ's panels" and mean
+        // only these.
+        data-accordion-panel=""
         data-state={open ? "open" : "closed"}
         className="pz-acc-panel"
       >

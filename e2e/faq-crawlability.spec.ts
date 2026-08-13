@@ -58,7 +58,10 @@ test.describe("FAQ crawlability", () => {
     // crawler that does not run scripts. The attribute is applied after mount or
     // not at all.
     const html = await (await request.get(TOOL)).text();
-    const panels = html.match(/id="[^"]*-panel"[^>]*/g) ?? [];
+    // `data-accordion-panel`, not "an id ending in -panel": the tool pages'
+    // settings disclosure reuses the same collapse CSS and the same id shape,
+    // and it is deliberately never `hidden` at all.
+    const panels = html.match(/<div[^>]*data-accordion-panel[^>]*>/g) ?? [];
     expect(panels.length, "no FAQ panels were rendered at all").toBeGreaterThan(
       0,
     );
@@ -78,7 +81,9 @@ test.describe("FAQ crawlability", () => {
     // The *second* row. `FaqSection` opens the first one by default, so it never
     // carries the attribute — asserting against it would have tested nothing and
     // passed for the wrong reason on every engine.
-    const panel = page.locator('[data-state="closed"][id$="-panel"]').first();
+    const panel = page
+      .locator('[data-accordion-panel][data-state="closed"]')
+      .first();
     await expect(panel).toBeAttached();
 
     const supported = await page.evaluate(

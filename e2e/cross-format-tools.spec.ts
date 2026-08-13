@@ -143,6 +143,28 @@ test.describe("mp4 to gif", () => {
     expect(output.durationMs).toBeGreaterThan(7_000);
   });
 
+  test("keeps a chosen trim span when a preset chip is clicked", async ({
+    page,
+  }) => {
+    await page.goto("/mp4-to-gif");
+    const engine = await engineCan(page);
+    test.skip(!engine.videoDecode, "no WebCodecs VideoDecoder in this engine");
+
+    await loadFixture(page, MP4, "screen-720p-10s.mp4");
+
+    await page.locator('[data-trim-field="to"]').fill("3");
+    await page.locator('[data-trim-field="to"]').press("Enter");
+
+    // A preset resolves width, fps and quality and nothing else — it is merged
+    // over the current values rather than replacing them, so the span the
+    // visitor chose is a key no chip owns and no chip may discard.
+    await page.locator('[data-preset="smallest"]').click();
+    await expect(page.locator('[data-trim-field="to"]')).toHaveValue("3.0");
+    await expect(page.getByLabel("Frames per second (exact value)")).toHaveValue(
+      "10",
+    );
+  });
+
   test("states the device limit and predicts a size before the job runs", async ({
     page,
   }) => {
@@ -156,6 +178,13 @@ test.describe("mp4 to gif", () => {
     test.skip(!engine.videoDecode, "no WebCodecs VideoDecoder in this engine");
 
     await loadFixture(page, MP4, "screen-720p-10s.mp4");
+
+    // Below `lg` the settings are a disclosure and start collapsed, so the
+    // controls and the two note slots have to be opened before they can be
+    // measured. Collapsed here means `visibility: hidden`, not a zero-height
+    // clip — a test that reached a control a visitor could not see was the
+    // defect, not the fix.
+    await page.locator('button[aria-controls="mp4-to-gif-settings-panel"]').click();
 
     // Computed from the tier budget, never written as static copy — so it names
     // a real number of seconds rather than the wireframe's "up to 60 seconds",

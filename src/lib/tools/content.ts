@@ -149,6 +149,23 @@ export interface ToolContent {
   /** Keyed by control id from the page's schema. */
   controls: Readonly<Record<string, ControlCopy>>;
   /**
+   * The named starting points above the primary action, on the two tools that
+   * have a small↔sharp axis to name.
+   *
+   * Distinct from `preset` below, which is the Discord cluster's own copy: this
+   * one is three chips over the same controls the page already shows, and every
+   * label is written in that tool's own vocabulary — a compressor chip talks
+   * about palette and frames, an MP4 chip talks about motion. Two rows that
+   * differed only by a substituted noun would be the scaled-content pattern in
+   * the shortest strings on the page.
+   */
+  presetChips?: {
+    /** The `<legend>` of the chip group. */
+    legend: string;
+    /** Chip label per preset id. */
+    labels: Readonly<Record<string, string>>;
+  };
+  /**
    * This tool's card in the homepage grid.
    *
    * `registry.ts` owns the name; this owns the reason to click it. One line,

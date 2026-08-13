@@ -29,9 +29,15 @@ import {
   type ToolFlowState,
 } from "@/components/tool/job-state";
 import { NextTools } from "@/components/tool/next-tools";
+import { PresetChips } from "@/components/tool/preset-chips";
 import { ProgressBar } from "@/components/tool/progress-bar";
 import { ResultPanel, ResultSummary } from "@/components/tool/result-panel";
-import { SettingsPanel } from "@/components/tool/settings-panel";
+import {
+  SettingsDisclosure,
+  SettingsPanel,
+} from "@/components/tool/settings-panel";
+import { useToolIntent } from "@/components/tool/use-tool-intent";
+import { presetById, type ToolPresetGroup } from "@/lib/presets/tool-presets";
 import { SettingsForm } from "@/components/tool/settings/settings-form";
 import type {
   ControlDef,
@@ -85,15 +91,6 @@ import type { MediaFormat } from "@/lib/tools/registry";
  * or through the message catalogue (genuinely identical chrome: "Cancel",
  * "Settings"). This file contains no sentence that could end up on two pages.
  */
-
-/** True while every control still holds the value it was mounted with. */
-function untouched(current: ControlValues, defaults: ControlValues): boolean {
-  const keys = new Set([...Object.keys(current), ...Object.keys(defaults)]);
-  for (const key of keys) {
-    if (current[key] !== defaults[key]) return false;
-  }
-  return true;
-}
 
 /** The settings `errors.ts` can ask a tool to change on the user's behalf. */
 type ChangeableSetting = Extract<
@@ -169,6 +166,17 @@ export interface GifWorkbenchProps {
    * Neither is knowable before the probe answers.
    */
   valuesForProbe?(probe: InputProbe, current: ControlValues): ControlValues;
+  /**
+   * Named starting points, shown as a chip row above the primary action.
+   *
+   * Absent on the seven tools whose controls have no small↔sharp axis, and
+   * their absence is what routes them straight to `valuesForProbe` unchanged.
+   *
+   * Already resolved for this device by the page: `mp4-to-gif` is the only tool
+   * whose values depend on the tier, and it already holds the tier, so this
+   * component gains no capabilities dependency.
+   */
+  presets?: ToolPresetGroup;
   controls(context: WorkbenchContext): readonly ControlDef[];
   buildSpec(values: ControlValues, probe: InputProbe | null): JobSpec;
   /** Appended to the input's stem, e.g. `-resized`. */
@@ -255,6 +263,7 @@ export function GifWorkbench({
   accept,
   defaultValues,
   valuesForProbe,
+  presets,
   controls,
   buildSpec,
   downloadSuffix,
@@ -281,6 +290,12 @@ export function GifWorkbench({
   const [probe, setProbe] = useState<InputProbe | null>(null);
   const [values, setValues] = useState<ControlValues>(defaultValues);
   const [elapsed, setElapsed] = useState(0);
+  /**
+   * Below `lg` only. At `≥lg` the panel is forced open by CSS and the toggle is
+   * not rendered, so this value is never read there — which is what keeps the
+   * breakpoint out of JavaScript entirely.
+   */
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Owned by the file, not by this component's mount — see `useObjectUrl` for
   // the Strict Mode failure that shape is there to make impossible.
@@ -289,9 +304,33 @@ export function GifWorkbench({
   const flow = toolFlowState(file !== null, job.state.status);
   const locked = settingsLocked(flow);
 
-  const setValue = useCallback((id: string, value: ControlValue) => {
-    setValues((current) => ({ ...current, [id]: value }));
-  }, []);
+  const intent = useToolIntent(presets?.defaultId ?? null);
+  const { markCustom, readIntent, restoreDefault } = intent;
+
+  const setValue = useCallback(
+    (id: string, value: ControlValue) => {
+      // Functional, not seeded from a captured `values`: `mp4-to-gif`'s trim
+      // control calls this twice in one handler, and a seeded updater drops the
+      // first of the two writes.
+      setValues((current) => ({ ...current, [id]: value }));
+      markCustom();
+    },
+    [markCustom],
+  );
+
+  /**
+   * A chip click. Merged over the current values rather than replacing them, so
+   * a key no preset owns — `mp4-to-gif`'s trim span — survives the switch.
+   */
+  const selectPreset = useCallback(
+    (id: string) => {
+      intent.selectPreset(id);
+      const preset = presetById(presets, id);
+      if (!preset) return;
+      setValues((current) => ({ ...current, ...preset.resolve({ probe }) }));
+    },
+    [intent, presets, probe],
+  );
 
   /**
    * The file the page is currently about.
@@ -312,20 +351,30 @@ export function GifWorkbench({
       job.probe(next, (result) => {
         if (currentFileRef.current !== next) return;
         setProbe(result);
-        if (!result || !valuesForProbe) return;
+        if (!result) return;
         // Sizing the controls to the file is a *default*, not a correction, so
-        // it applies only while they are still untouched.
+        // it applies only while the page still owns them.
         //
         // A probe is a worker round trip, and on a large GIF it lands after the
         // page is already interactive. Measured on `/crop-gif`: a rectangle
         // typed before the probe returned was silently reverted to the whole
         // frame a moment later, which reads as the control fighting the user.
-        setValues((current) =>
-          untouched(current, defaultValues) ? valuesForProbe(result, current) : current,
-        );
+        //
+        // The intent is read from the ref inside the updater rather than from
+        // state outside it: this callback was created at drop time and is never
+        // recreated, so a captured state value would be stale by now.
+        setValues((current) => {
+          const active = readIntent();
+          if (active.kind === "custom") return current;
+          const seeded = valuesForProbe ? valuesForProbe(result, current) : current;
+          const preset = presetById(presets, active.presetId);
+          return preset
+            ? { ...seeded, ...preset.resolve({ probe: result }) }
+            : seeded;
+        });
       });
     },
-    [defaultValues, job, valuesForProbe],
+    [job, presets, readIntent, valuesForProbe],
   );
 
   // A file dropped on the homepage arrives here already chosen. No-op on every
@@ -337,8 +386,11 @@ export function GifWorkbench({
     setFile(null);
     setProbe(null);
     currentFileRef.current = null;
+    // Intent first, or the *next* file inherits the last one's edits and its
+    // controls are never sized to it.
+    restoreDefault();
     setValues(defaultValues);
-  }, [defaultValues, job]);
+  }, [defaultValues, job, restoreDefault]);
 
   const run = useCallback(() => {
     // Re-entrancy guard. `Button`'s `loading` state only sets
@@ -350,14 +402,19 @@ export function GifWorkbench({
     job.run(file, buildSpec(values, probe));
   }, [buildSpec, file, job, locked, probe, values]);
 
-  /** Reset returns the controls to their defaults *for this file*. */
+  /**
+   * Reset returns the controls to their defaults *for this file* — which, on a
+   * tool with a chip row, means selecting the default preset again.
+   */
   const resetSettings = useCallback(() => {
-    setValues(
+    restoreDefault();
+    const seeded =
       probe && valuesForProbe
         ? valuesForProbe(probe, defaultValues)
-        : defaultValues,
-    );
-  }, [defaultValues, probe, valuesForProbe]);
+        : defaultValues;
+    const preset = presetById(presets, presets?.defaultId ?? null);
+    setValues(preset ? { ...seeded, ...preset.resolve({ probe }) } : seeded);
+  }, [defaultValues, presets, probe, restoreDefault, valuesForProbe]);
 
   /**
    * The elapsed readout. A real clock, shown only where there is no counter.
@@ -517,7 +574,10 @@ export function GifWorkbench({
                   <FileChip
                     name={file?.name ?? ""}
                     size={formatBytes(file?.size ?? 0)}
-                    removable={!locked}
+                    // Kept in the layout while the job owns the file, not
+                    // unmounted: removing it narrows the chip and moves the
+                    // metadata badge beside it, twice per job.
+                    removeDisabled={locked}
                     onRemove={startOver}
                     removeLabel={tDropzone("removeFile")}
                   />
@@ -535,11 +595,20 @@ export function GifWorkbench({
                           })
                       : "…"}
                   </Badge>
-                  {!locked ? (
-                    <Button variant="ghost" size="sm" onClick={startOver}>
-                      {t("chooseDifferent")}
-                    </Button>
-                  ) : null}
+                  {/* Disabled while the job owns the file, never unmounted.
+                      Removing it narrows this wrapping row by 158px, which on a
+                      viewport wide enough for the ad rail is the difference
+                      between one line and two — so the preview below it moved
+                      44px twice per job, and the second move lands long after
+                      the click that started it. */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={locked}
+                    onClick={startOver}
+                  >
+                    {t("chooseDifferent")}
+                  </Button>
                 </div>
 
                 <div className="relative min-h-0 flex-1 overflow-hidden rounded-card border border-line bg-surface-2">
@@ -563,6 +632,12 @@ export function GifWorkbench({
               onRunDegraded={(degraded) => {
                 if (!file) return;
                 setElapsed(0);
+                // The degraded offer splices the engine's own plan into the
+                // spec without touching `values`, so nothing else here can
+                // clear the pressed chip — and a run at 320px/10fps under a
+                // chip that says "Smoothest" is the displayed-versus-executed
+                // divergence this feature exists to prevent.
+                markCustom();
                 const spec = buildSpec(values, probe);
                 job.run(file, {
                   ...spec,
@@ -722,39 +797,26 @@ export function GifWorkbench({
       }
       settings={
         <SettingsPanel>
-          <div className="flex items-center justify-between gap-3">
-            <span className="font-sans text-h4 font-semibold text-fg">
-              {t("settings")}
-            </span>
-            {flow === "idle" ? (
-              <Badge variant="neutral">{t("waitingForFile")}</Badge>
-            ) : locked ? (
-              <Badge variant="neutral">{t("lockedWhileEncoding")}</Badge>
-            ) : (
-              <Button variant="ghost" size="sm" onClick={resetSettings}>
-                {t("reset")}
-              </Button>
-            )}
-          </div>
-
-          <SettingsForm
-            controls={controlDefs}
-            values={values}
-            onChange={setValue}
-            disabled={flow === "idle" || locked}
-            describedBy={`${slug}-primary-reason`}
-            panelHint={
-              flow === "idle"
-                ? (idleReason ?? content.actions.disabledReason)
-                : undefined
-            }
-          />
-
-          {noticeNode}
+          {/* Chips, then the primary, then the controls. The primary used to
+              sit under the whole panel, which put it below the fold in the
+              768–1023px band — wide enough that the sticky bar is gone, narrow
+              enough that the settings are still stacked above it. */}
+          {presets ? (
+            <PresetChips
+              legend={presets.legend}
+              presets={presets.items}
+              labels={presets.labels}
+              selected={intent.presetId}
+              onSelect={selectPreset}
+              // The same condition `SettingsForm` uses. A chip clicked mid-job
+              // would desync the panel from the settings the job is running.
+              disabled={flow === "idle" || locked}
+            />
+          ) : null}
 
           {/* Hidden below md — the sticky bar carries the primary there. */}
           <Button
-            className="mt-2 hidden w-full md:inline-flex"
+            className="hidden w-full md:inline-flex"
             size="lg"
             variant={flow === "result" ? "secondary" : "primary"}
             onClick={run}
@@ -769,6 +831,9 @@ export function GifWorkbench({
           >
             {flow === "result" ? content.actions.rerun : content.actions.run}
           </Button>
+          {/* Outside the disclosure below, deliberately: it is the primary's
+              `aria-describedby` target, and a description a visitor has to
+              expand a panel to reach is not one. */}
           <p
             id={`${slug}-primary-reason`}
             // Visually hidden below `md`, where the sticky bar carries the
@@ -780,6 +845,39 @@ export function GifWorkbench({
               ? (idleReason ?? content.actions.disabledReason)
               : t("runsLocally")}
           </p>
+
+          <SettingsDisclosure
+            id={slug}
+            heading={t("settings")}
+            open={settingsOpen}
+            onToggle={() => setSettingsOpen((current) => !current)}
+            aside={
+              flow === "idle" ? (
+                <Badge variant="neutral">{t("waitingForFile")}</Badge>
+              ) : locked ? (
+                <Badge variant="neutral">{t("lockedWhileEncoding")}</Badge>
+              ) : (
+                <Button variant="ghost" size="sm" onClick={resetSettings}>
+                  {t("reset")}
+                </Button>
+              )
+            }
+          >
+            <SettingsForm
+              controls={controlDefs}
+              values={values}
+              onChange={setValue}
+              disabled={flow === "idle" || locked}
+              describedBy={`${slug}-primary-reason`}
+              panelHint={
+                flow === "idle"
+                  ? (idleReason ?? content.actions.disabledReason)
+                  : undefined
+              }
+            />
+
+            {noticeNode}
+          </SettingsDisclosure>
         </SettingsPanel>
       }
     >

@@ -1,3 +1,6 @@
+"use client";
+
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -42,6 +45,118 @@ export function SettingsPanel({
         {children}
       </div>
     </section>
+  );
+}
+
+/**
+ * The controls, as a disclosure below `lg` and always open at or above it.
+ *
+ * ── Why it collapses only where it changes something ───────────────────────
+ * At `≥lg` the settings have their own grid column beside the stage, so
+ * collapsing them would hide a panel and move nothing. Below `lg` the shell is
+ * one column and the panel sits between the stage and the explainer, the FAQ,
+ * the related tools and the reserved ad slot — which is where an open panel
+ * pushes the primary action off the first screen.
+ *
+ * ── Why the mechanism is CSS and nothing else ──────────────────────────────
+ * `grid-template-rows: 0fr → 1fr` on content that never leaves the layout is
+ * the same technique §5.12 uses for the FAQ, and for the same reason: every
+ * control label and hint must stay in the served HTML. `lg:grid-rows-[1fr]`
+ * then forces it open, and it wins over `.pz-acc-panel[data-state]` because
+ * utilities sit in a later cascade layer than `@layer components` — no
+ * specificity war and no `!important`.
+ *
+ * `hidden="until-found"` is deliberately **not** carried over from
+ * `accordion.tsx`. It has to be attached imperatively, and at `≥lg` it would
+ * apply `display: none` to a panel this CSS says is open. §5.12 wants it for
+ * FAQ *prose*, which is the crawl surface; a Width slider is not that.
+ */
+export function SettingsDisclosure({
+  id,
+  heading,
+  aside,
+  open,
+  onToggle,
+  children,
+}: {
+  /** Unique per route. Becomes the heading and panel DOM ids. */
+  id: string;
+  heading: string;
+  /** Reset, or the waiting/locked badge. Stays visible while collapsed. */
+  aside: React.ReactNode;
+  open: boolean;
+  onToggle(): void;
+  children: React.ReactNode;
+}) {
+  const headingId = `${id}-settings-heading`;
+  const panelId = `${id}-settings-panel`;
+
+  return (
+    <>
+      {/* Three direct children, and deliberately not a heading plus a wrapper
+          around the other two. `aside` swaps a wide badge for a narrow button
+          when a file loads: as two sibling elements that is a replacement, which
+          scores no layout shift, but inside a shared wrapper it becomes one
+          element whose box changes — and Chromium scores that, on a transition
+          that happens seconds after the file picker opened and so is not
+          excused as prompted. Measured at 0.0008 before this was flattened. */}
+      <div className="flex items-center justify-between gap-3">
+        <span
+          id={headingId}
+          className="mr-auto font-sans text-h4 font-semibold text-fg"
+        >
+          {heading}
+        </span>
+        {aside}
+        <button
+          type="button"
+          // Named by the heading rather than by a string of its own: a button
+          // whose accessible name is "Settings" and whose state is
+          // `aria-expanded` announces exactly what it does, and adds no
+          // sentence to the message catalogue that would then need writing for
+          // every locale.
+          aria-labelledby={headingId}
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={onToggle}
+          className={cn(
+            "-mr-1.5 inline-flex size-11 flex-none cursor-pointer items-center justify-center",
+            "rounded-control text-fg-muted transition-colors duration-[120ms] ease-out",
+            "hover:bg-surface-2 hover:text-fg lg:hidden",
+          )}
+        >
+          <ChevronDown
+            aria-hidden="true"
+            className={cn(
+              "size-5 transition-transform duration-150 ease-out",
+              open && "rotate-180 text-brand",
+            )}
+          />
+        </button>
+      </div>
+
+      <div
+        id={panelId}
+        data-state={open ? "open" : "closed"}
+        className={cn(
+          "pz-acc-panel lg:grid-rows-[1fr]",
+          // `grid-template-rows: 0fr` clips the panel; it does not take it out
+          // of the tab order or the accessibility tree. Without this a keyboard
+          // or screen-reader user at 768px tabs off the toggle straight into
+          // five controls they cannot see. `visibility: hidden` removes them
+          // from both, is inherited by every descendant, and — unlike
+          // `display: none` — leaves the labels in the layout and therefore in
+          // the served HTML, which is the whole reason the collapse is built
+          // this way. The `lg:` half re-shows them where the panel is forced
+          // open and the toggle is not rendered at all.
+          "data-[state=closed]:invisible lg:data-[state=closed]:visible",
+        )}
+      >
+        <div>
+          <div className="flex flex-col gap-4">{children}</div>
+        </div>
+      </div>
+    </>
   );
 }
 

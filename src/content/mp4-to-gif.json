@@ -36,6 +36,14 @@
       "hint": "How hard the encoder works to keep colours faithful. Lowering it helps most on filmed footage and barely registers on flat graphics."
     }
   },
+  "presetChips": {
+    "legend": "How should the clip come out?",
+    "labels": {
+      "smallest": "Light and quick",
+      "balanced": "Everyday loop",
+      "smoothest": "Smoothest motion"
+    }
+  },
   "notes": {
     "limits": "At {width}×{height} and {fps} fps, the engine plans for about {seconds} seconds at a time. Longer selections are refused before any work starts, with a setting that would fit.",
     "estimate": "Estimated result: {low} to {high}.",

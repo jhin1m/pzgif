@@ -212,6 +212,30 @@ describe("every live tool page", () => {
     }
   });
 
+  it("labels every preset chip in the tool's own words", () => {
+    // Two chip rows over the same three ids is the shortest possible place for
+    // a filled template to hide, so no label may appear on both pages.
+    const seen = new Map<string, string>();
+    for (const page of PAGES) {
+      const chips = page.presetChips;
+      if (!chips) continue;
+      expect(chips.legend.length, page.slug).toBeGreaterThan(10);
+      expect(Object.keys(chips.labels).length, page.slug).toBe(3);
+      for (const label of Object.values(chips.labels)) {
+        const key = label.trim().toLowerCase();
+        expect(
+          seen.has(key),
+          `"${label}" also labels a chip on ${seen.get(key)}`,
+        ).toBe(false);
+        seen.set(key, page.slug);
+      }
+    }
+    // Both tools in scope have a row. A page that grew a chip row without copy
+    // would render three chips labelled by their ids.
+    expect([...seen.values()].filter((slug) => slug === "gif-compressor")).toHaveLength(3);
+    expect([...seen.values()].filter((slug) => slug === "mp4-to-gif")).toHaveLength(3);
+  });
+
   it("makes no unverified claim about size, speed or duration", () => {
     // The three defects `plan.md` records in the wireframe copy. They are
     // asserted per page rather than once, because the next page to be written

@@ -192,6 +192,31 @@ test.describe("gif compressor", () => {
     ).toBeVisible();
   });
 
+  test("keeps an off-ladder source width on the untouched default path", async ({
+    page,
+  }) => {
+    test.setTimeout(JOB_TIMEOUT_MS);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/gif-compressor");
+
+    // `loop-small.gif` is 480 px, which is already a `WIDTH_LADDER` rung — so
+    // any regression that snapped a requested width to the nearest rung would
+    // be invisible against it. 499 is not a rung, and `admit()` puts the
+    // requested width first and only walks rungs strictly below it, so a width
+    // that fits the budget must come out verbatim.
+    const fixture = join(process.cwd(), "e2e", "fixtures", "odd-dims.gif");
+    const source = summariseGif(new Uint8Array(readFileSync(fixture)));
+    expect(source.width, "the fixture is on a ladder rung").toBe(499);
+
+    await page.locator('input[type="file"]').setInputFiles(fixture);
+    await expect(stage(page).getByTitle("odd-dims.gif")).toBeVisible();
+    await expect(page.getByText(`${source.width}×${source.height}`)).toBeVisible();
+
+    const output = await compressAndDecode(page);
+    expect(output.width).toBe(source.width);
+    expect(output.height).toBe(source.height);
+  });
+
   test("honours 'drop every second frame' in the produced file", async ({
     page,
   }) => {

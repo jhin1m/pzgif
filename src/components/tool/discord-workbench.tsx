@@ -435,10 +435,16 @@ export function DiscordWorkbench({
           {showPicker ? (
             <PresetChips
               legend={copy.legend ?? ""}
-              presets={DISCORD_PRESETS}
+              // The dimensions are formatted here rather than inside the chip
+              // row: they are a Discord fact, and the tool pages that share
+              // this component have no equivalent figure to show.
+              presets={DISCORD_PRESETS.map((entry) => ({
+                id: entry.id,
+                dimensions: `${entry.width}×${entry.height}`,
+              }))}
               labels={copy.chips ?? {}}
               selected={presetId}
-              onSelect={selectPreset}
+              onSelect={(id) => selectPreset(id as DiscordPresetId)}
               disabled={locked}
             />
           ) : null}
@@ -461,7 +467,10 @@ export function DiscordWorkbench({
                   <FileChip
                     name={file?.name ?? ""}
                     size={formatBytes(file?.size ?? 0)}
-                    removable={!locked}
+                    // Kept in the layout while the job owns the file, not
+                    // unmounted: removing it narrows the chip and moves the
+                    // metadata badge beside it, twice per job.
+                    removeDisabled={locked}
                     onRemove={startOver}
                     removeLabel={tDropzone("removeFile")}
                   />
@@ -479,11 +488,20 @@ export function DiscordWorkbench({
                           })
                       : "…"}
                   </Badge>
-                  {!locked ? (
-                    <Button variant="ghost" size="sm" onClick={startOver}>
-                      {t("chooseDifferent")}
-                    </Button>
-                  ) : null}
+                  {/* Disabled while the job owns the file, never unmounted.
+                      Removing it narrows this wrapping row by 158px, which on a
+                      viewport wide enough for the ad rail is the difference
+                      between one line and two — so the preview below it moved
+                      44px twice per job, and the second move lands long after
+                      the click that started it. */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={locked}
+                    onClick={startOver}
+                  >
+                    {t("chooseDifferent")}
+                  </Button>
                 </div>
 
                 <div className="relative min-h-0 flex-1 overflow-hidden rounded-card border border-line bg-surface-2">

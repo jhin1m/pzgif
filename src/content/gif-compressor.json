@@ -62,6 +62,14 @@
       "hint": "Halves the frame count. Fine for screen recordings, visible on fast motion."
     }
   },
+  "presetChips": {
+    "legend": "Start from one of these",
+    "labels": {
+      "smallest": "Squeeze it hard",
+      "balanced": "Full palette",
+      "sharpest": "Keep every detail"
+    }
+  },
   "card": {
     "benefit": "Trade sharpness for bytes on a slider, and see both halves of the trade side by side before you keep it."
   },

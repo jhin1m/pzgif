@@ -6,9 +6,15 @@ priority: P1
 effort: "11-16 weeks solo (see timeline note)"
 tags: [nextjs, webcodecs, wasm, seo, ads, mvp]
 created: 2026-08-05
-blockedBy: [260805-2239-pzgif-homepage-soul-pass-ship-0-homepage-brand-motif-job-moments]
+blockedBy: [260805-2239-pzgif-homepage-soul-pass-ship-0-homepage-brand-motif-job-moments, 260813-1055-preset-first-tool-settings-ui-chips-promoted-primary-collapsible-settings]
 blocks: []
 ---
+
+> **Phase 11 gains a new audit surface.**
+> `plans/260813-1055-preset-first-tool-settings-ui-.../` reorders the settings
+> column on `gif-compressor` and `mp4-to-gif`, adds three named presets per tool
+> and collapses the panel below `lg`. Its chip copy and its disclosure must be
+> inside Phase 11's copy audit and a11y sweep, so Phase 11 runs after it.
 
 > **Ship 0's homepage slice runs in a sibling plan.**
 > `plans/260805-2239-pzgif-homepage-soul-pass-.../` executes the homepage,

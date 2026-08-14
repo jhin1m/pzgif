@@ -269,10 +269,30 @@ is why `balanced` and `sharpest` use source width unchanged.
    motion", under "How should the clip come out?". `tool-copy.test.ts` now
    asserts no label appears on both rows; whether each label describes what its
    preset actually does is the Phase 11 copy audit's call.
+
+   **Superseded 2026-08-14.** The audit question above answered itself early.
+   `smallest` capped the palette at 128, which pins the encoder to `gifenc`, and
+   `bench-results/calibration.json` has gifenc at 128 colours coming out *larger*
+   than gifski at quality 80 on five of the seven fixtures (+4% to +59%) — so
+   "Squeeze it hard" usually grew the file. The cap also disables the Quality
+   slider, removing the one lever the same bench shows working (-40% to -70% from
+   80 → 40). The compressor's three presets now move quality alone and hold
+   `colours` at 256: **"Smaller file" / "Balanced" / "Best quality"**. The
+   `colours` hint, the "which setting first" explainer and the
+   quality-vs-colours FAQ answer were corrected to match the measurement.
+   `tool-presets.test.ts` asserts no preset caps the palette.
 2. **Chips at `idle`.** Resolved by decision, not left open: the chip row takes
    the same `disabled` condition as `SettingsForm` — `flow === "idle" || locked`.
    Red team found no phase disabled it during `processing`, which would let a
    mid-job click desync the panel from the running job.
+3. ~~**Where the compressor's panel collapses.**~~ Resolved 2026-08-14, against
+   the `≥lg` forced-open rule the other eight routes keep. `SettingsDisclosure`
+   takes an optional `toggleLabel`, and supplying it keeps the panel a disclosure
+   at every width with a visible Show/Hide row. Only `gif-compressor` passes it:
+   its three chips are the whole answer for most visitors. The row is its own
+   full-width element rather than inline in the heading row — inline, the ~80px
+   label wrapped the "Waiting for a file" badge onto a second line, and
+   un-wrapping it on file load cost 0.000075 of un-prompted CLS.
 
 ## Red Team Review
 

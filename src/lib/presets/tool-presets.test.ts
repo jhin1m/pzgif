@@ -116,6 +116,38 @@ describe("gif-compressor presets", () => {
     );
     expect(new Set(seen).size).toBe(COMPRESSOR_PRESETS.length);
   });
+
+  it("never caps the palette, on any preset", () => {
+    // A capped palette pins the encoder to `gifenc`, which `calibration.json`
+    // measured *larger* than gifski at quality 80 on five of seven fixtures —
+    // and it disables the Quality slider, removing the lever that does work.
+    // A preset that shipped a cap would be a "smaller file" button that grows
+    // the file, so this is asserted rather than left to review.
+    for (const preset of COMPRESSOR_PRESETS) {
+      expect(preset.resolve({ probe: probeOf(480) }).colours, preset.id).toBe(
+        "256",
+      );
+    }
+  });
+
+  it("moves quality and nothing else", () => {
+    // The chips promise an output-size trade, not a different GIF. Changing the
+    // width or the frame count under a chip click is a change to what the file
+    // *is*, and both stay one deliberate control edit away.
+    const context = { probe: probeOf(480) };
+    const [smallest, balanced, sharpest] = COMPRESSOR_PRESETS.map((preset) =>
+      preset.resolve(context),
+    );
+
+    for (const key of ["colours", "width", "dropFrames"] as const) {
+      expect(smallest![key], key).toEqual(balanced![key]);
+      expect(sharpest![key], key).toEqual(balanced![key]);
+    }
+
+    // Monotone, so the row reads left-to-right as smaller → larger.
+    expect(Number(smallest!.quality)).toBeLessThan(Number(balanced!.quality));
+    expect(Number(sharpest!.quality)).toBeGreaterThan(Number(balanced!.quality));
+  });
 });
 
 describe("mp4-to-gif presets", () => {

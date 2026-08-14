@@ -144,7 +144,17 @@ export function GifCompressorTool({
   const [probe, setProbe] = useState<InputProbe | null>(null);
   const [values, setValues] = useState<ControlValues>(DEFAULT_VALUES);
   const [elapsed, setElapsed] = useState(0);
-  /** Below `lg` only — at `≥lg` the panel is forced open and the toggle is gone. */
+  /**
+   * Closed at every width until the visitor opens it.
+   *
+   * The other eight tools force the panel open from `lg` up, because there the
+   * settings have their own column and collapsing them hides a panel while
+   * moving nothing. This one does not, and the reason is the chip row directly
+   * above: three presets are the whole answer for almost everyone who arrives
+   * here, and four controls permanently open beside them read as work to do
+   * rather than as an option. `false` on the server and on the client, so
+   * hydration changes nothing and the collapse costs no layout shift.
+   */
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   /**
@@ -605,7 +615,7 @@ export function GifCompressorTool({
                 // This path splices the engine's own plan into the spec and
                 // never touches `values`, so nothing else can clear the pressed
                 // chip — and a job running at 320px under a chip that says
-                // "Keep every detail" is the divergence the chips exist to stop.
+                // "Best quality" is the divergence the chips exist to stop.
                 markCustom();
                 const spec = buildSpec(values);
                 job.run(file, {
@@ -835,6 +845,9 @@ export function GifCompressorTool({
             heading={t("settings")}
             open={settingsOpen}
             onToggle={() => setSettingsOpen((current) => !current)}
+            // Supplying it collapses the panel at every width, not just below
+            // `lg` — see the note on the state above.
+            toggleLabel={settingsOpen ? t("hideSettings") : t("showSettings")}
             aside={
               flow === "idle" ? (
                 <Badge variant="neutral">{t("waitingForFile")}</Badge>

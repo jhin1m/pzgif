@@ -85,25 +85,63 @@ function sourceWidth(probe: InputProbe | null): number {
 }
 
 /**
+ * Quality is the only axis these three move, and that is a measured decision.
+ *
+ * ── Why no preset touches Colours ──────────────────────────────────────────
+ * Capping the palette below 256 pins the encoder to `gifenc`, and `gifenc` is
+ * worse per byte than gifski at every palette size that still looks acceptable.
+ * `bench-results/calibration.json`, at 480 px over identical frames, gifski at
+ * quality 80 against gifenc at 128 colours:
+ *
+ *     flat-art      214 KB → 304 KB   (+42%)
+ *     clip-vp9      377 KB → 597 KB   (+59%)
+ *     loop-large    625 KB → 696 KB   (+11%)
+ *     screen-720p   476 KB → 520 KB   (+9%)
+ *     odd-dims      356 KB → 369 KB   (+4%)
+ *
+ * Five of seven fixtures get *bigger*. A preset called "smaller file" that
+ * reliably produces a larger one is the same class of dishonesty as a faked
+ * progress bar, so the lever it pulls is the one that actually works. Colours
+ * stays a manual control for the case it is genuinely for — a flat diagram
+ * whose banding the visitor can see and accept — and never a preset default.
+ *
+ * The second cost is compounding: `colours < 256` also disables the Quality
+ * slider, because Quality is gifski's dial and gifski's alone. So the old
+ * `smallest` row simultaneously chose the weaker encoder and removed the strong
+ * lever from the panel.
+ *
+ * ── Why quality alone, and not width or dropped frames ─────────────────────
+ * Both of those change what the GIF *is* — its dimensions, its motion — and a
+ * visitor who clicks a chip labelled by output size does not expect the frame
+ * rate to halve. They stay one deliberate control edit away. On the same bench
+ * the quality axis alone carries the saving: 80 → 40 is between -40% and -70%
+ * on every fixture measured.
+ *
  * `colours` is a **string** here, and that is not an oversight: the page reads
  * it with `stringValue` because it is a `<select>` whose options are strings.
  */
+const COMPRESSOR_QUALITY = {
+  /** Between the measured 40 and 60 points, both of which are large savings. */
+  smaller: 50,
+  /** Today's default. The byte-identical anchor for an untouched visit. */
+  balanced: 80,
+  best: 95,
+} as const;
+
 export const COMPRESSOR_PRESETS: readonly ToolPreset[] = [
   {
     id: "smallest",
     resolve: ({ probe }) => ({
-      // Returned at the value `buildSpec` would use, so the slider the capped
-      // palette makes inert still shows a true number rather than its minimum.
-      quality: 80,
-      colours: "128",
-      width: Math.max(COMPRESSOR_WIDTH_MIN, Math.round(sourceWidth(probe) * 0.75)),
-      dropFrames: true,
+      quality: COMPRESSOR_QUALITY.smaller,
+      colours: "256",
+      width: sourceWidth(probe),
+      dropFrames: false,
     }),
   },
   {
     id: "balanced",
     resolve: ({ probe }) => ({
-      quality: 80,
+      quality: COMPRESSOR_QUALITY.balanced,
       colours: "256",
       // Source width unchanged. The page cannot read the device tier, so it
       // cannot honestly offer a width the engine's own cap would then reduce.
@@ -114,7 +152,7 @@ export const COMPRESSOR_PRESETS: readonly ToolPreset[] = [
   {
     id: "sharpest",
     resolve: ({ probe }) => ({
-      quality: 95,
+      quality: COMPRESSOR_QUALITY.best,
       colours: "256",
       width: sourceWidth(probe),
       dropFrames: false,

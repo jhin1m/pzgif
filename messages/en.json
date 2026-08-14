@@ -66,6 +66,8 @@
   },
   "tool": {
     "settings": "Settings",
+    "showSettings": "Show",
+    "hideSettings": "Hide",
     "waitingForFile": "Waiting for a file",
     "lockedWhileEncoding": "Locked while encoding",
     "reset": "Reset",

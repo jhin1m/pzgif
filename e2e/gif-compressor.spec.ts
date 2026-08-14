@@ -50,6 +50,22 @@ async function loadFixture(page: Page) {
   await expect(stage(page).getByTitle("loop-small.gif")).toBeVisible();
 }
 
+/**
+ * Opens the settings panel.
+ *
+ * This tool's panel is a disclosure at *every* width — unlike the other eight,
+ * where it is forced open from `lg` up — so a control is not in the
+ * accessibility tree until this runs. `getByRole` walks that tree, so without
+ * it a query for the Colours select or the drop-frames switch resolves to
+ * nothing rather than to a hidden node.
+ */
+async function openSettings(page: Page) {
+  const toggle = page.locator('button[aria-controls="gif-compressor-settings-panel"]');
+  if ((await toggle.getAttribute("aria-expanded")) === "true") return;
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+}
+
 /** The visible Download link — the inline one on desktop, the bar's on mobile. */
 function downloadLink(page: Page) {
   return page.locator("a[download]:visible");
@@ -224,6 +240,7 @@ test.describe("gif compressor", () => {
     await page.goto("/gif-compressor");
     await loadFixture(page);
 
+    await openSettings(page);
     await page.getByRole("switch", { name: /drop every second frame/i }).click();
     const output = await compressAndDecode(page);
 

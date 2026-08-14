@@ -4,14 +4,21 @@ import { ADS_ENABLED } from "./lib/ads";
 
 /**
  * The preset-first settings column: chips, a promoted primary, and a settings
- * panel that is a disclosure below `lg`.
+ * panel that is a disclosure.
  *
- * ── Why 768×1024 is the viewport that matters ──────────────────────────────
+ * ── Two collapse behaviours, and which route has which ─────────────────────
+ * The eight `GifWorkbench` routes collapse below `lg` and are forced open from
+ * `lg` up, where the settings have their own column and hiding them would move
+ * nothing. `/gif-compressor` passes `toggleLabel` and opts out: its three preset
+ * chips are the expected answer, so the four controls stay closed at every width
+ * until the visitor presses Show. Both are asserted below, on their own routes.
+ *
+ * ── Why 768×1024 is the viewport that matters for the workbench ────────────
  * Below `md` the sticky action bar already pins the primary to the bottom of
  * the viewport, so 390px passed before this feature existed and proves nothing
  * about it. At `≥lg` the settings have their own column. 768–1023px is the only
  * band where the panel genuinely sat between the visitor and the button, and it
- * is the band these assertions measure.
+ * is the band those assertions measure.
  *
  * ── Why this suite exists at all ───────────────────────────────────────────
  * `vitest.config.mts` sets `environment: "node"` and this repository has no DOM
@@ -41,6 +48,20 @@ function toggle(page: Page, slug: string) {
 
 function panel(page: Page, slug: string) {
   return page.locator(`#${slug}-settings-panel`);
+}
+
+/**
+ * Opens the compressor's panel.
+ *
+ * Its controls are outside the accessibility tree until this runs — the panel
+ * is `visibility: hidden` while closed, and it is closed at every width — so
+ * `getByRole` finds nothing rather than something hidden.
+ */
+async function openSettings(page: Page) {
+  const control = toggle(page, "gif-compressor");
+  if ((await control.getAttribute("aria-expanded")) === "true") return;
+  await control.click();
+  await expect(control).toHaveAttribute("aria-expanded", "true");
 }
 
 /** The inline primary, which is the one that lives in the settings column. */
@@ -95,36 +116,54 @@ test.describe("gif compressor settings column", () => {
     expect(await topOf(button)).toBeLessThan(await topOf(settings));
   });
 
-  test("collapses below lg and is forced open at xl, by CSS alone", async ({
+  test("stays collapsed at every width until Show is pressed", async ({
     page,
   }) => {
-    await page.setViewportSize(TABLET);
-    await page.goto("/gif-compressor");
+    // Both bands, because this route opts out of the forced-open `≥lg` rule
+    // that the other eight keep. A regression that reinstated
+    // `lg:grid-rows-[1fr]` here would still pass at 768px.
+    for (const viewport of [TABLET, WIDE]) {
+      await page.setViewportSize(viewport);
+      await page.goto("/gif-compressor");
 
-    const region = panel(page, "gif-compressor");
-    const control = toggle(page, "gif-compressor");
+      const region = panel(page, "gif-compressor");
+      const control = toggle(page, "gif-compressor");
 
-    await expect(control).toHaveAttribute("aria-expanded", "false");
-    await expect(region).toHaveAttribute("data-state", "closed");
-    // Collapsed to zero height, but never `display: none` — the labels have to
-    // stay in the layout, which is what keeps them in the served HTML.
-    expect((await region.boundingBox())!.height).toBe(0);
+      // The affordance is a word, not a bare chevron: this panel is the only
+      // route to the controls, so "there is more here" has to be readable
+      // rather than inferred from an icon.
+      await expect(control).toBeVisible();
+      await expect(control).toHaveText(/Show/);
+      await expect(control).toHaveAttribute("aria-expanded", "false");
+      await expect(region).toHaveAttribute("data-state", "closed");
+      // Collapsed to zero height, but never `display: none` — the labels have
+      // to stay in the layout, which is what keeps them in the served HTML.
+      expect((await region.boundingBox())!.height, String(viewport.width)).toBe(0);
 
-    await control.click();
-    await expect(control).toHaveAttribute("aria-expanded", "true");
-    // Polled, not read once: the panel animates its `grid-template-rows` over
-    // 150 ms, so a single measurement races the transition rather than the code.
-    await expect
-      .poll(async () => (await region.boundingBox())!.height)
-      .toBeGreaterThan(100);
+      await control.click();
+      await expect(control).toHaveAttribute("aria-expanded", "true");
+      await expect(control).toHaveText(/Hide/);
+      // Polled, not read once: the panel animates its `grid-template-rows` over
+      // 150 ms, so a single measurement races the transition rather than the
+      // code.
+      await expect
+        .poll(async () => (await region.boundingBox())!.height)
+        .toBeGreaterThan(100);
+    }
+  });
 
-    // At `xl` the toggle is gone and the panel is open regardless of the state
+  test("keeps the other eight forced open at xl, by CSS alone", async ({
+    page,
+  }) => {
+    // The rule the compressor opts out of, asserted on a route that keeps it:
+    // at `≥lg` the toggle is gone and the panel is open regardless of the state
     // attribute React still holds. This is the specificity claim in the CSS —
-    // `lg:grid-rows-[1fr]` is a utility, and utilities beat `@layer components`
-    // — asserted rather than assumed.
+    // `lg:grid-rows-[1fr]` is a utility, and utilities beat `@layer components`.
     await page.setViewportSize(WIDE);
-    await page.goto("/gif-compressor");
-    await expect(toggle(page, "gif-compressor")).toBeHidden();
+    await page.goto("/resize-gif");
+
+    const region = panel(page, "resize-gif");
+    await expect(toggle(page, "resize-gif")).toBeHidden();
     await expect(region).toHaveAttribute("data-state", "closed");
     expect(
       await region.evaluate((node) => getComputedStyle(node).gridTemplateRows),
@@ -275,8 +314,9 @@ test.describe("gif compressor presets", () => {
     await expect(chip(page, "balanced")).toBeEnabled();
   });
 
-  test("moves the controls to the preset's own numbers", async ({ page }) => {
+  test("moves quality, and only quality, between the chips", async ({ page }) => {
     await loadGif(page);
+    await openSettings(page);
 
     // The untouched default: `balanced`, sized to the source. This is also the
     // byte-identical anchor — a visitor who touches nothing runs the job the
@@ -291,26 +331,29 @@ test.describe("gif compressor presets", () => {
     await chip(page, "smallest").click();
     await expect(chip(page, "smallest")).toHaveAttribute("aria-pressed", "true");
     await expect(chip(page, "balanced")).toHaveAttribute("aria-pressed", "false");
-    // 75% of 480, the palette capped at 128, every second frame dropped. The
-    // Quality slider goes inert but still reads the value the job would use —
-    // a missing key would display 1 and run 80.
-    expect(await sliderValue(page, /^Width/)).toBe(360);
-    expect(await sliderValue(page, /^Quality/)).toBe(80);
-    await expect(page.getByText("128 — good balance")).toBeVisible();
+    // Quality drops and nothing else moves. Capping the palette here is what
+    // this preset used to do, and `calibration.json` measured that *growing*
+    // the file on five of seven fixtures because it pins the weaker encoder —
+    // so a 128 in the select would be the defect, not a detail.
+    expect(await sliderValue(page, /^Quality/)).toBe(50);
+    expect(await sliderValue(page, /^Width/)).toBe(480);
+    await expect(page.getByText("256 — best quality")).toBeVisible();
     await expect(page.getByRole("switch", { name: /drop every second frame/i })).toHaveAttribute(
       "aria-checked",
-      "true",
+      "false",
     );
 
     await chip(page, "sharpest").click();
     expect(await sliderValue(page, /^Quality/)).toBe(95);
     expect(await sliderValue(page, /^Width/)).toBe(480);
+    await expect(page.getByText("256 — best quality")).toBeVisible();
   });
 
   test("clears the pressed chip when a control is edited by hand", async ({
     page,
   }) => {
     await loadGif(page);
+    await openSettings(page);
     await expect(chip(page, "balanced")).toHaveAttribute("aria-pressed", "true");
 
     await page.getByRole("switch", { name: /drop every second frame/i }).click();
@@ -330,12 +373,14 @@ test.describe("gif compressor presets", () => {
     await chip(page, "sharpest").click();
     await expect(stage(page).getByText("480×270")).toBeVisible({ timeout: 60_000 });
     await expect(chip(page, "sharpest")).toHaveAttribute("aria-pressed", "true");
+    await openSettings(page);
     expect(await sliderValue(page, /^Quality/)).toBe(95);
 
     // (b) The other direction: an edit before the probe lands is the user's,
     // and the probe must not size over it.
     await page.reload();
     await page.locator('input[type="file"]').setInputFiles(GIF);
+    await openSettings(page);
     await page.getByRole("switch", { name: /drop every second frame/i }).click();
     await expect(stage(page).getByText("480×270")).toBeVisible({ timeout: 60_000 });
     await expect(page.getByRole("switch", { name: /drop every second frame/i })).toHaveAttribute(
@@ -355,15 +400,19 @@ test.describe("gif compressor presets", () => {
     page,
   }) => {
     await loadGif(page);
+    await openSettings(page);
     await chip(page, "smallest").click();
-    expect(await sliderValue(page, /^Width/)).toBe(360);
+    expect(await sliderValue(page, /^Quality/)).toBe(50);
 
     // `startOver` has to restore the default intent, or the next file inherits
     // the last one's choices and is never sized to itself.
     await page.getByRole("button", { name: /choose a different/i }).click();
     await loadGif(page);
+    await openSettings(page);
 
     await expect(chip(page, "balanced")).toHaveAttribute("aria-pressed", "true");
+    expect(await sliderValue(page, /^Quality/)).toBe(80);
+    // Sized to the file it is now about, not left at the pre-probe fallback.
     expect(await sliderValue(page, /^Width/)).toBe(480);
   });
 
@@ -385,9 +434,12 @@ test.describe("gif compressor presets", () => {
 
   test("returns to the default preset on Reset", async ({ page }) => {
     await loadGif(page);
+    await openSettings(page);
     await chip(page, "sharpest").click();
     expect(await sliderValue(page, /^Quality/)).toBe(95);
 
+    // Reset lives in `aside`, outside the collapsible region, so it is reachable
+    // whether the panel is open or not.
     await page.getByRole("button", { name: "Reset", exact: true }).click();
 
     await expect(chip(page, "balanced")).toHaveAttribute("aria-pressed", "true");
@@ -410,7 +462,7 @@ test.describe("the settings prose survives the collapse", () => {
         "Halving the width is the single biggest size win",
         "Fine for screen recordings, visible on fast motion",
         "Start from one of these",
-        "Keep every detail",
+        "Best quality",
       ],
     },
     {
@@ -547,11 +599,13 @@ test.describe("the ad rail does not move when the settings do", () => {
       (node) => getComputedStyle(node).gridTemplateColumns,
     );
 
-    // At `xl` the toggle is `lg:hidden`, so the state is flipped where a
-    // visitor could flip it and the rail is measured where it exists.
-    await page.setViewportSize(TABLET);
+    // Flipped at `xl`, where the rail exists: this route keeps its toggle at
+    // every width, so there is no need to shrink the viewport to reach it.
     await toggle(page, "gif-compressor").click();
-    await page.setViewportSize(WIDE);
+    await expect(toggle(page, "gif-compressor")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
     expect(await railBox()).toEqual(before);
     expect(

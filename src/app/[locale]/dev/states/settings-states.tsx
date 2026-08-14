@@ -18,12 +18,15 @@ import {
  * screenshotting, so a fixed-`open` prop would show the two boxes without
  * showing that either can be reached.
  *
- * `lg:grid-rows-[1fr]` forces the panel open at `≥lg`, which is where the
- * gallery is normally read: shrink the window below 1024px to see the collapsed
- * state, exactly as a visitor on a tablet would.
+ * `lg:grid-rows-[1fr]` forces the first two panels open at `≥lg`, which is where
+ * the gallery is normally read: shrink the window below 1024px to see the
+ * collapsed state, exactly as a visitor on a tablet would. The third opts out of
+ * that with `toggleLabel` and stays a disclosure at every width — the compressor's
+ * arrangement, where the preset chips above are the expected answer.
  */
 export function DisclosureStates() {
   const [open, setOpen] = useState(false);
+  const [alwaysOpen, setAlwaysOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-4">
@@ -54,6 +57,23 @@ export function DisclosureStates() {
           <Slider label="Colours" min={16} max={256} step={16} defaultValue={128} />
         </SettingsDisclosure>
       </SettingsPanel>
+
+      <SettingsPanel className="w-full">
+        <SettingsDisclosure
+          id="dev-always"
+          heading="Settings"
+          open={alwaysOpen}
+          onToggle={() => setAlwaysOpen((current) => !current)}
+          toggleLabel={alwaysOpen ? "Hide" : "Show"}
+          aside={
+            <Button variant="ghost" size="sm">
+              Reset
+            </Button>
+          }
+        >
+          <Slider label="Quality" min={1} max={100} defaultValue={80} />
+        </SettingsDisclosure>
+      </SettingsPanel>
     </div>
   );
 }
@@ -71,9 +91,9 @@ export function ToolPresetChipStates() {
         legend="Start from one of these"
         presets={[{ id: "smallest" }, { id: "balanced" }, { id: "sharpest" }]}
         labels={{
-          smallest: "Squeeze it hard",
-          balanced: "Full palette",
-          sharpest: "Keep every detail",
+          smallest: "Smaller file",
+          balanced: "Balanced",
+          sharpest: "Best quality",
         }}
         selected={selected}
         onSelect={setSelected}
@@ -84,9 +104,9 @@ export function ToolPresetChipStates() {
         legend="…and the same row with nothing selected"
         presets={[{ id: "smallest" }, { id: "balanced" }, { id: "sharpest" }]}
         labels={{
-          smallest: "Squeeze it hard",
-          balanced: "Full palette",
-          sharpest: "Keep every detail",
+          smallest: "Smaller file",
+          balanced: "Balanced",
+          sharpest: "Best quality",
         }}
         selected={null}
         onSelect={() => {}}

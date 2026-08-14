@@ -70,6 +70,16 @@ export function SettingsPanel({
  * `accordion.tsx`. It has to be attached imperatively, and at `≥lg` it would
  * apply `display: none` to a panel this CSS says is open. §5.12 wants it for
  * FAQ *prose*, which is the crawl surface; a Width slider is not that.
+ *
+ * ── `toggleLabel`: a disclosure at every width ─────────────────────────────
+ * Passing it opts a tool out of the forced-open `≥lg` behaviour above, so the
+ * panel starts collapsed on a desktop too and the visitor opens it deliberately.
+ * That is only correct for a tool whose preset chips are a complete answer on
+ * their own — the compressor, where three chips cover what almost everyone
+ * wants and the four controls below are the exception. It also changes the
+ * affordance: a bare chevron is discoverable enough beside a heading a visitor
+ * already expected to be open, but not when the panel is the *only* way to
+ * reach the controls, so the word is rendered rather than implied.
  */
 export function SettingsDisclosure({
   id,
@@ -77,6 +87,7 @@ export function SettingsDisclosure({
   aside,
   open,
   onToggle,
+  toggleLabel,
   children,
 }: {
   /** Unique per route. Becomes the heading and panel DOM ids. */
@@ -86,20 +97,65 @@ export function SettingsDisclosure({
   aside: React.ReactNode;
   open: boolean;
   onToggle(): void;
+  /**
+   * Visible text on the toggle — "Show" / "Hide", supplied by the page because
+   * the wording is a message-catalogue string and this file takes no `t`.
+   *
+   * Its presence is what keeps the panel collapsible at `≥lg`.
+   */
+  toggleLabel?: string;
   children: React.ReactNode;
 }) {
   const headingId = `${id}-settings-heading`;
   const panelId = `${id}-settings-panel`;
+  /** Collapsible at every width, rather than forced open from `lg` up. */
+  const alwaysCollapsible = toggleLabel !== undefined;
+
+  const toggleButton = (
+    <button
+      type="button"
+      // Without a visible label, named by the heading rather than by a string of
+      // its own: a button whose accessible name is "Settings" and whose state is
+      // `aria-expanded` announces exactly what it does, and adds no sentence to
+      // the message catalogue. With one, the visible word *is* the name — WCAG
+      // 2.5.3 wants the two to match, and an `aria-labelledby` pointing
+      // elsewhere would override the text a speech-input user reads off the
+      // screen. `aria-describedby` carries "Settings" instead, so the row still
+      // announces what it opens.
+      aria-labelledby={alwaysCollapsible ? undefined : headingId}
+      aria-describedby={alwaysCollapsible ? headingId : undefined}
+      aria-expanded={open}
+      aria-controls={panelId}
+      onClick={onToggle}
+      className={cn(
+        "inline-flex cursor-pointer items-center justify-center gap-1",
+        "rounded-control text-fg-muted transition-colors duration-[120ms] ease-out",
+        "hover:bg-surface-2 hover:text-fg",
+        alwaysCollapsible
+          ? "min-h-11 w-full border border-line text-label font-semibold"
+          : "-mr-1.5 size-11 flex-none lg:hidden",
+      )}
+    >
+      {toggleLabel}
+      <ChevronDown
+        aria-hidden="true"
+        className={cn(
+          "size-5 transition-transform duration-150 ease-out",
+          open && "rotate-180 text-brand",
+        )}
+      />
+    </button>
+  );
 
   return (
     <>
-      {/* Three direct children, and deliberately not a heading plus a wrapper
-          around the other two. `aside` swaps a wide badge for a narrow button
-          when a file loads: as two sibling elements that is a replacement, which
-          scores no layout shift, but inside a shared wrapper it becomes one
-          element whose box changes — and Chromium scores that, on a transition
-          that happens seconds after the file picker opened and so is not
-          excused as prompted. Measured at 0.0008 before this was flattened. */}
+      {/* Flat children, and deliberately not a heading plus a wrapper around the
+          rest. `aside` swaps a wide badge for a narrow button when a file loads:
+          as two sibling elements that is a replacement, which scores no layout
+          shift, but inside a shared wrapper it becomes one element whose box
+          changes — and Chromium scores that, on a transition that happens
+          seconds after the file picker opened and so is not excused as prompted.
+          Measured at 0.0008 before this was flattened. */}
       <div className="flex items-center justify-between gap-3">
         <span
           id={headingId}
@@ -108,38 +164,22 @@ export function SettingsDisclosure({
           {heading}
         </span>
         {aside}
-        <button
-          type="button"
-          // Named by the heading rather than by a string of its own: a button
-          // whose accessible name is "Settings" and whose state is
-          // `aria-expanded` announces exactly what it does, and adds no
-          // sentence to the message catalogue that would then need writing for
-          // every locale.
-          aria-labelledby={headingId}
-          aria-expanded={open}
-          aria-controls={panelId}
-          onClick={onToggle}
-          className={cn(
-            "-mr-1.5 inline-flex size-11 flex-none cursor-pointer items-center justify-center",
-            "rounded-control text-fg-muted transition-colors duration-[120ms] ease-out",
-            "hover:bg-surface-2 hover:text-fg lg:hidden",
-          )}
-        >
-          <ChevronDown
-            aria-hidden="true"
-            className={cn(
-              "size-5 transition-transform duration-150 ease-out",
-              open && "rotate-180 text-brand",
-            )}
-          />
-        </button>
+        {/* Inline only where it is an icon. A labelled toggle is ~80px wide, and
+            in the settings column that is enough of the row to make the "Waiting
+            for a file" badge wrap to two lines — so the row shrank by 11px when
+            the badge was replaced by Reset, moving its own contents, seconds
+            after the file picker opened. Measured at 0.000075. Its own row has
+            no horizontal contention and therefore no state-dependent height. */}
+        {alwaysCollapsible ? null : toggleButton}
       </div>
+      {alwaysCollapsible ? toggleButton : null}
 
       <div
         id={panelId}
         data-state={open ? "open" : "closed"}
         className={cn(
-          "pz-acc-panel lg:grid-rows-[1fr]",
+          "pz-acc-panel",
+          !alwaysCollapsible && "lg:grid-rows-[1fr]",
           // `grid-template-rows: 0fr` clips the panel; it does not take it out
           // of the tab order or the accessibility tree. Without this a keyboard
           // or screen-reader user at 768px tabs off the toggle straight into
@@ -149,7 +189,8 @@ export function SettingsDisclosure({
           // the served HTML, which is the whole reason the collapse is built
           // this way. The `lg:` half re-shows them where the panel is forced
           // open and the toggle is not rendered at all.
-          "data-[state=closed]:invisible lg:data-[state=closed]:visible",
+          "data-[state=closed]:invisible",
+          !alwaysCollapsible && "lg:data-[state=closed]:visible",
         )}
       >
         <div>

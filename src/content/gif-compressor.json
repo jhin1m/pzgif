@@ -33,7 +33,7 @@
     },
     "colours": {
       "label": "Colours",
-      "hint": "256 keeps the full palette and the best-looking output. Fewer colours shrinks the palette table in every frame — clean on flat art, visible banding on photos.",
+      "hint": "Leave this at 256 unless you have a reason not to. Capping it switches to a simpler encoder, and on our own test files that usually makes the GIF larger rather than smaller — Quality above is the dial that shrinks it.",
       "options": [
         {
           "value": "256",
@@ -65,9 +65,9 @@
   "presetChips": {
     "legend": "Start from one of these",
     "labels": {
-      "smallest": "Squeeze it hard",
-      "balanced": "Full palette",
-      "sharpest": "Keep every detail"
+      "smallest": "Smaller file",
+      "balanced": "Balanced",
+      "sharpest": "Best quality"
     }
   },
   "card": {
@@ -101,7 +101,7 @@
       "paragraphs": [
         "**Width.** Halving the width of a GIF removes three quarters of the pixels and usually cuts the file by roughly the same proportion, with no visible damage as long as the GIF is not already small. Try that before you touch anything else. It is also the change that costs your device the least, because everything downstream is working on a quarter of the data.",
         "**Quality** next. It is a single dial from 1 to 100 and 80 is a deliberate default: high enough that most people cannot tell the output from the input, low enough that the file is meaningfully smaller. Drop it in steps of ten and watch the slider rather than the number — the point at which a GIF starts to look wrong depends entirely on what is in it.",
-        "**Colours** last, and only for flat artwork, screenshots and line drawings. Capping the palette below 256 is the bluntest of the four levers: it shrinks the palette table in every single frame, which is a real saving on a diagram and immediate banding on a photograph. Leave it at 256 unless the picture is genuinely flat.",
+        "**Colours** almost never, and this is the one most other compressors get backwards. Capping the palette below 256 switches this tool to a simpler palette encoder, and we measured that encoder against gifski on seven test files: at 128 colours it produced a *larger* GIF on five of them, by between 4% and 59%. Fewer colours does shrink the palette table, but it also gives up the per-frame palettes and temporal dithering that were doing the real work. Reach for it when you want a deliberately flat, poster-like look, not when you want a smaller file.",
         "**Drop every second frame** is the fifth option and the one people forget. It halves the frame count outright, which halves both the file and the memory the job needs. On a screen recording it is close to invisible. On fast motion it is not, and the before/after slider will tell you which one you have."
       ]
     },
@@ -165,7 +165,7 @@
       "question": "What is the difference between Quality and Colours?",
       "answer": [
         "Quality is the encoder's overall effort dial: how much error it will tolerate in exchange for a smaller file, judged across the whole animation. Colours is a hard cap on how many distinct shades any one frame may contain.",
-        "They damage different things first. Quality softens fine texture and fast motion. Colours bands gradients and smooth shading immediately. For a photograph, lower the quality and leave the palette alone; for a diagram or a screenshot, capping the palette is nearly free."
+        "They damage different things first. Quality softens fine texture and fast motion. Colours bands gradients and smooth shading immediately. Quality is also the only one of the two that reliably makes the file smaller: capping the palette hands the job to a simpler encoder, and on most of our test files that came out larger than leaving the palette at 256 and lowering Quality instead. Use Quality to shrink a GIF; use Colours when you actually want the flatter look."
       ]
     },
     {
